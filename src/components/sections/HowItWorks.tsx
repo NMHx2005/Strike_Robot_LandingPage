@@ -1,66 +1,97 @@
 "use client";
 
 import { useRef } from "react";
-import { motion, useInView, useReducedMotion } from "framer-motion";
+import {
+  useMotionValueEvent,
+  useReducedMotion,
+  useScroll,
+  useTransform,
+} from "framer-motion";
 import { SCROLLING_TEXT } from "@/lib/constants";
-import { cn } from "@/lib/utils";
 
-const enterVariants = {
-  hidden: { opacity: 0, x: "12vw" },
-  visible: {
-    opacity: 1,
-    x: "0vw",
-    transition: {
-      duration: 1,
-      ease: [0.25, 0.1, 0.25, 1] as [number, number, number, number],
-    },
-  },
-};
+const REPEAT_COUNT = 6;
+/** startOffset (%) khi section vừa chạm mép dưới viewport — chữ còn nằm ngoài bên phải */
+const OFFSET_START = 100;
+/** startOffset (%) khi section rời khỏi mép trên viewport */
+const OFFSET_END = -250;
 
 export function HowItWorks() {
   const sectionRef = useRef<HTMLElement>(null);
+  const textPathRef = useRef<SVGTextPathElement>(null);
   const prefersReducedMotion = useReducedMotion();
-  const isNearViewport = useInView(sectionRef, {
-    once: true,
-    amount: 0.35,
-    margin: "0px 0px -15% 0px",
+
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start end", "end start"],
+  });
+
+  const startOffset = useTransform(
+    scrollYProgress,
+    [0, 1],
+    [OFFSET_START, OFFSET_END]
+  );
+
+  useMotionValueEvent(startOffset, "change", (v) => {
+    if (prefersReducedMotion) return;
+    textPathRef.current?.setAttribute("startOffset", `${v}%`);
   });
 
   const phrase = `${SCROLLING_TEXT.parts[0]} ${SCROLLING_TEXT.parts[1]} ${SCROLLING_TEXT.parts[2]}`;
-  const marqueeActive = isNearViewport && !prefersReducedMotion;
+  const repeatedText = Array.from({ length: REPEAT_COUNT })
+    .map(() => phrase)
+    .join("  ·  ");
 
   return (
     <section
       ref={sectionRef}
       id="how-it-works"
-      className="relative overflow-hidden bg-white py-16 md:py-24"
+      className="relative overflow-hidden bg-white py-8"
       aria-label="Platform title section"
     >
-      <motion.div
-        className="flex overflow-hidden"
-        variants={prefersReducedMotion ? {} : enterVariants}
-        initial="hidden"
-        animate={marqueeActive || prefersReducedMotion ? "visible" : "hidden"}
+      <svg
+        className="block w-full"
+        viewBox="0 0 1440 230"
+        fill="none"
+        aria-hidden="true"
+        style={{ overflow: "visible" }}
       >
-        <div
-          className={cn("flex w-max", marqueeActive && "spatial-marquee")}
-          aria-hidden={!prefersReducedMotion}
+        <defs>
+          <linearGradient id="arc-text-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="#000000" />
+            <stop offset="38%" stopColor="#000000" />
+            <stop offset="46%" stopColor="#5a4059" />
+            <stop offset="54%" stopColor="#4a606d" />
+            <stop offset="61%" stopColor="#515a6e" />
+            <stop offset="72%" stopColor="#000000" />
+            <stop offset="100%" stopColor="#000000" />
+          </linearGradient>
+          {/* Bên trái nằm ngang phía trên, mép phải hạ xuống dưới —
+              chữ vào từ góc dưới-phải rồi leo dần lên đường ngang */}
+          <path
+            id="arc-text-path"
+            d="M -40 75 L 700 75 C 1050 75 1180 205 1480 205"
+          />
+        </defs>
+        <text
+          fill="url(#arc-text-gradient)"
+          style={{
+            fontSize: 72,
+            fontFamily: "var(--font-golos-text), sans-serif",
+            letterSpacing: "-0.01em",
+          }}
         >
-          {[0, 1, 2, 3].map((i) => (
-            <p
-              key={i}
-              className="viewport-text-gradient whitespace-nowrap px-6 font-normal tracking-normal"
-              style={{ fontSize: "clamp(48px, 8vw, 120px)", lineHeight: 1.05 }}
-            >
-              {phrase}
-              <span className="px-8 text-black/20">·</span>
-            </p>
-          ))}
-        </div>
-      </motion.div>
-      {prefersReducedMotion && (
-        <p className="sr-only">{phrase}</p>
-      )}
+          <textPath
+            ref={textPathRef}
+            href="#arc-text-path"
+            startOffset={
+              prefersReducedMotion ? "0%" : `${OFFSET_START}%`
+            }
+          >
+            {repeatedText}
+          </textPath>
+        </text>
+      </svg>
+      <p className="sr-only">{phrase}</p>
     </section>
   );
 }

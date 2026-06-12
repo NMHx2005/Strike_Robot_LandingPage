@@ -76,25 +76,38 @@ function FeatureItem({
   headerRef,
 }: FeatureItemProps) {
   const Icon = ICON_MAP[feature.icon] ?? Box;
-  const animateDescription = !prefersReducedMotion;
 
   return (
-    <div className="overflow-hidden">
+    <div className="relative">
       <button
         type="button"
         onClick={onSelect}
         aria-expanded={isActive}
         className={cn(
-          "w-full cursor-pointer text-left transition-[background-color,border-color,opacity] duration-300 ease-[cubic-bezier(0.25,0.1,0.25,1)]",
-          "px-6 py-3",
-          !isFirst && !isActive && "border-t border-black/10",
-          isActive
-            ? "rounded-xl border border-white/60 border-l-2 border-l-white/60"
-            : "hover:opacity-85"
+          "relative w-full cursor-pointer text-left px-6 py-3",
+          "transition-[border-color,opacity] duration-300 ease-[cubic-bezier(0.25,0.1,0.25,1)]",
+          // Border luôn render để không gây layout shift — chỉ đổi màu
+          !isFirst && "border-t",
+          !isFirst && (isActive ? "border-transparent" : "border-black/10"),
+          !isActive && "hover:opacity-85"
         )}
-        style={isActive ? { background: activeGradient } : undefined}
       >
-        <div ref={headerRef} className="flex items-center gap-6">
+        {/* Highlight tách thành layer riêng: gradient không transition được
+            bằng CSS nên fade cả layer; inset-0 tự bám theo chiều cao nút khi mở */}
+        <motion.span
+          aria-hidden
+          className="pointer-events-none absolute inset-0 rounded-xl border border-white/60 border-l-2 border-l-white/60"
+          style={{ background: activeGradient }}
+          initial={false}
+          animate={{ opacity: isActive ? 1 : 0 }}
+          transition={
+            prefersReducedMotion
+              ? { duration: 0 }
+              : { duration: 0.35, ease: EASE }
+          }
+        />
+
+        <div ref={headerRef} className="relative flex items-center gap-6">
           <span
             className={cn(
               "flex h-12 w-12 shrink-0 items-center justify-center rounded-lg transition-[background-color,opacity] duration-300",
@@ -106,30 +119,38 @@ function FeatureItem({
 
           <span
             className={cn(
-              "text-[20px] tracking-[-0.01em] text-black transition-[font-weight] duration-300",
-              isActive ? "font-medium" : "font-normal"
+              "text-[20px] font-medium tracking-[-0.01em] text-black transition-opacity duration-300",
+              isActive ? "opacity-100" : "opacity-[0.65]"
             )}
           >
             {feature.title}
           </span>
         </div>
 
-        <div
-          className={cn(
-            "grid overflow-hidden",
-            animateDescription &&
-              "transition-[grid-template-rows,opacity,margin] duration-[400ms] ease-[cubic-bezier(0.25,0.1,0.25,1)]",
-            isActive ? "mt-3 grid-rows-[1fr] opacity-100" : "mt-0 grid-rows-[0fr] opacity-0"
-          )}
+        <motion.div
+          className="relative overflow-hidden"
+          initial={false}
+          animate={{
+            height: isActive ? "auto" : 0,
+            opacity: isActive ? 1 : 0,
+          }}
+          transition={
+            prefersReducedMotion
+              ? { duration: 0 }
+              : {
+                  height: { duration: 0.45, ease: EASE },
+                  opacity: { duration: 0.3, ease: "easeOut" },
+                }
+          }
           aria-hidden={!isActive}
         >
-          <div className="min-h-0 overflow-hidden pl-[54px] pr-1 pb-3">
+          <div className="pl-[54px] pr-1 pb-3 pt-3">
             <FeatureDescription
               description={feature.description}
               boldPhrase={feature.boldPhrase}
             />
           </div>
-        </div>
+        </motion.div>
       </button>
     </div>
   );
@@ -155,8 +176,8 @@ export function Features() {
   }, []);
 
   useEffect(() => {
-    const t = setTimeout(() => updateIndicator(activeId), 60);
-    return () => clearTimeout(t);
+    const raf = requestAnimationFrame(() => updateIndicator(activeId));
+    return () => cancelAnimationFrame(raf);
   }, [activeId, updateIndicator]);
 
   useEffect(() => {

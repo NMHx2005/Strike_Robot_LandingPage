@@ -1,18 +1,16 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { motion, useReducedMotion } from "framer-motion";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useReducedMotion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 const SCRAMBLE_CHARSET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$";
 const SCRAMBLE_FRAMES = 10;
-const SCRAMBLE_INTERVAL_MS = 40;
+const FRAME_DURATION_MS = 40;
 const LETTER_JUMP_RANGE = 8;
 
-const letterEase = [0.25, 0.1, 0.25, 1] as const;
-
 function parseLetters(text: string): string[] {
-  return text.split("").map((char) => (char === " " ? "\u00A0" : char));
+  return text.split("").map((char) => (char === " " ? " " : char));
 }
 
 function randomChar(): string {
@@ -32,12 +30,9 @@ export function AnimatedButtonLabel({
 }: AnimatedButtonLabelProps) {
   const prefersReducedMotion = useReducedMotion();
   const letters = useMemo(() => parseLetters(children), [children]);
-  const [displayChars, setDisplayChars] = useState(letters);
-  const [jumpOffsets, setJumpOffsets] = useState<number[]>(() =>
-    letters.map(() => 0)
-  );
+  const letterRefs = useRef<(HTMLSpanElement | null)[]>([]);
+  const rafRef = useRef<number | null>(null);
   const [canAnimate, setCanAnimate] = useState(false);
-  const intervalIds = useRef<ReturnType<typeof setInterval>[]>([]);
 
   useEffect(() => {
     setCanAnimate(
@@ -46,78 +41,91 @@ export function AnimatedButtonLabel({
     );
   }, [prefersReducedMotion]);
 
-  const clearIntervals = useCallback(() => {
-    intervalIds.current.forEach(clearInterval);
-    intervalIds.current = [];
-  }, []);
+  // Keep ref array length in sync when the label changes
+  useEffect(() => {
+    letterRefs.current.length = letters.length;
+  }, [letters.length]);
 
   useEffect(() => {
-    const next = parseLetters(children);
-    setDisplayChars(next);
-    setJumpOffsets(next.map(() => 0));
-  }, [children]);
+    const cancel = () => {
+      if (rafRef.current !== null) {
+        cancelAnimationFrame(rafRef.current);
+        rafRef.current = null;
+      }
+    };
 
-  useEffect(() => clearIntervals, [clearIntervals]);
+    const resetLetters = () => {
+      for (let i = 0; i < letters.length; i++) {
+        const el = letterRefs.current[i];
+        if (!el) continue;
+        el.textContent = letters[i];
+        el.style.transform = "translateY(0px)";
+      }
+    };
 
-  const runScramble = useCallback(() => {
-    if (!canAnimate) return;
-    clearIntervals();
-
-    letters.forEach((original, index) => {
-      let frame = 0;
-      const jumpY =
-        (Math.random() > 0.5 ? 1 : -1) *
-        (Math.random() * LETTER_JUMP_RANGE + 2);
-
-      setJumpOffsets((prev) => {
-        const next = [...prev];
-        next[index] = jumpY;
-        return next;
-      });
-
-      const id = setInterval(() => {
-        frame += 1;
-        if (frame >= SCRAMBLE_FRAMES) {
-          clearInterval(id);
-          intervalIds.current = intervalIds.current.filter((i) => i !== id);
-          setDisplayChars((prev) => {
-            const next = [...prev];
-            next[index] = original;
-            return next;
-          });
-          setJumpOffsets((prev) => {
-            const next = [...prev];
-            next[index] = 0;
-            return next;
-          });
-          return;
-        }
-
-        setDisplayChars((prev) => {
-          const next = [...prev];
-          next[index] = randomChar();
-          return next;
-        });
-      }, SCRAMBLE_INTERVAL_MS);
-
-      intervalIds.current.push(id);
-    });
-  }, [canAnimate, clearIntervals, letters]);
-
-  const resetLabel = useCallback(() => {
-    if (!canAnimate) return;
-    clearIntervals();
-    setDisplayChars(letters);
-    setJumpOffsets(letters.map(() => 0));
-  }, [canAnimate, clearIntervals, letters]);
-
-  useEffect(() => {
-    if (active) {
-      runScramble();
+    if (!canAnimate) {
+      cancel();
+      resetLetters();
       return;
     }
-    resetLabel();
-  }, [active, runScramble, resetLabel]);
+
+    if (!active) {
+      cancel();
+      resetLetters();
+      return;
+    }
+
+    cancel();
+
+    const jumpYs = letters.map(
+      () =>
+        (Math.random() > 0.5 ? 1 : -1) *
+        (Math.random() * LETTER_JUMP_RANGE + 2)
+    );
+    const lastFrameApplied = new Array<number>(letters.length).fill(-1);
+
+    // Kick off the CSS-transitioned jump on the next frame so the change
+    // is animated instead of snapping.
+    for (let i = 0; i < letters.length; i++) {
+      const el = letterRefs.current[i];
+      if (el) el.style.transform = `translateY(${jumpYs[i]}px)`;
+    }
+
+    const startTime = performance.now();
+
+    const tick = (now: number) => {
+      const elapsed = now - startTime;
+      const frame = Math.min(
+        SCRAMBLE_FRAMES,
+        Math.floor(elapsed / FRAME_DURATION_MS)
+      );
+
+      for (let i = 0; i < letters.length; i++) {
+        if (lastFrameApplied[i] === frame) continue;
+        const el = letterRefs.current[i];
+        if (!el) continue;
+
+        if (frame >= SCRAMBLE_FRAMES) {
+          el.textContent = letters[i];
+          el.style.transform = "translateY(0px)";
+        } else {
+          el.textContent = randomChar();
+        }
+        lastFrameApplied[i] = frame;
+      }
+
+      if (frame >= SCRAMBLE_FRAMES) {
+        rafRef.current = null;
+        return;
+      }
+
+      rafRef.current = requestAnimationFrame(tick);
+    };
+
+    rafRef.current = requestAnimationFrame(tick);
+
+    return cancel;
+  }, [active, canAnimate, letters]);
 
   return (
     <span
@@ -130,23 +138,22 @@ export function AnimatedButtonLabel({
         className="absolute inset-0 flex items-center justify-center whitespace-pre"
         aria-hidden="true"
       >
-        {displayChars.map((char, index) =>
-          canAnimate ? (
-            <motion.span
-              key={`${index}-${char}`}
-              layout={false}
-              className="inline-block"
-              animate={{ y: jumpOffsets[index] ?? 0 }}
-              transition={{ duration: 0.2, ease: letterEase }}
-            >
-              {char}
-            </motion.span>
-          ) : (
-            <span key={index} className="inline-block">
-              {char}
-            </span>
-          )
-        )}
+        {letters.map((char, i) => (
+          <span
+            key={i}
+            ref={(el) => {
+              letterRefs.current[i] = el;
+            }}
+            className={cn(
+              "inline-block",
+              canAnimate &&
+                "transition-transform duration-200 ease-[cubic-bezier(0.25,0.1,0.25,1)]"
+            )}
+            style={{ willChange: canAnimate ? "transform" : undefined }}
+          >
+            {char}
+          </span>
+        ))}
       </span>
       <span className="sr-only">{children}</span>
     </span>
