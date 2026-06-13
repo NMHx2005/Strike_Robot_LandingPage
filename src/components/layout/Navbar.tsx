@@ -67,24 +67,23 @@ export function Navbar() {
         </Link>
 
         <div
-          className="hidden md:block p-[1.4px] rounded-3xl flex-shrink-0"
+          className="hidden md:block flex-shrink-0 rounded-[24px] p-[1.4px]"
           style={{
             background:
               "conic-gradient(from 0deg at 50% 50%, #D9D9D9 0deg, #D9D9D9 65deg, #F2F2F2 150deg, #DFD0EA 176deg, #D9D9D9 204deg, #D9D9D9 255deg, #A6CEDA 285deg, #ECECEC 319deg, #D9D9D9 360deg)",
-            backdropFilter: "blur(20px)",
-            WebkitBackdropFilter: "blur(20px)",
-            boxShadow:
-              "inset 0px -2px 4px 0px #FFFFFF4D, inset 0px 4px 6px 0px #FFFFFF33",
           }}
         >
           <div
             ref={navInnerRef}
-            className="relative flex items-center h-12 px-6 rounded-[22px]"
+            className="relative flex h-12 items-center overflow-hidden px-6"
             style={{
+              borderRadius: 22.6,
               background:
-                "linear-gradient(97deg, rgba(245,245,247,0.97) 4.23%, rgba(240,240,244,0.95) 56%, rgba(232,234,236,0.97) 99.91%)",
+                "linear-gradient(91deg, rgba(255, 255, 255, 0.80) 4.23%, rgba(255, 255, 255, 0.40) 56%, rgba(223, 227, 229, 0.50) 99.91%)",
+              backdropFilter: "blur(10px)",
+              WebkitBackdropFilter: "blur(10px)",
               boxShadow:
-                "inset 0 -2px 4px rgba(255,255,255,0.5), inset 0 4px 6px rgba(255,255,255,0.3), 0 1px 3px rgba(0,0,0,0.06)",
+                "inset 0 4px 6px 0 rgba(255, 255, 255, 0.20), inset 0 -2px 4px 0 rgba(255, 255, 255, 0.30)",
             }}
           >
             <nav className="flex items-center gap-3" aria-label="Main navigation">
