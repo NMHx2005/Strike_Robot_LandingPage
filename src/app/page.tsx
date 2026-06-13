@@ -1,4 +1,5 @@
 import { Navbar } from "@/components/layout/Navbar";
+import { MainSection } from "@/components/layout/MainSection";
 import { Hero } from "@/components/sections/Hero";
 import { Features } from "@/components/sections/Features";
 import { HowItWorks } from "@/components/sections/HowItWorks";
@@ -13,19 +14,21 @@ export default function LandingPage() {
       <div className="relative">
         <div
           aria-hidden
-          className="pointer-events-none absolute inset-0 z-0 bg-cover bg-center bg-no-repeat"
+          className="pointer-events-none sticky top-0 -z-10 h-screen w-full bg-cover bg-center bg-no-repeat"
           style={{ backgroundImage: `url('${HERO_BACKGROUND}')` }}
         />
-        <Navbar />
-        <Hero />
+        <div className="relative z-10 -mt-[100vh]">
+          <Navbar />
+          <Hero />
+          <Features />
+        </div>
       </div>
-      <main>
-        <Features />
+      <MainSection>
         <HowItWorks />
         <Pricing />
         <CTA />
         <Footer />
-      </main>
+      </MainSection>
     </>
   );
 }

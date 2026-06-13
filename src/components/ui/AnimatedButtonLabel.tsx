@@ -1,37 +1,85 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
-import { useReducedMotion } from "framer-motion";
+import { useEffect, useMemo, useState } from "react";
+import { motion, useReducedMotion, type Variants } from "framer-motion";
 import { cn } from "@/lib/utils";
 
-const SCRAMBLE_CHARSET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$";
-const SCRAMBLE_FRAMES = 10;
-const FRAME_DURATION_MS = 40;
-const LETTER_JUMP_RANGE = 8;
+const EASING = [0.25, 0.1, 0.25, 1] as const;
 
-function parseLetters(text: string): string[] {
-  return text.split("").map((char) => (char === " " ? " " : char));
+type LetterMeta = {
+  y: number;
+  scale: number;
+  rotate: number;
+  opacity: number;
+  delay: number;
+};
+
+function pseudoRand(seed: number): number {
+  const x = Math.sin(seed * 12.9898 + 78.233) * 43758.5453;
+  return x - Math.floor(x);
 }
 
-function randomChar(): string {
-  return SCRAMBLE_CHARSET[Math.floor(Math.random() * SCRAMBLE_CHARSET.length)];
+function buildLetterMeta(text: string): LetterMeta[] {
+  return text.split("").map((char, i) => {
+    if (char === " ") {
+      return { y: 0, scale: 1, rotate: 0, opacity: 1, delay: 0 };
+    }
+    const r1 = pseudoRand(i + 1);
+    const r2 = pseudoRand(i + 11);
+    const r3 = pseudoRand(i + 23);
+    const r4 = pseudoRand(i + 37);
+    const r5 = pseudoRand(i + 53);
+    return {
+      y: -(1 + r1 * 3),
+      scale: 1.2 + r5 * 0.25,
+      rotate: (r2 - 0.5) * 24,
+      opacity: 0.7 + r3 * 0.22,
+      delay: r4 * 0.08,
+    };
+  });
 }
+
+const buildVariants = (restWeight: number, hoverWeight: number): Variants => ({
+  rest: {
+    y: 0,
+    scale: 1,
+    rotate: 0,
+    opacity: 1,
+    fontWeight: restWeight,
+    transition: { duration: 0.25, ease: EASING },
+  },
+  active: (meta: LetterMeta) => ({
+    y: [0, meta.y, 0],
+    scale: [1, meta.scale, 1],
+    rotate: [0, meta.rotate, 0],
+    opacity: [1, meta.opacity, 1],
+    fontWeight: [restWeight, hoverWeight, restWeight],
+    transition: {
+      delay: meta.delay,
+      duration: 0.55,
+      ease: EASING,
+      times: [0, 0.45, 1],
+    },
+  }),
+});
 
 type AnimatedButtonLabelProps = {
   children: string;
   className?: string;
   active?: boolean;
+  /** [restWeight, hoverWeight] — defaults to [500, 700]. Pass [400, 700] for outline variant. */
+  weightRange?: [number, number];
 };
 
 export function AnimatedButtonLabel({
   children,
   className,
   active = false,
+  weightRange = [500, 700],
 }: AnimatedButtonLabelProps) {
   const prefersReducedMotion = useReducedMotion();
-  const letters = useMemo(() => parseLetters(children), [children]);
-  const letterRefs = useRef<(HTMLSpanElement | null)[]>([]);
-  const rafRef = useRef<number | null>(null);
+  const letters = useMemo(() => children.split(""), [children]);
+  const letterMeta = useMemo(() => buildLetterMeta(children), [children]);
   const [canAnimate, setCanAnimate] = useState(false);
 
   useEffect(() => {
@@ -41,97 +89,23 @@ export function AnimatedButtonLabel({
     );
   }, [prefersReducedMotion]);
 
-  // Keep ref array length in sync when the label changes
-  useEffect(() => {
-    letterRefs.current.length = letters.length;
-  }, [letters.length]);
+  const [restWeight, hoverWeight] = weightRange;
+  const variants = useMemo(
+    () => buildVariants(restWeight, hoverWeight),
+    [restWeight, hoverWeight]
+  );
 
-  useEffect(() => {
-    const cancel = () => {
-      if (rafRef.current !== null) {
-        cancelAnimationFrame(rafRef.current);
-        rafRef.current = null;
-      }
-    };
-
-    const resetLetters = () => {
-      for (let i = 0; i < letters.length; i++) {
-        const el = letterRefs.current[i];
-        if (!el) continue;
-        el.textContent = letters[i];
-        el.style.transform = "translateY(0px)";
-      }
-    };
-
-    if (!canAnimate) {
-      cancel();
-      resetLetters();
-      return;
-    }
-
-    if (!active) {
-      cancel();
-      resetLetters();
-      return;
-    }
-
-    cancel();
-
-    const jumpYs = letters.map(
-      () =>
-        (Math.random() > 0.5 ? 1 : -1) *
-        (Math.random() * LETTER_JUMP_RANGE + 2)
-    );
-    const lastFrameApplied = new Array<number>(letters.length).fill(-1);
-
-    // Kick off the CSS-transitioned jump on the next frame so the change
-    // is animated instead of snapping.
-    for (let i = 0; i < letters.length; i++) {
-      const el = letterRefs.current[i];
-      if (el) el.style.transform = `translateY(${jumpYs[i]}px)`;
-    }
-
-    const startTime = performance.now();
-
-    const tick = (now: number) => {
-      const elapsed = now - startTime;
-      const frame = Math.min(
-        SCRAMBLE_FRAMES,
-        Math.floor(elapsed / FRAME_DURATION_MS)
-      );
-
-      for (let i = 0; i < letters.length; i++) {
-        if (lastFrameApplied[i] === frame) continue;
-        const el = letterRefs.current[i];
-        if (!el) continue;
-
-        if (frame >= SCRAMBLE_FRAMES) {
-          el.textContent = letters[i];
-          el.style.transform = "translateY(0px)";
-        } else {
-          el.textContent = randomChar();
-        }
-        lastFrameApplied[i] = frame;
-      }
-
-      if (frame >= SCRAMBLE_FRAMES) {
-        rafRef.current = null;
-        return;
-      }
-
-      rafRef.current = requestAnimationFrame(tick);
-    };
-
-    rafRef.current = requestAnimationFrame(tick);
-
-    return cancel;
-  }, [active, canAnimate, letters]);
+  const shouldAnimate = canAnimate && active;
 
   return (
     <span
       className={cn("relative inline-flex items-center justify-center", className)}
     >
-      <span className="invisible whitespace-pre" aria-hidden="true">
+      <span
+        className="invisible whitespace-pre"
+        aria-hidden="true"
+        style={{ fontWeight: hoverWeight }}
+      >
         {children}
       </span>
       <span
@@ -139,20 +113,23 @@ export function AnimatedButtonLabel({
         aria-hidden="true"
       >
         {letters.map((char, i) => (
-          <span
+          <motion.span
             key={i}
-            ref={(el) => {
-              letterRefs.current[i] = el;
+            className="inline-block"
+            custom={letterMeta[i]}
+            initial={false}
+            animate={shouldAnimate ? "active" : "rest"}
+            variants={canAnimate ? variants : undefined}
+            style={{
+              willChange: canAnimate
+                ? "transform, font-weight, opacity"
+                : undefined,
+              fontWeight: canAnimate ? undefined : restWeight,
+              transformOrigin: "50% 60%",
             }}
-            className={cn(
-              "inline-block",
-              canAnimate &&
-                "transition-transform duration-200 ease-[cubic-bezier(0.25,0.1,0.25,1)]"
-            )}
-            style={{ willChange: canAnimate ? "transform" : undefined }}
           >
             {char}
-          </span>
+          </motion.span>
         ))}
       </span>
       <span className="sr-only">{children}</span>

@@ -50,7 +50,7 @@ export function Navbar() {
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 h-32 flex items-center pointer-events-none">
-      <div className="relative w-full max-w-[1728px] mx-auto px-6 flex items-center justify-between gap-6 pointer-events-auto">
+      <div className="relative w-full mx-auto px-[48px] flex items-center justify-between gap-6 pointer-events-auto">
         <Link
           href="/"
           className="flex-shrink-0 w-[360px] flex items-center"

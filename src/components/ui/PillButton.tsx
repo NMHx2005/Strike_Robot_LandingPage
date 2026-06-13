@@ -30,12 +30,18 @@ const sizeClasses = {
 function ButtonLabel({
   children,
   active,
+  weightRange,
 }: {
   children: React.ReactNode;
   active: boolean;
+  weightRange?: [number, number];
 }) {
   if (typeof children === "string") {
-    return <AnimatedButtonLabel active={active}>{children}</AnimatedButtonLabel>;
+    return (
+      <AnimatedButtonLabel active={active} weightRange={weightRange}>
+        {children}
+      </AnimatedButtonLabel>
+    );
   }
   return <span>{children}</span>;
 }
@@ -85,7 +91,7 @@ export function PillButton({
           className="absolute inset-0 z-0 bg-white pointer-events-none rounded-[inherit]"
         />
         <span className="relative z-[2]">
-          <ButtonLabel active={hovered}>{children}</ButtonLabel>
+          <ButtonLabel active={hovered} weightRange={[400, 700]}>{children}</ButtonLabel>
         </span>
         {showArrow && (
           <ArrowRight

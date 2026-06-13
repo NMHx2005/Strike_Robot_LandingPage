@@ -89,12 +89,14 @@ export const COMMUNITY = {
     title: "Community Creations",
     description:
       "See what teams and researchers are building — simulation environments, training datasets, and robot tasks generated with SR Platform.",
+    hoverLabel: "Explore Showcase",
   },
   tutorials: {
     tag: "#Learn",
     title: "Tutorials",
     description:
       "Step-by-step guides to generating your first environment, building custom assets, and exporting training datasets for your robot stack.",
+    hoverLabel: "Watch Tutorial",
   },
 };
 

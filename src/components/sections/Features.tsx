@@ -2,14 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback } from "react";
 import { motion, useReducedMotion } from "framer-motion";
-import {
-  Box,
-  LayoutGrid,
-  Car,
-  PencilLine,
-  Download,
-  type LucideIcon,
-} from "lucide-react";
+import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { FEATURES, FEATURES_SECTION, VIDEOS } from "@/lib/constants";
 import { PillButtonCta } from "@/components/ui/PillButton";
@@ -19,23 +12,36 @@ import { staggerContainer } from "@/components/animations/stagger";
 
 const EASE = [0.25, 0.1, 0.25, 1] as const;
 
-const ICON_MAP: Record<string, LucideIcon> = {
-  Box,
-  LayoutGrid,
-  Car,
-  PencilLine,
-  Download,
+const INDICATOR_SPRING = {
+  type: "spring" as const,
+  stiffness: 420,
+  damping: 36,
+  mass: 0.85,
 };
 
-const activeGradient =
-  "linear-gradient(91deg, #fff 4.23%, #ebebeb 56%, #fff 99.91%)";
+const HEADER_BAND_MIN_H = 206;
+const BRACKET_HEIGHT = 173;
+const BRACKET_TOP = (HEADER_BAND_MIN_H - BRACKET_HEIGHT) / 2;
+const LINE_LEFT = 70;
+const INDICATOR_HEIGHT = 40;
+const INDICATOR_WIDTH = 3;
+const ITEM_ICON_CENTER_FROM_TOP = 36;
 
-const indicatorSpring = { type: "spring" as const, stiffness: 450, damping: 38, mass: 0.8 };
+const ICON_SRC: Record<string, string> = {
+  "asset-creation": "/icons/features/asset-creation.png",
+  "spatial-layout": "/icons/features/spatial-layout.png",
+  "stimulation": "/icons/features/stimulation.png",
+  "realtime-edit": "/icons/features/realtime-edit.png",
+  "export-pipeline": "/icons/features/export-pipeline.png",
+};
 
-interface IndicatorStyle {
-  top: number;
-  height: number;
-}
+const ACTIVE_GRADIENT =
+  "linear-gradient(91.36deg, #fff 4.23%, #ebebeb 56%, #fff 99.91%)";
+
+const LEFT_BRACKET_D =
+  "M0.391113 0.311523L9.77805 12.0984C11.4699 14.2228 12.3911 16.8582 12.3911 19.574V153.049C12.3911 155.765 11.4699 158.4 9.77804 160.525L0.391113 172.312";
+const RIGHT_BRACKET_D =
+  "M12.5 0.311523L3.11307 12.0984C1.42121 14.2228 0.5 16.8582 0.5 19.574V153.049C0.5 155.765 1.42121 158.4 3.11307 160.525L12.5 172.312";
 
 function FeatureDescription({
   description,
@@ -45,12 +51,14 @@ function FeatureDescription({
   boldPhrase?: string;
 }) {
   if (!boldPhrase || !description.includes(boldPhrase)) {
-    return <p className="text-base leading-[22px] text-[#3e424d]">{description}</p>;
+    return (
+      <p className="text-[16px] leading-[22px] text-[#3e424d]">{description}</p>
+    );
   }
 
   const [before, after] = description.split(boldPhrase);
   return (
-    <p className="text-base leading-[22px] text-[#3e424d]">
+    <p className="text-[16px] leading-[22px] text-[#3e424d]">
       {before}
       <span className="font-semibold">{boldPhrase}</span>
       {after}
@@ -61,118 +69,152 @@ function FeatureDescription({
 type FeatureItemProps = {
   feature: (typeof FEATURES)[number];
   isActive: boolean;
-  isFirst: boolean;
+  showTopBorder: boolean;
   onSelect: () => void;
   prefersReducedMotion: boolean | null;
-  headerRef: (el: HTMLDivElement | null) => void;
+  buttonRef: (el: HTMLButtonElement | null) => void;
 };
 
 function FeatureItem({
   feature,
   isActive,
-  isFirst,
+  showTopBorder,
   onSelect,
   prefersReducedMotion,
-  headerRef,
+  buttonRef,
 }: FeatureItemProps) {
-  const Icon = ICON_MAP[feature.icon] ?? Box;
+  const iconSrc = ICON_SRC[feature.id];
 
   return (
-    <div className="relative">
-      <button
-        type="button"
-        onClick={onSelect}
-        aria-expanded={isActive}
-        className={cn(
-          "relative w-full cursor-pointer text-left px-6 py-3",
-          "transition-[border-color,opacity] duration-300 ease-[cubic-bezier(0.25,0.1,0.25,1)]",
-          // Border luôn render để không gây layout shift — chỉ đổi màu
-          !isFirst && "border-t",
-          !isFirst && (isActive ? "border-transparent" : "border-black/10"),
-          !isActive && "hover:opacity-85"
-        )}
-      >
-        {/* Highlight tách thành layer riêng: gradient không transition được
-            bằng CSS nên fade cả layer; inset-0 tự bám theo chiều cao nút khi mở */}
+    <button
+      ref={buttonRef}
+      type="button"
+      onClick={onSelect}
+      aria-expanded={isActive}
+      className={cn(
+        "group relative w-full cursor-pointer text-left px-6 py-3 rounded-xl",
+        "outline-none focus-visible:ring-2 focus-visible:ring-black/15"
+      )}
+    >
+      <motion.span
+        aria-hidden
+        className="pointer-events-none absolute left-0 right-0 top-0 h-px origin-center bg-black/10"
+        initial={false}
+        animate={{ opacity: showTopBorder ? 1 : 0 }}
+        transition={
+          prefersReducedMotion ? { duration: 0 } : { duration: 0.25, ease: EASE }
+        }
+      />
+
+      <motion.span
+        aria-hidden
+        className="pointer-events-none absolute inset-0 rounded-xl border border-white/60 border-l-2 border-l-white/60"
+        style={{ background: ACTIVE_GRADIENT, willChange: "opacity" }}
+        initial={false}
+        animate={{ opacity: isActive ? 1 : 0 }}
+        transition={
+          prefersReducedMotion ? { duration: 0 } : { duration: 0.4, ease: EASE }
+        }
+      />
+
+      <div className="relative flex items-center gap-6">
         <motion.span
           aria-hidden
-          className="pointer-events-none absolute inset-0 rounded-xl border border-white/60 border-l-2 border-l-white/60"
-          style={{ background: activeGradient }}
+          className="relative block h-12 w-12 shrink-0"
           initial={false}
-          animate={{ opacity: isActive ? 1 : 0 }}
+          animate={{ opacity: isActive ? 1 : 0.6 }}
           transition={
             prefersReducedMotion
               ? { duration: 0 }
-              : { duration: 0.35, ease: EASE }
+              : { duration: 0.3, ease: EASE }
           }
-        />
+          style={{ willChange: "opacity" }}
+        >
+          {iconSrc && (
+            <Image
+              src={iconSrc}
+              alt=""
+              width={96}
+              height={96}
+              className="h-12 w-12 object-contain select-none"
+              draggable={false}
+              priority
+            />
+          )}
+        </motion.span>
 
-        <div ref={headerRef} className="relative flex items-center gap-6">
-          <span
-            className={cn(
-              "flex h-12 w-12 shrink-0 items-center justify-center rounded-lg transition-[background-color,opacity] duration-300",
-              isActive ? "bg-black/5 opacity-100" : "bg-transparent opacity-60"
-            )}
-          >
-            <Icon className="h-6 w-6 text-black/70" strokeWidth={1.5} />
-          </span>
-
-          <span
-            className={cn(
-              "text-[20px] font-medium tracking-[-0.01em] text-black transition-opacity duration-300",
-              isActive ? "opacity-100" : "opacity-[0.65]"
-            )}
-          >
-            {feature.title}
-          </span>
-        </div>
-
-        <motion.div
-          className="relative overflow-hidden"
+        <motion.span
+          className="block text-black"
           initial={false}
           animate={{
-            height: isActive ? "auto" : 0,
-            opacity: isActive ? 1 : 0,
+            fontSize: isActive ? "22px" : "20px",
+            letterSpacing: isActive ? "-0.22px" : "-0.2px",
+            fontWeight: isActive ? 500 : 400,
+            opacity: isActive ? 1 : 0.92,
           }}
           transition={
             prefersReducedMotion
               ? { duration: 0 }
-              : {
-                  height: { duration: 0.45, ease: EASE },
-                  opacity: { duration: 0.3, ease: "easeOut" },
-                }
+              : { duration: 0.3, ease: EASE }
           }
-          aria-hidden={!isActive}
+          style={{
+            lineHeight: 1.2,
+            willChange: "font-size, font-weight",
+          }}
         >
-          <div className="pl-[54px] pr-1 pb-3 pt-3">
-            <FeatureDescription
-              description={feature.description}
-              boldPhrase={feature.boldPhrase}
-            />
-          </div>
-        </motion.div>
-      </button>
-    </div>
+          {feature.title}
+        </motion.span>
+      </div>
+
+      <motion.div
+        className="relative overflow-hidden"
+        initial={false}
+        animate={{
+          height: isActive ? "auto" : 0,
+          opacity: isActive ? 1 : 0,
+        }}
+        transition={
+          prefersReducedMotion
+            ? { duration: 0 }
+            : {
+                height: { duration: 0.45, ease: EASE },
+                opacity: { duration: isActive ? 0.4 : 0.18, ease: "easeOut" },
+              }
+        }
+        aria-hidden={!isActive}
+      >
+        <div className="pl-[72px] pr-1 pt-3 pb-1">
+          <FeatureDescription
+            description={feature.description}
+            boldPhrase={feature.boldPhrase}
+          />
+        </div>
+      </motion.div>
+    </button>
   );
 }
 
 export function Features() {
   const [activeId, setActiveId] = useState(FEATURES[0].id);
-  const [indicator, setIndicator] = useState<IndicatorStyle>({ top: 0, height: 24 });
+  const [indicator, setIndicator] = useState({ top: 0, ready: false });
   const prefersReducedMotion = useReducedMotion();
 
-  const listRef = useRef<HTMLDivElement>(null);
-  const headerRefs = useRef<Map<string, HTMLDivElement>>(new Map());
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  const itemRefs = useRef<Map<string, HTMLButtonElement>>(new Map());
 
   const updateIndicator = useCallback((id: string) => {
-    const listEl = listRef.current;
-    const headerEl = headerRefs.current.get(id);
-    if (!listEl || !headerEl) return;
+    const wrapperEl = wrapperRef.current;
+    const itemEl = itemRefs.current.get(id);
+    if (!wrapperEl || !itemEl) return;
 
-    const listRect = listEl.getBoundingClientRect();
-    const headerRect = headerEl.getBoundingClientRect();
-    const centerY = headerRect.top - listRect.top + headerRect.height / 2;
-    setIndicator({ top: centerY - 12, height: 24 });
+    const wrapperRect = wrapperEl.getBoundingClientRect();
+    const itemRect = itemEl.getBoundingClientRect();
+    const iconCenterY = itemRect.top - wrapperRect.top + ITEM_ICON_CENTER_FROM_TOP;
+    const top = iconCenterY - INDICATOR_HEIGHT / 2;
+
+    setIndicator((prev) =>
+      prev.top === top && prev.ready ? prev : { top, ready: true }
+    );
   }, []);
 
   useEffect(() => {
@@ -181,22 +223,26 @@ export function Features() {
   }, [activeId, updateIndicator]);
 
   useEffect(() => {
-    const listEl = listRef.current;
-    if (!listEl) return;
-
+    const wrapperEl = wrapperRef.current;
+    if (!wrapperEl) return;
     const ro = new ResizeObserver(() => updateIndicator(activeId));
-    ro.observe(listEl);
+    ro.observe(wrapperEl);
     return () => ro.disconnect();
   }, [activeId, updateIndicator]);
 
-  const setHeaderRef = useCallback(
-    (id: string) => (el: HTMLDivElement | null) => {
-      if (el) headerRefs.current.set(id, el);
-      else headerRefs.current.delete(id);
+  useEffect(() => {
+    const onResize = () => updateIndicator(activeId);
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, [activeId, updateIndicator]);
+
+  const setItemRef = useCallback(
+    (id: string) => (el: HTMLButtonElement | null) => {
+      if (el) itemRefs.current.set(id, el);
+      else itemRefs.current.delete(id);
     },
     []
   );
-
 
   return (
     <section
@@ -204,130 +250,168 @@ export function Features() {
       className="relative bg-bg pt-[80px] md:pt-[110px]"
       aria-label="Features section"
     >
-      <div
-        className="relative mx-auto max-w-[1632px] overflow-hidden px-6 py-12 md:pl-[216px] md:pr-12"
-        style={{ minHeight: 206 }}
-      >
+      <div ref={wrapperRef} className="relative mx-[48px] pl-[100px]">
+        {/* Top horizontal line of header band */}
         <motion.div
           aria-hidden
           className="pointer-events-none absolute left-0 right-0 top-0 h-px bg-black/15"
           initial={prefersReducedMotion ? undefined : { scaleX: 0 }}
           whileInView={{ scaleX: 1 }}
           viewport={{ once: true, margin: "-60px" }}
-          transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
+          transition={{ duration: 0.6, ease: EASE }}
           style={{ transformOrigin: "50% 50%" }}
         />
+
+        {/* Bottom horizontal line of header band */}
         <motion.div
           aria-hidden
-          className="pointer-events-none absolute bottom-0 left-0 right-0 h-px bg-black/15"
+          className="pointer-events-none absolute left-0 right-0 h-px bg-black/15"
+          style={{ top: HEADER_BAND_MIN_H, transformOrigin: "50% 50%" }}
           initial={prefersReducedMotion ? undefined : { scaleX: 0 }}
           whileInView={{ scaleX: 1 }}
           viewport={{ once: true, margin: "-60px" }}
-          transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1], delay: 0.05 }}
-          style={{ transformOrigin: "50% 50%" }}
+          transition={{ duration: 0.6, ease: EASE, delay: 0.05 }}
         />
+
+        {/* Left bracket SVG */}
+        <motion.svg
+          aria-hidden
+          width="13"
+          height={BRACKET_HEIGHT}
+          viewBox="0 0 13 173"
+          fill="none"
+          className="pointer-events-none absolute hidden md:block"
+          style={{ left: 0, top: BRACKET_TOP }}
+          initial={prefersReducedMotion ? undefined : { opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true, margin: "-60px" }}
+          transition={{ duration: 0.5, ease: EASE, delay: 0.45 }}
+        >
+          <path d={LEFT_BRACKET_D} stroke="black" strokeOpacity="0.15" />
+        </motion.svg>
+
+        {/* Right bracket SVG */}
+        <motion.svg
+          aria-hidden
+          width="13"
+          height={BRACKET_HEIGHT}
+          viewBox="0 0 13 173"
+          fill="none"
+          className="pointer-events-none absolute hidden md:block"
+          style={{ right: 0, top: BRACKET_TOP }}
+          initial={prefersReducedMotion ? undefined : { opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true, margin: "-60px" }}
+          transition={{ duration: 0.5, ease: EASE, delay: 0.45 }}
+        >
+          <path d={RIGHT_BRACKET_D} stroke="black" strokeOpacity="0.15" />
+        </motion.svg>
+
+        {/* Single continuous vertical line — spans header band + features list */}
         <motion.div
           aria-hidden
-          className="pointer-events-none absolute left-3 top-1/2 hidden h-[172px] w-[1px] -translate-y-1/2 md:block"
+          className="pointer-events-none absolute top-0 bottom-0 w-px bg-black/15 hidden md:block"
+          style={{ left: LINE_LEFT, transformOrigin: "50% 0%" }}
           initial={prefersReducedMotion ? undefined : { scaleY: 0 }}
           whileInView={{ scaleY: 1 }}
           viewport={{ once: true, margin: "-60px" }}
-          transition={{ duration: 0.45, ease: [0.25, 0.1, 0.25, 1], delay: 0.55 }}
+          transition={{ duration: 0.7, ease: EASE, delay: 0.2 }}
+        />
+
+        {/* Animated black indicator on the vertical line */}
+        <motion.div
+          aria-hidden
+          className="pointer-events-none absolute hidden md:block rounded-full bg-black"
           style={{
-            transformOrigin: "50% 0%",
-            borderLeft: "1px solid transparent",
-            borderImage: "linear-gradient(#d9d9d9, #bbb) 1",
+            left: LINE_LEFT,
+            x: "-50%",
+            width: INDICATOR_WIDTH,
+            height: INDICATOR_HEIGHT,
+            willChange: "top",
           }}
+          initial={false}
+          animate={{
+            top: indicator.top,
+            opacity: indicator.ready ? 1 : 0,
+          }}
+          transition={
+            prefersReducedMotion
+              ? { duration: 0 }
+              : {
+                  top: INDICATOR_SPRING,
+                  opacity: { duration: 0.35, ease: EASE, delay: indicator.ready ? 0.15 : 0 },
+                }
+          }
         />
-        <motion.div
-          aria-hidden
-          className="pointer-events-none absolute right-0 top-1/2 hidden h-[172px] w-3 -translate-y-1/2 md:block"
-          initial={prefersReducedMotion ? undefined : { scaleY: 0 }}
-          whileInView={{ scaleY: 1 }}
-          viewport={{ once: true, margin: "-60px" }}
-          transition={{ duration: 0.45, ease: [0.25, 0.1, 0.25, 1], delay: 0.55 }}
-          style={{ transformOrigin: "50% 0%" }}
-        >
-          <div className="h-full w-[1px] rounded-sm bg-gradient-to-b from-black/10 via-black/20 to-black/10" />
-        </motion.div>
 
-        <motion.div
-          variants={prefersReducedMotion ? {} : staggerContainer}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: "-100px" }}
-          className="max-w-[913px]"
+        {/* Header band content */}
+        <div
+          className="relative md:pl-[60px] md:pr-[60px]"
+          style={{ minHeight: HEADER_BAND_MIN_H }}
         >
-          <motion.h2
-            variants={prefersReducedMotion ? {} : fadeUp}
-            className="text-[clamp(36px,4vw,64px)] font-normal leading-[1.1] tracking-[-0.02em] text-black"
+          <motion.div
+            variants={prefersReducedMotion ? {} : staggerContainer}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-100px" }}
+            className="py-12 max-w-[913px]"
           >
-            {FEATURES_SECTION.headline}
-          </motion.h2>
-          <motion.p
-            variants={prefersReducedMotion ? {} : fadeUp}
-            className="mt-4 max-w-[913px] text-base leading-6 text-[#3e424d]/70"
+            <motion.h2
+              variants={prefersReducedMotion ? {} : fadeUp}
+              className="text-[clamp(36px,4vw,64px)] font-normal leading-[1.1] tracking-[-0.02em] text-black"
+            >
+              {FEATURES_SECTION.headline}
+            </motion.h2>
+            <motion.p
+              variants={prefersReducedMotion ? {} : fadeUp}
+              className="mt-4 max-w-[913px] text-base leading-6 text-[#3e424d]/70"
+            >
+              {FEATURES_SECTION.description}
+            </motion.p>
+          </motion.div>
+        </div>
+
+        {/* Features content */}
+        <div className="flex flex-col items-start gap-12 py-6 lg:flex-row lg:gap-12 md:pl-[60px] md:pr-[60px]">
+          <motion.div
+            className="w-full shrink-0 lg:w-[462px]"
+            initial={prefersReducedMotion ? undefined : { opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.6, ease: EASE }}
           >
-            {FEATURES_SECTION.description}
-          </motion.p>
-        </motion.div>
-      </div>
-
-      <div className="mx-auto flex max-w-[1200px] flex-col items-start gap-12 px-6 py-6 lg:flex-row lg:gap-12">
-        <motion.div
-          className="w-full shrink-0 lg:w-[462px]"
-          initial={prefersReducedMotion ? undefined : { opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-100px" }}
-          transition={{ duration: 0.6, ease: EASE }}
-        >
-          <div ref={listRef} className="relative pl-5">
-            <div
-              aria-hidden
-              className="pointer-events-none absolute left-0 top-0 bottom-0 w-px bg-gradient-to-b from-black/10 via-black/20 to-black/10"
-            />
-
-            {!prefersReducedMotion ? (
-              <motion.div
-                aria-hidden
-                className="pointer-events-none absolute left-0 w-1 -translate-x-[1.5px] rounded-full bg-black"
-                animate={{ top: indicator.top, height: indicator.height }}
-                transition={indicatorSpring}
-              />
-            ) : (
-              <div
-                aria-hidden
-                className="pointer-events-none absolute left-0 h-6 w-1 -translate-x-[1.5px] rounded-full bg-black"
-                style={{ top: indicator.top }}
-              />
-            )}
-
             <div className="flex flex-col">
-              {FEATURES.map((feature, index) => (
-                <FeatureItem
-                  key={feature.id}
-                  feature={feature}
-                  isActive={feature.id === activeId}
-                  isFirst={index === 0}
-                  onSelect={() => setActiveId(feature.id)}
-                  prefersReducedMotion={prefersReducedMotion}
-                  headerRef={setHeaderRef(feature.id)}
-                />
-              ))}
+              {FEATURES.map((feature, index) => {
+                const isActive = feature.id === activeId;
+                const prev = index > 0 ? FEATURES[index - 1] : null;
+                const prevIsActive = prev ? prev.id === activeId : false;
+                const showTopBorder = index > 0 && !isActive && !prevIsActive;
+                return (
+                  <FeatureItem
+                    key={feature.id}
+                    feature={feature}
+                    isActive={isActive}
+                    showTopBorder={showTopBorder}
+                    onSelect={() => setActiveId(feature.id)}
+                    prefersReducedMotion={prefersReducedMotion}
+                    buttonRef={setItemRef(feature.id)}
+                  />
+                );
+              })}
             </div>
-          </div>
 
-          <div className="pt-6">
-            <PillButtonCta>{FEATURES_SECTION.cta}</PillButtonCta>
-          </div>
-        </motion.div>
+            <div className="pt-6">
+              <PillButtonCta>{FEATURES_SECTION.cta}</PillButtonCta>
+            </div>
+          </motion.div>
 
-        <div className="relative h-[400px] w-full shrink-0 overflow-hidden rounded-2xl border border-[#d9d9d9] bg-black/5 lg:h-[511px] lg:flex-1">
-          <AutoplayVideo
-            src={VIDEOS.featureEditor}
-            objectPosition="top center"
-            ariaLabel="SR Platform 3D asset editor interface"
-          />
+          <div className="relative h-[400px] w-full shrink-0 overflow-hidden rounded-2xl border border-[#d9d9d9] bg-black/5 lg:h-[511px] lg:flex-1">
+            <AutoplayVideo
+              src={VIDEOS.featureEditor}
+              objectPosition="top center"
+              ariaLabel="SR Platform 3D asset editor interface"
+            />
+          </div>
         </div>
       </div>
     </section>

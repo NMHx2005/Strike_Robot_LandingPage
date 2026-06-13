@@ -70,12 +70,29 @@ export function AutoplayVideo({
   useEffect(() => {
     if (!shouldLoad) return;
     const video = videoRef.current;
-    if (!video || prefersReducedMotion) return;
+    const container = containerRef.current;
+    if (!video || !container || prefersReducedMotion) return;
 
     const tryPlay = () => video.play().catch(() => {});
+
+    // Pause video khi out of viewport — giảm tải decode/render cost.
+    // Resume khi vào lại viewport.
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) tryPlay();
+        else video.pause();
+      },
+      { rootMargin: "200px" }
+    );
+    observer.observe(container);
+
     tryPlay();
     video.addEventListener("loadeddata", tryPlay);
-    return () => video.removeEventListener("loadeddata", tryPlay);
+
+    return () => {
+      observer.disconnect();
+      video.removeEventListener("loadeddata", tryPlay);
+    };
   }, [shouldLoad, prefersReducedMotion, src]);
 
   return (

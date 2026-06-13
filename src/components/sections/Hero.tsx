@@ -42,7 +42,7 @@ export function Hero() {
   const prefersReducedMotion = useReducedMotion();
 
   return (
-    <section className="relative z-10 flex flex-col items-center px-6 pt-32 pb-16 md:pt-36 md:pb-20">
+    <section className="relative z-10 flex flex-col items-center px-[48px] pt-32 pb-16 md:pt-36 md:pb-20">
       {/* Title block */}
       <motion.div
         className="mx-auto flex w-full max-w-[1200px] flex-col items-center"
