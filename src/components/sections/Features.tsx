@@ -22,7 +22,7 @@ const INDICATOR_SPRING = {
 const HEADER_BAND_MIN_H = 206;
 const BRACKET_HEIGHT = 173;
 const BRACKET_TOP = (HEADER_BAND_MIN_H - BRACKET_HEIGHT) / 2;
-const LINE_LEFT = 70;
+const LINE_LEFT = 10;
 const INDICATOR_HEIGHT = 40;
 const INDICATOR_WIDTH = 3;
 const ITEM_ICON_CENTER_FROM_TOP = 36;
@@ -122,7 +122,7 @@ function FeatureItem({
           aria-hidden
           className="relative block h-12 w-12 shrink-0"
           initial={false}
-          animate={{ opacity: isActive ? 1 : 0.6 }}
+          animate={{ opacity: isActive ? 1 : 0.45 }}
           transition={
             prefersReducedMotion
               ? { duration: 0 }
@@ -139,6 +139,7 @@ function FeatureItem({
               className="h-12 w-12 object-contain select-none"
               draggable={false}
               priority
+              style={{ mixBlendMode: "multiply" }}
             />
           )}
         </motion.span>
@@ -247,11 +248,11 @@ export function Features() {
   return (
     <section
       id="features"
-      className="relative bg-bg pt-[80px] md:pt-[110px]"
+      className="relative bg-transparent pt-[80px] md:pt-[110px]"
       aria-label="Features section"
     >
-      <div ref={wrapperRef} className="relative mx-[48px] pl-[100px]">
-        {/* Top horizontal line of header band */}
+      <div ref={wrapperRef} className="relative mx-[48px]">
+        {/* Top horizontal line of header band — full frame width */}
         <motion.div
           aria-hidden
           className="pointer-events-none absolute left-0 right-0 top-0 h-px bg-black/15"
@@ -262,7 +263,7 @@ export function Features() {
           style={{ transformOrigin: "50% 50%" }}
         />
 
-        {/* Bottom horizontal line of header band */}
+        {/* Bottom horizontal line of header band — full frame width */}
         <motion.div
           aria-hidden
           className="pointer-events-none absolute left-0 right-0 h-px bg-black/15"
@@ -273,7 +274,7 @@ export function Features() {
           transition={{ duration: 0.6, ease: EASE, delay: 0.05 }}
         />
 
-        {/* Left bracket SVG */}
+        {/* Left bracket SVG — at outer frame edge */}
         <motion.svg
           aria-hidden
           width="13"
@@ -290,7 +291,7 @@ export function Features() {
           <path d={LEFT_BRACKET_D} stroke="black" strokeOpacity="0.15" />
         </motion.svg>
 
-        {/* Right bracket SVG */}
+        {/* Right bracket SVG — at outer frame edge */}
         <motion.svg
           aria-hidden
           width="13"
@@ -307,48 +308,52 @@ export function Features() {
           <path d={RIGHT_BRACKET_D} stroke="black" strokeOpacity="0.15" />
         </motion.svg>
 
-        {/* Single continuous vertical line — spans header band + features list */}
-        <motion.div
-          aria-hidden
-          className="pointer-events-none absolute top-0 bottom-0 w-px bg-black/15 hidden md:block"
-          style={{ left: LINE_LEFT, transformOrigin: "50% 0%" }}
-          initial={prefersReducedMotion ? undefined : { scaleY: 0 }}
-          whileInView={{ scaleY: 1 }}
-          viewport={{ once: true, margin: "-60px" }}
-          transition={{ duration: 0.7, ease: EASE, delay: 0.2 }}
-        />
+        {/* Inner content — locked at max 1268px, centered. Contains the text,
+            features grid, and the vertical line + indicator so the line stays
+            50px from the content's left edge regardless of viewport width. */}
+        <div className="relative mx-auto w-full max-w-[1268px]">
+          {/* Single continuous vertical line — sits 50px left of content text */}
+          <motion.div
+            aria-hidden
+            className="pointer-events-none absolute top-0 bottom-0 w-px bg-black/15 hidden md:block"
+            style={{ left: LINE_LEFT, transformOrigin: "50% 0%" }}
+            initial={prefersReducedMotion ? undefined : { scaleY: 0 }}
+            whileInView={{ scaleY: 1 }}
+            viewport={{ once: true, margin: "-60px" }}
+            transition={{ duration: 0.7, ease: EASE, delay: 0.2 }}
+          />
 
-        {/* Animated black indicator on the vertical line */}
-        <motion.div
-          aria-hidden
-          className="pointer-events-none absolute hidden md:block rounded-full bg-black"
-          style={{
-            left: LINE_LEFT,
-            x: "-50%",
-            width: INDICATOR_WIDTH,
-            height: INDICATOR_HEIGHT,
-            willChange: "top",
-          }}
-          initial={false}
-          animate={{
-            top: indicator.top,
-            opacity: indicator.ready ? 1 : 0,
-          }}
-          transition={
-            prefersReducedMotion
-              ? { duration: 0 }
-              : {
-                  top: INDICATOR_SPRING,
-                  opacity: { duration: 0.35, ease: EASE, delay: indicator.ready ? 0.15 : 0 },
-                }
-          }
-        />
+          {/* Animated black indicator on the vertical line */}
+          <motion.div
+            aria-hidden
+            className="pointer-events-none absolute hidden md:block rounded-full bg-black"
+            style={{
+              left: LINE_LEFT,
+              x: "-50%",
+              width: INDICATOR_WIDTH,
+              height: INDICATOR_HEIGHT,
+              willChange: "top",
+            }}
+            initial={false}
+            animate={{
+              top: indicator.top,
+              opacity: indicator.ready ? 1 : 0,
+            }}
+            transition={
+              prefersReducedMotion
+                ? { duration: 0 }
+                : {
+                    top: INDICATOR_SPRING,
+                    opacity: { duration: 0.35, ease: EASE, delay: indicator.ready ? 0.15 : 0 },
+                  }
+            }
+          />
 
-        {/* Header band content */}
-        <div
-          className="relative md:pl-[60px] md:pr-[60px]"
-          style={{ minHeight: HEADER_BAND_MIN_H }}
-        >
+          {/* Header band content */}
+          <div
+            className="relative md:pl-[60px] md:pr-[60px]"
+            style={{ minHeight: HEADER_BAND_MIN_H }}
+          >
           <motion.div
             variants={prefersReducedMotion ? {} : staggerContainer}
             initial="hidden"
@@ -372,7 +377,7 @@ export function Features() {
         </div>
 
         {/* Features content */}
-        <div className="flex flex-col items-start gap-12 py-6 lg:flex-row lg:gap-12 md:pl-[60px] md:pr-[60px]">
+        <div className="flex flex-col items-start gap-12 py-[64px] lg:flex-row lg:gap-12 md:pl-[60px] md:pr-[60px]">
           <motion.div
             className="w-full shrink-0 lg:w-[462px]"
             initial={prefersReducedMotion ? undefined : { opacity: 0, y: 20 }}
@@ -412,6 +417,7 @@ export function Features() {
               ariaLabel="SR Platform 3D asset editor interface"
             />
           </div>
+        </div>
         </div>
       </div>
     </section>

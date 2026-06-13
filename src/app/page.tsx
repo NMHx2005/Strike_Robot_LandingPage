@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { Navbar } from "@/components/layout/Navbar";
 import { MainSection } from "@/components/layout/MainSection";
 import { Hero } from "@/components/sections/Hero";
@@ -14,9 +15,17 @@ export default function LandingPage() {
       <div className="relative">
         <div
           aria-hidden
-          className="pointer-events-none sticky top-0 -z-10 h-screen w-full bg-cover bg-center bg-no-repeat"
-          style={{ backgroundImage: `url('${HERO_BACKGROUND}')` }}
-        />
+          className="pointer-events-none sticky top-0 -z-10 h-screen w-full"
+        >
+          <Image
+            src={HERO_BACKGROUND}
+            alt=""
+            fill
+            priority
+            sizes="100vw"
+            className="object-cover object-center"
+          />
+        </div>
         <div className="relative z-10 -mt-[100vh]">
           <Navbar />
           <Hero />

@@ -21,11 +21,13 @@ const SEPARATOR = "  ·  ";
 
 /**
  * startOffset (%) — phải < 100 để chars visible.
- * 90 = rất tucked, chỉ ~3 chữ ở khúc cong cuối.
+ * Path start ở x=-200 (ngoài viewBox bên trái) để text phủ kín từ mép trái;
+ * transition (horizontal→curve) ở x≈1050, kết thúc tại góc dưới-phải
+ * (1440, 230). Đoạn visible (x=0→1440) nằm gọn trong viewBox.
  */
-const OFFSET_START = 90;
-/** Khi section ra viewport top — visible chars phủ thêm khúc curve giữa. */
-const OFFSET_END = 60;
+const OFFSET_START = 48;
+/** Khi section ra viewport top — text trôi vào đoạn ngang bên trái. */
+const OFFSET_END = 18;
 
 /** Tốc độ drift liên tục (% path length / giây). Âm = trôi sang trái. */
 const DRIFT_SPEED = -10;
@@ -130,10 +132,13 @@ export function HowItWorks() {
             <stop offset="72%" stopColor="#000000" />
             <stop offset="100%" stopColor="#000000" />
           </linearGradient>
-          {/* Bên trái nằm ngang phía trên, mép phải hạ xuống dưới */}
+          {/* Path start kéo ra ngoài viewBox bên trái (x=-200) để text phủ
+              kín từ mép trái màn hình. Transition (horizontal→curve) ở
+              x≈1050; kết thúc tại góc dưới-phải viewBox (1440, 230) — đoạn
+              visible nằm gọn trong viewBox, không bị overflow-hidden cắt. */}
           <path
             id="arc-text-path"
-            d="M -40 75 L 700 75 C 1050 75 1180 205 1480 205"
+            d="M -200 75 L 1050 75 C 1280 75 1400 150 1440 230"
           />
         </defs>
         <text

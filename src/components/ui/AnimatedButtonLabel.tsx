@@ -121,7 +121,7 @@ export function AnimatedButtonLabel({
             animate={shouldAnimate ? "active" : "rest"}
             variants={canAnimate ? variants : undefined}
             style={{
-              willChange: canAnimate
+              willChange: shouldAnimate
                 ? "transform, font-weight, opacity"
                 : undefined,
               fontWeight: canAnimate ? undefined : restWeight,

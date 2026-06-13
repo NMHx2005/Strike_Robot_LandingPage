@@ -18,14 +18,17 @@ import {
 type ScrollVideoRevealProps = {
   children: React.ReactNode;
   className?: string;
+  targetRef?: React.RefObject<HTMLDivElement | null>;
 };
 
 export function ScrollVideoReveal({
   children,
   className,
+  targetRef,
 }: ScrollVideoRevealProps) {
   const prefersReducedMotion = useReducedMotion();
-  const containerRef = useRef<HTMLDivElement>(null);
+  const internalRef = useRef<HTMLDivElement | null>(null);
+  const containerRef = targetRef ?? internalRef;
 
   const { scrollYProgress } = useScroll({
     target: containerRef,
@@ -49,7 +52,7 @@ export function ScrollVideoReveal({
 
   return (
     <div
-      ref={containerRef}
+      ref={containerRef as React.RefObject<HTMLDivElement>}
       className={cn("w-full", className)}
       style={{ perspective: `${REVEAL_PERSPECTIVE_PX}px` }}
     >

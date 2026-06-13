@@ -1,12 +1,19 @@
 "use client";
 
-import { motion, useReducedMotion } from "framer-motion";
+import { useRef } from "react";
+import {
+  motion,
+  useReducedMotion,
+  useScroll,
+  useTransform,
+} from "framer-motion";
 import { HERO, VIDEOS } from "@/lib/constants";
 import { PillButton } from "@/components/ui/PillButton";
 import { AutoplayVideo } from "@/components/ui/AutoplayVideo";
 import { ScrollVideoReveal } from "@/components/ui/ScrollVideoReveal";
 import { fadeUp } from "@/components/animations/fadeUp";
 import { staggerContainer } from "@/components/animations/stagger";
+import { REVEAL_OFFSET } from "@/components/animations/scrollVideoReveal";
 
 function PlatformIcon() {
   return (
@@ -40,15 +47,33 @@ function PlatformIcon() {
 
 export function Hero() {
   const prefersReducedMotion = useReducedMotion();
+  const videoWrapperRef = useRef<HTMLDivElement>(null);
+
+  const { scrollYProgress } = useScroll({
+    target: videoWrapperRef,
+    offset: REVEAL_OFFSET as unknown as ["start end", "center 65%"],
+  });
+
+  const titleOpacity = useTransform(
+    scrollYProgress,
+    [0, 0.5, 1],
+    [1, 0.7, 0]
+  );
+  const titleScale = useTransform(scrollYProgress, [0, 1], [1, 0.92]);
+
+  const titleMotionStyle = prefersReducedMotion
+    ? undefined
+    : { opacity: titleOpacity, scale: titleScale };
 
   return (
-    <section className="relative z-10 flex flex-col items-center px-[48px] pt-32 pb-16 md:pt-36 md:pb-20">
-      {/* Title block */}
+    <section className="relative z-10 flex flex-col items-center px-[48px]">
+      {/* Title block — vertically centered in viewport below the 128px navbar */}
       <motion.div
-        className="mx-auto flex w-full max-w-[1200px] flex-col items-center"
+        className="mx-auto flex w-full max-w-[1200px] flex-col items-center justify-center min-h-[calc(100vh-128px)] pt-32"
         variants={prefersReducedMotion ? {} : staggerContainer}
         initial="hidden"
         animate="visible"
+        style={titleMotionStyle}
       >
         <motion.div className="mb-6 flex gap-2.5" variants={prefersReducedMotion ? {} : fadeUp}>
           {[HERO.badge1, HERO.badge2].map((badge) => (
@@ -97,7 +122,10 @@ export function Hero() {
         </motion.div>
       </motion.div>
 
-      <ScrollVideoReveal className="mt-4 max-w-[calc(100vw-96px)]">
+      <ScrollVideoReveal
+        className="mb-16 mt-4 max-w-[calc(100vw-96px)] md:mb-20"
+        targetRef={videoWrapperRef}
+      >
         <div className="relative aspect-[1200/484] overflow-hidden rounded-3xl border border-black/10 bg-black/5 shadow-[0_32px_90px_rgba(0,0,0,0.18)]">
           <AutoplayVideo
             src={VIDEOS.hero}

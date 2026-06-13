@@ -71,6 +71,10 @@ export function Navbar() {
           style={{
             background:
               "conic-gradient(from 0deg at 50% 50%, #D9D9D9 0deg, #D9D9D9 65deg, #F2F2F2 150deg, #DFD0EA 176deg, #D9D9D9 204deg, #D9D9D9 255deg, #A6CEDA 285deg, #ECECEC 319deg, #D9D9D9 360deg)",
+            backdropFilter: "blur(20px)",
+            WebkitBackdropFilter: "blur(20px)",
+            boxShadow:
+              "inset 0px -2px 4px 0px #FFFFFF4D, inset 0px 4px 6px 0px #FFFFFF33",
           }}
         >
           <div
