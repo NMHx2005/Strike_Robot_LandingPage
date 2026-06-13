@@ -70,7 +70,7 @@ export function Navbar() {
           className="hidden md:block flex-shrink-0 rounded-[24px] p-[1.4px]"
           style={{
             background:
-              "conic-gradient(from 0deg at 50% 50%, #D9D9D9 0deg, #D9D9D9 65deg, #F2F2F2 150deg, #DFD0EA 176deg, #D9D9D9 204deg, #D9D9D9 255deg, #A6CEDA 285deg, #ECECEC 319deg, #D9D9D9 360deg)",
+              "linear-gradient(from 0deg at 50% 50%, #D9D9D9 0deg, #D9D9D9 65deg, #F2F2F2 150deg, #DFD0EA 176deg, #D9D9D9 204deg, #D9D9D9 255deg, #A6CEDA 285deg, #ECECEC 319deg, #D9D9D9 360deg)",
           }}
         >
           <div
@@ -103,13 +103,13 @@ export function Navbar() {
                     style={
                       isActive
                         ? {
-                            background:
-                              "linear-gradient(180deg, #8c8c8c 0%, #000000 100%)",
-                            WebkitBackgroundClip: "text",
-                            WebkitTextFillColor: "transparent",
-                            backgroundClip: "text",
-                            fontWeight: 700,
-                          }
+                          background:
+                            "linear-gradient(180deg, #8c8c8c 0%, #000000 100%)",
+                          WebkitBackgroundClip: "text",
+                          WebkitTextFillColor: "transparent",
+                          backgroundClip: "text",
+                          fontWeight: 700,
+                        }
                         : undefined
                     }
                   >
