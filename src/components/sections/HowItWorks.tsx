@@ -86,9 +86,15 @@ export function HowItWorks() {
 
     // Throttle mobile xuống ~30fps để giảm số lần SVG textPath re-layout.
     const minFrameMs = isMobile ? 1000 / 30 : 0;
+    // Drift chỉ chạy khi: section in-viewport VÀ user không đang scroll.
+    // Pause-on-scroll giúp nhường CPU cho việc composite/layout của scroll
+    // → đỡ giật cả scroll lẫn drift trên thiết bị yếu.
     let rafId: number | null = null;
     let lastTime = 0;
     let lastFrameTime = 0;
+    let isVisible = false;
+    let isScrolling = false;
+    let scrollIdleTimer: ReturnType<typeof setTimeout> | null = null;
 
     const tick = (now: number) => {
       if (now - lastFrameTime >= minFrameMs) {
@@ -106,6 +112,7 @@ export function HowItWorks() {
     };
     const start = () => {
       if (rafId !== null) return;
+      if (!isVisible || isScrolling) return;
       lastTime = performance.now();
       lastFrameTime = lastTime;
       rafId = requestAnimationFrame(tick);
@@ -116,16 +123,35 @@ export function HowItWorks() {
       rafId = null;
     };
 
+    const onScroll = () => {
+      if (!isScrolling) {
+        isScrolling = true;
+        stop();
+      }
+      if (scrollIdleTimer !== null) clearTimeout(scrollIdleTimer);
+      // Idle 150ms sau lần scroll cuối → coi như user đã ngừng → resume drift.
+      scrollIdleTimer = setTimeout(() => {
+        isScrolling = false;
+        scrollIdleTimer = null;
+        start();
+      }, 150);
+    };
+
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting) start();
+        isVisible = entry.isIntersecting;
+        if (isVisible) start();
         else stop();
       },
       { rootMargin: "100px" }
     );
     observer.observe(section);
+    window.addEventListener("scroll", onScroll, { passive: true });
+
     return () => {
       observer.disconnect();
+      window.removeEventListener("scroll", onScroll);
+      if (scrollIdleTimer !== null) clearTimeout(scrollIdleTimer);
       stop();
     };
   }, [prefersReducedMotion, driftOffset, isMobile]);
