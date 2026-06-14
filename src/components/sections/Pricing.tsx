@@ -109,7 +109,7 @@ function CommunityCard({
     >
       <article
         ref={tiltRef}
-        className="group relative h-full w-full overflow-hidden rounded-[20px] p-4 will-change-transform transition-colors duration-300 ease-[cubic-bezier(0.25,0.1,0.25,1)] hover:bg-white"
+        className="group relative h-full w-full overflow-hidden rounded-[20px] p-2.5 will-change-transform transition-colors duration-300 ease-[cubic-bezier(0.25,0.1,0.25,1)] hover:bg-white md:p-4"
       >
         {/* Card media area — notch-masked so the bottom-right circle is
             carved out for the button. On hover: container bg becomes white,
@@ -224,7 +224,7 @@ export function Pricing() {
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, margin: "-100px" }}
-        className="mx-auto grid max-w-[1280px] grid-cols-1 gap-4 px-6 md:grid-cols-2 md:grid-rows-1"
+        className="mx-auto grid max-w-[1280px] grid-cols-1 gap-4 px-3 md:grid-cols-2 md:grid-rows-1 md:px-6"
       >
         <CommunityCard
           tag={COMMUNITY.explore.tag}

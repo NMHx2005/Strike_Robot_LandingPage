@@ -4,7 +4,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
-import { FEATURES, FEATURES_SECTION, VIDEOS } from "@/lib/constants";
+import { FEATURES, FEATURES_SECTION } from "@/lib/constants";
 import { PillButtonCta } from "@/components/ui/PillButton";
 import { AutoplayVideo } from "@/components/ui/AutoplayVideo";
 import { fadeUp } from "@/components/animations/fadeUp";
@@ -84,6 +84,7 @@ function FeatureItem({
   buttonRef,
 }: FeatureItemProps) {
   const iconSrc = ICON_SRC[feature.id];
+  const videoSrc = feature.videoSrc;
 
   return (
     <button
@@ -190,6 +191,19 @@ function FeatureItem({
             boldPhrase={feature.boldPhrase}
           />
         </div>
+        {/* Mobile/tablet inline video — full-width trong card (không indent
+            theo pl-72 của description). Chỉ mount khi isActive, ẩn ở lg+
+            (lg+ đã có cột phải). Container display:none ở lg+ → IO không
+            trigger video load. */}
+        {isActive && videoSrc && (
+          <div className="lg:hidden mt-3 relative h-[200px] w-full overflow-hidden rounded-2xl border border-[#d9d9d9] bg-black/5 sm:h-[260px]">
+            <AutoplayVideo
+              src={videoSrc}
+              objectPosition="top center"
+              ariaLabel={`${feature.title} preview`}
+            />
+          </div>
+        )}
       </motion.div>
     </button>
   );
@@ -199,6 +213,7 @@ export function Features() {
   const [activeId, setActiveId] = useState(FEATURES[0].id);
   const [indicator, setIndicator] = useState({ top: 0, ready: false });
   const prefersReducedMotion = useReducedMotion();
+  const activeFeature = FEATURES.find((f) => f.id === activeId) ?? FEATURES[0];
 
   const wrapperRef = useRef<HTMLDivElement>(null);
   const itemRefs = useRef<Map<string, HTMLButtonElement>>(new Map());
@@ -422,11 +437,14 @@ export function Features() {
             </div>
           </motion.div>
 
-          <div className="relative h-[178px] w-full shrink-0 overflow-hidden rounded-2xl border border-[#d9d9d9] bg-black/5 md:h-[400px] lg:h-[511px] lg:flex-1">
+          {/* Desktop-only right column — switch video theo activeId
+              (key remount để clean reset state mỗi lần đổi feature). */}
+          <div className="relative hidden h-[511px] w-full shrink-0 overflow-hidden rounded-2xl border border-[#d9d9d9] bg-black/5 lg:block lg:flex-1">
             <AutoplayVideo
-              src={VIDEOS.featureEditor}
+              key={activeFeature.id}
+              src={activeFeature.videoSrc}
               objectPosition="top center"
-              ariaLabel="SR Platform 3D asset editor interface"
+              ariaLabel={`${activeFeature.title} preview`}
             />
           </div>
         </div>

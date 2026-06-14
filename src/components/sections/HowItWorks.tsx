@@ -1,91 +1,113 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   useMotionValue,
   useMotionValueEvent,
   useReducedMotion,
-  useScroll,
-  useTransform,
 } from "framer-motion";
 import { SCROLLING_TEXT } from "@/lib/constants";
 
 /**
- * Lặp text rất nhiều lần để drift trôi liên tục mãi không hết.
- * 50 phrases × ~95%/phrase ≈ 4750% path length. Với DRIFT_SPEED -10%/s,
- * text mất ~8 phút mới drift hết → user gần như không bao giờ thấy "end".
- * KHÔNG dùng wrap modulo nữa → không có jump.
+ * 10 phrases + modulo wrap đo theo phrase width thực tế.
+ * Vì phrases giống hệt nhau, wrap đúng tại 1 phrase width là seamless
+ * (đoạn visible trước/sau wrap là identical). Giảm ~80% text layout work
+ * mỗi frame so với bản 50-phrase unrolled cũ.
  */
-const REPEAT_COUNT = 50;
+const REPEAT_COUNT = 10;
 const SEPARATOR = "  ·  ";
 
-/**
- * startOffset (%) — phải < 100 để chars visible.
- * Path start ở x=-200 (ngoài viewBox bên trái) để text phủ kín từ mép trái;
- * transition (horizontal→curve) ở x≈1050, kết thúc tại góc dưới-phải
- * (1440, 230). Đoạn visible (x=0→1440) nằm gọn trong viewBox.
- */
 const OFFSET_START = 48;
-/** Khi section ra viewport top — text trôi vào đoạn ngang bên trái. */
-const OFFSET_END = 18;
-
-/** Tốc độ drift liên tục (% path length / giây). Âm = trôi sang trái. */
 const DRIFT_SPEED = -10;
 
-/** Cỡ chữ SVG (viewBox 1440x230) */
 const FONT_SIZE = 96;
 
-/**
- * Desktop path: curve ở góc phải-dưới của viewBox 1440x230.
- * Mobile path: viewBox vẫn 1440x230 nhưng SVG render w-[180%] nên vùng nhìn
- * thấy chỉ là viewBox 0-800. Curve phải nằm trong khoảng đó (kết thúc ở x=800)
- * để user thấy text cong xuống ở mép phải mobile.
- */
 const PATH_D_DESKTOP = "M -200 75 L 1050 75 C 1280 75 1400 150 1440 230";
 const PATH_D_MOBILE = "M -200 75 L 700 75 C 760 75 790 140 800 230";
 
 export function HowItWorks() {
   const sectionRef = useRef<HTMLElement>(null);
+  const textDesktopRef = useRef<SVGTextElement>(null);
+  const textMobileRef = useRef<SVGTextElement>(null);
   const textPathDesktopRef = useRef<SVGTextPathElement>(null);
   const textPathMobileRef = useRef<SVGTextPathElement>(null);
+  const pathDesktopRef = useRef<SVGPathElement>(null);
+  const pathMobileRef = useRef<SVGPathElement>(null);
+  const wrapIntervalRef = useRef<number | null>(null);
   const prefersReducedMotion = useReducedMotion();
+  const [isMobile, setIsMobile] = useState(false);
 
-  const { scrollYProgress } = useScroll({
-    target: sectionRef,
-    offset: ["start end", "end start"],
-  });
-  const scrollOffset = useTransform(
-    scrollYProgress,
-    [0, 1],
-    [OFFSET_START, OFFSET_END]
-  );
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const mq = window.matchMedia("(max-width: 767px)");
+    const update = () => setIsMobile(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
+
+  // Đo 1 phrase width theo % path length → dùng cho modulo wrap.
+  // Đo lại khi đổi mobile/desktop và khi font web load xong (advance khác).
+  useEffect(() => {
+    const measure = () => {
+      const textEl = isMobile ? textMobileRef.current : textDesktopRef.current;
+      const pathEl = isMobile ? pathMobileRef.current : pathDesktopRef.current;
+      if (!textEl || !pathEl) return;
+      try {
+        const totalLen = textEl.getComputedTextLength();
+        const pathLen = pathEl.getTotalLength();
+        if (totalLen > 0 && pathLen > 0) {
+          wrapIntervalRef.current = (totalLen / REPEAT_COUNT / pathLen) * 100;
+        }
+      } catch {
+        wrapIntervalRef.current = null;
+      }
+    };
+    const rafId = requestAnimationFrame(measure);
+    if (typeof document !== "undefined" && "fonts" in document) {
+      document.fonts.ready.then(measure).catch(() => {});
+    }
+    return () => cancelAnimationFrame(rafId);
+  }, [isMobile]);
 
   const phrase = `${SCROLLING_TEXT.parts[0]} ${SCROLLING_TEXT.parts[1]} ${SCROLLING_TEXT.parts[2]}`;
   const repeatedText = Array.from({ length: REPEAT_COUNT })
     .map(() => phrase)
     .join(SEPARATOR);
 
-  // Drift — rAF gated by IntersectionObserver, KHÔNG wrap → trôi liên tục
-  // không quay đầu. Vì text dài 50 phrases, drift mất ~8 phút mới hết.
-  const driftOffset = useMotionValue(0);
+  // Drift độc lập với scroll — tốc độ không đổi dù user scroll lên/xuống/đứng yên.
+  // driftOffset chính là giá trị startOffset (%) sẽ apply lên textPath.
+  const driftOffset = useMotionValue(OFFSET_START);
 
   useEffect(() => {
     if (prefersReducedMotion) return;
     const section = sectionRef.current;
     if (!section) return;
 
+    // Throttle mobile xuống ~30fps để giảm số lần SVG textPath re-layout.
+    const minFrameMs = isMobile ? 1000 / 30 : 0;
     let rafId: number | null = null;
     let lastTime = 0;
+    let lastFrameTime = 0;
 
     const tick = (now: number) => {
-      const delta = now - lastTime;
-      lastTime = now;
-      driftOffset.set(driftOffset.get() + (DRIFT_SPEED * delta) / 1000);
+      if (now - lastFrameTime >= minFrameMs) {
+        const delta = now - lastTime;
+        lastTime = now;
+        lastFrameTime = now;
+        let next = driftOffset.get() + (DRIFT_SPEED * delta) / 1000;
+        const wrap = wrapIntervalRef.current;
+        // Modulo wrap tại đúng 1 phrase width → seam invisible vì phrases identical.
+        // Drift cycles trong [OFFSET_START - wrap, OFFSET_START].
+        if (wrap && next <= OFFSET_START - wrap) next += wrap;
+        driftOffset.set(next);
+      }
       rafId = requestAnimationFrame(tick);
     };
     const start = () => {
       if (rafId !== null) return;
       lastTime = performance.now();
+      lastFrameTime = lastTime;
       rafId = requestAnimationFrame(tick);
     };
     const stop = () => {
@@ -106,18 +128,14 @@ export function HowItWorks() {
       observer.disconnect();
       stop();
     };
-  }, [prefersReducedMotion, driftOffset]);
+  }, [prefersReducedMotion, driftOffset, isMobile]);
 
-  const totalOffset = useTransform(
-    [scrollOffset, driftOffset],
-    (latest: number[]) => latest[0] + latest[1]
-  );
-
-  useMotionValueEvent(totalOffset, "change", (v) => {
+  useMotionValueEvent(driftOffset, "change", (v) => {
     if (prefersReducedMotion) return;
     const offsetStr = `${v}%`;
-    textPathDesktopRef.current?.setAttribute("startOffset", offsetStr);
-    textPathMobileRef.current?.setAttribute("startOffset", offsetStr);
+    // Chỉ touch ref đang visible — SVG kia đang display:none, không cần update.
+    const ref = isMobile ? textPathMobileRef : textPathDesktopRef;
+    ref.current?.setAttribute("startOffset", offsetStr);
   });
 
   const initialOffset = prefersReducedMotion ? "0%" : `${OFFSET_START}%`;
@@ -137,6 +155,13 @@ export function HowItWorks() {
     fontFamily: "var(--font-golos-text), sans-serif",
     letterSpacing: "-0.01em" as const,
   };
+  // Promote section sang compositor layer riêng + cô lập paint
+  // → repaint của textPath không invalidate cả trang.
+  const svgStyle = {
+    overflow: "visible" as const,
+    transform: "translateZ(0)",
+    contain: "layout paint" as const,
+  };
 
   return (
     <section
@@ -151,15 +176,15 @@ export function HowItWorks() {
         viewBox="0 0 1440 230"
         fill="none"
         aria-hidden="true"
-        style={{ overflow: "visible" }}
+        style={svgStyle}
       >
         <defs>
           <linearGradient id="arc-text-gradient-d" x1="0%" y1="0%" x2="100%" y2="0%">
             {gradientStops}
           </linearGradient>
-          <path id="arc-text-path-d" d={PATH_D_DESKTOP} />
+          <path ref={pathDesktopRef} id="arc-text-path-d" d={PATH_D_DESKTOP} />
         </defs>
-        <text fill="url(#arc-text-gradient-d)" style={textStyle}>
+        <text ref={textDesktopRef} fill="url(#arc-text-gradient-d)" style={textStyle}>
           <textPath
             ref={textPathDesktopRef}
             href="#arc-text-path-d"
@@ -170,23 +195,21 @@ export function HowItWorks() {
         </text>
       </svg>
 
-      {/* Mobile: SVG w-[180%] (text lớn hơn) — vùng nhìn thấy là viewBox 0-800,
-          nên curve thiết kế để kết thúc ở (800, 230) đảm bảo user thấy text
-          cong xuống ở mép phải màn mobile. */}
+      {/* Mobile: SVG w-[180%] — vùng nhìn thấy là viewBox 0-800, curve kết thúc ở (800, 230). */}
       <svg
         className="block md:hidden w-[180%]"
         viewBox="0 0 1440 230"
         fill="none"
         aria-hidden="true"
-        style={{ overflow: "visible" }}
+        style={svgStyle}
       >
         <defs>
           <linearGradient id="arc-text-gradient-m" x1="0%" y1="0%" x2="100%" y2="0%">
             {gradientStops}
           </linearGradient>
-          <path id="arc-text-path-m" d={PATH_D_MOBILE} />
+          <path ref={pathMobileRef} id="arc-text-path-m" d={PATH_D_MOBILE} />
         </defs>
-        <text fill="url(#arc-text-gradient-m)" style={textStyle}>
+        <text ref={textMobileRef} fill="url(#arc-text-gradient-m)" style={textStyle}>
           <textPath
             ref={textPathMobileRef}
             href="#arc-text-path-m"
