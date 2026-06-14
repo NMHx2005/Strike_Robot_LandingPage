@@ -8,7 +8,7 @@ export const NAV_LINKS = [
   { label: "About", href: "#features" },
   { label: "Case Studies", href: "#community", hasDropdown: true },
   { label: "Product", href: "#features", hasDropdown: true },
-  { label: "Stimulation", href: "#cta" },
+  { label: "Simulation", href: "#cta" },
 ];
 
 export const NAV_CTA = "Create with SR Platform";
@@ -58,7 +58,7 @@ export const FEATURES = [
   },
   {
     id: "stimulation",
-    title: "Stimulation & Rollouts",
+    title: "Simulation & Rollouts",
     description:
       "Run thousands of robot policy rollouts inside generated environments. Every simulation is instrumented with sensor outputs, collision data, and task success metrics exported automatically.",
     icon: "Car",

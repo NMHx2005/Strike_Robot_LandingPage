@@ -251,7 +251,7 @@ export function Features() {
       className="relative bg-transparent pt-[80px] md:pt-[110px]"
       aria-label="Features section"
     >
-      <div ref={wrapperRef} className="relative mx-[48px]">
+      <div ref={wrapperRef} className="relative mx-6 md:mx-[48px]">
         {/* Top horizontal line of header band — full frame width */}
         <motion.div
           aria-hidden
@@ -377,7 +377,7 @@ export function Features() {
         </div>
 
         {/* Features content */}
-        <div className="flex flex-col items-start gap-12 py-[64px] lg:flex-row lg:gap-12 md:pl-[60px] md:pr-[60px]">
+        <div className="flex flex-col items-start gap-12 py-8 md:py-[64px] lg:flex-row lg:gap-12 md:pl-[60px] md:pr-[60px]">
           <motion.div
             className="w-full shrink-0 lg:w-[462px]"
             initial={prefersReducedMotion ? undefined : { opacity: 0, y: 20 }}
@@ -410,7 +410,7 @@ export function Features() {
             </div>
           </motion.div>
 
-          <div className="relative h-[400px] w-full shrink-0 overflow-hidden rounded-2xl border border-[#d9d9d9] bg-black/5 lg:h-[511px] lg:flex-1">
+          <div className="relative h-[178px] w-full shrink-0 overflow-hidden rounded-2xl border border-[#d9d9d9] bg-black/5 md:h-[400px] lg:h-[511px] lg:flex-1">
             <AutoplayVideo
               src={VIDEOS.featureEditor}
               objectPosition="top center"

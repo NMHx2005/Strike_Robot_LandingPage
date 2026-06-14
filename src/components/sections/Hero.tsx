@@ -66,10 +66,10 @@ export function Hero() {
     : { opacity: titleOpacity, scale: titleScale };
 
   return (
-    <section className="relative z-10 flex flex-col items-center px-[48px]">
-      {/* Title block — vertically centered in viewport below the 128px navbar */}
+    <section className="relative z-10 flex flex-col items-center px-3 md:px-[48px]">
+      {/* Title block — vertically centered in viewport below navbar */}
       <motion.div
-        className="mx-auto flex w-full max-w-[1200px] flex-col items-center justify-center min-h-[calc(100vh-128px)] pt-32"
+        className="mx-auto flex w-full max-w-[1200px] flex-col items-center justify-center min-h-[calc(100vh-72px)] md:min-h-[calc(100vh-128px)] pt-20 md:pt-32"
         variants={prefersReducedMotion ? {} : staggerContainer}
         initial="hidden"
         animate="visible"
@@ -103,27 +103,32 @@ export function Hero() {
         </motion.h1>
 
         <motion.p
-          className="mx-auto mt-6 max-w-[800px] text-center text-base leading-6 text-black/70"
+          className="mx-auto mt-6 max-w-[800px] px-[27px] md:px-0 text-center text-base leading-6 text-black/70"
           variants={prefersReducedMotion ? {} : fadeUp}
         >
           {HERO.description}
         </motion.p>
 
         <motion.div
-          className="mt-6 flex flex-wrap items-center justify-center gap-2.5 py-6"
+          className="mt-6 flex w-full flex-col md:flex-row md:flex-wrap items-center justify-center gap-4 md:gap-2.5 py-6"
           variants={prefersReducedMotion ? {} : fadeUp}
         >
-          <PillButton size="lg" icon={<PlatformIcon />} showArrow={false} className="pl-4 pr-6 tracking-[-0.02em]">
+          <PillButton
+            size="lg"
+            icon={<PlatformIcon />}
+            showArrow={false}
+            className="w-[262px] md:w-auto pl-4 pr-6 tracking-[-0.02em]"
+          >
             {HERO.ctaPrimary}
           </PillButton>
-          <PillButton variant="outline" size="lg">
+          <PillButton variant="outline" size="lg" className="w-[225px] md:w-auto">
             {HERO.ctaSecondary}
           </PillButton>
         </motion.div>
       </motion.div>
 
       <ScrollVideoReveal
-        className="mb-16 mt-4 max-w-[calc(100vw-96px)] md:mb-20"
+        className="mb-16 mt-4 max-w-[calc(100vw-24px)] md:max-w-[calc(100vw-96px)] md:mb-20"
         targetRef={videoWrapperRef}
       >
         <div className="relative aspect-[1200/484] overflow-hidden rounded-3xl border border-black/10 bg-black/5 shadow-[0_32px_90px_rgba(0,0,0,0.18)]">
