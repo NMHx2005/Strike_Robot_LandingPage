@@ -30,7 +30,7 @@ const SOCIAL_ICONS: Record<string, React.ReactNode> = {
 export function Footer() {
   return (
     <footer
-      className="relative p-12"
+      className="relative p-12 cv-auto"
       aria-label="Site footer"
     >
       <div className="mx-auto flex flex-col items-center gap-6 md:flex-row md:justify-between">

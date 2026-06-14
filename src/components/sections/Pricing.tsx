@@ -216,7 +216,7 @@ export function Pricing() {
   return (
     <section
       id="community"
-      className="relative pb-16 pt-8"
+      className="relative pb-16 pt-8 cv-auto"
       aria-label="Community section"
     >
       <motion.div

@@ -203,6 +203,9 @@ export function Features() {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const itemRefs = useRef<Map<string, HTMLButtonElement>>(new Map());
 
+  const activeIdRef = useRef(activeId);
+  activeIdRef.current = activeId;
+
   const updateIndicator = useCallback((id: string) => {
     const wrapperEl = wrapperRef.current;
     const itemEl = itemRefs.current.get(id);
@@ -218,24 +221,33 @@ export function Features() {
     );
   }, []);
 
+  // Update khi active item đổi.
   useEffect(() => {
     const raf = requestAnimationFrame(() => updateIndicator(activeId));
     return () => cancelAnimationFrame(raf);
   }, [activeId, updateIndicator]);
 
+  // Single ResizeObserver, RAF-throttled — bao phủ cả window resize
+  // (window resize gây wrapper resize). Dùng activeIdRef tránh re-attach
+  // observer mỗi lần activeId đổi.
   useEffect(() => {
     const wrapperEl = wrapperRef.current;
     if (!wrapperEl) return;
-    const ro = new ResizeObserver(() => updateIndicator(activeId));
-    ro.observe(wrapperEl);
-    return () => ro.disconnect();
-  }, [activeId, updateIndicator]);
 
-  useEffect(() => {
-    const onResize = () => updateIndicator(activeId);
-    window.addEventListener("resize", onResize);
-    return () => window.removeEventListener("resize", onResize);
-  }, [activeId, updateIndicator]);
+    let rafId: number | null = null;
+    const ro = new ResizeObserver(() => {
+      if (rafId !== null) return;
+      rafId = requestAnimationFrame(() => {
+        rafId = null;
+        updateIndicator(activeIdRef.current);
+      });
+    });
+    ro.observe(wrapperEl);
+    return () => {
+      if (rafId !== null) cancelAnimationFrame(rafId);
+      ro.disconnect();
+    };
+  }, [updateIndicator]);
 
   const setItemRef = useCallback(
     (id: string) => (el: HTMLButtonElement | null) => {

@@ -129,6 +129,14 @@
     border-radius: inherit;
   }
 
+  /* Defer rendering của section off-screen — browser skip paint/layout
+     khi section nằm ngoài viewport. Khi user cuộn tới, browser render
+     bình thường. Có contain-intrinsic-size để giữ chiều cao ước tính,
+     tránh layout shift / scroll jump. */
+  .cv-auto {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 600px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

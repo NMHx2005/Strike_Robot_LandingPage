@@ -13,7 +13,7 @@ export function CTA() {
   return (
     <section
       id="cta"
-      className="relative px-3 pb-16 pt-4 md:px-12"
+      className="relative px-3 pb-16 pt-4 md:px-12 cv-auto"
       aria-label="Call to action section"
     >
       <motion.div

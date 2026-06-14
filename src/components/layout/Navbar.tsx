@@ -18,6 +18,9 @@ const PILL_BAR_BG =
   "linear-gradient(95deg, rgba(255,255,255,0.80) 4.23%, rgba(255,255,255,0.40) 56%, rgba(223,227,229,0.50) 99.91%)";
 const PILL_BAR_SHADOW =
   "inset 0 4px 6px 0 rgba(255,255,255,0.20), inset 0 -2px 4px 0 rgba(255,255,255,0.30)";
+// translateZ(0) force GPU compositing layer cho element có backdrop-filter,
+// giúp scroll mượt hơn (không repaint blur mỗi frame).
+const GPU_LAYER = "translateZ(0)";
 
 export function Navbar() {
   const [activeItem, setActiveItem] = useState("Home");
@@ -120,6 +123,8 @@ export function Navbar() {
                 backdropFilter: "blur(10px)",
                 WebkitBackdropFilter: "blur(10px)",
                 boxShadow: PILL_BAR_SHADOW,
+                transform: GPU_LAYER,
+                willChange: "backdrop-filter",
               }}
             >
               <nav className="flex items-center gap-3" aria-label="Main navigation">
@@ -193,6 +198,8 @@ export function Navbar() {
               backdropFilter: "blur(10px)",
               WebkitBackdropFilter: "blur(10px)",
               boxShadow: PILL_BAR_SHADOW,
+              transform: GPU_LAYER,
+              willChange: "backdrop-filter",
             }}
           >
             <Link
@@ -237,6 +244,8 @@ export function Navbar() {
                 "linear-gradient(180deg, #1f1f1f 0%, rgba(10,10,10,0.9) 100%)",
               backdropFilter: "blur(15px)",
               WebkitBackdropFilter: "blur(15px)",
+              transform: GPU_LAYER,
+              willChange: "backdrop-filter",
             }}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -261,6 +270,8 @@ export function Navbar() {
                 backdropFilter: "blur(10px)",
                 WebkitBackdropFilter: "blur(10px)",
                 boxShadow: PILL_BAR_SHADOW,
+                transform: GPU_LAYER,
+                willChange: "backdrop-filter",
               }}
             >
               <Link
