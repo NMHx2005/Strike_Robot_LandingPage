@@ -108,9 +108,19 @@ export const COMMUNITY = {
 
 export const VIDEO_CTA = {
   background: "/Vid.png",
-  headlineLine1: "Build physical AI",
-  headlineLine2: "with SR Platform.",
+  subtitle: "Build physical AI with",
+  wordmark: "SR PLATFORM",
   cta: "Create with SR Platform",
+  rotatingBadge: "STRIKE ROBOT • STRIKE ROBOT • STRIKE ROBOT • STRIKE ROBOT • ",
+  sidebarLinks: [
+    { label: "About", href: "#" },
+    { label: "Search & Insights", href: "#" },
+    { label: "Strike Robot Labs", href: "#" },
+    { label: "About", href: "#" },
+    { label: "Term of Service", href: "#" },
+    { label: "Privacy Policy", href: "#" },
+    { label: "Security", href: "#" },
+  ],
 };
 
 export const FOOTER = {
