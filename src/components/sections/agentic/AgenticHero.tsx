@@ -1,0 +1,115 @@
+"use client";
+
+import { useRef } from "react";
+import {
+  motion,
+  useReducedMotion,
+  useScroll,
+  useTransform,
+} from "framer-motion";
+import { Sparkles } from "lucide-react";
+import { AGENTIC_HERO, VIDEOS } from "@/lib/constants";
+import { PillButton } from "@/components/ui/PillButton";
+import { AutoplayVideo } from "@/components/ui/AutoplayVideo";
+import { ScrollVideoReveal } from "@/components/ui/ScrollVideoReveal";
+import { fadeUp } from "@/components/animations/fadeUp";
+import { staggerContainer } from "@/components/animations/stagger";
+import { REVEAL_OFFSET } from "@/components/animations/scrollVideoReveal";
+
+export function AgenticHero() {
+  const prefersReducedMotion = useReducedMotion();
+  const videoWrapperRef = useRef<HTMLDivElement>(null);
+
+  const { scrollYProgress } = useScroll({
+    target: videoWrapperRef,
+    offset: REVEAL_OFFSET as unknown as ["start end", "center 65%"],
+  });
+
+  const titleOpacity = useTransform(scrollYProgress, [0, 0.5, 1], [1, 0.7, 0]);
+  const titleScale = useTransform(scrollYProgress, [0, 1], [1, 0.92]);
+
+  const titleMotionStyle = prefersReducedMotion
+    ? undefined
+    : { opacity: titleOpacity, scale: titleScale };
+
+  return (
+    <section
+      className="relative z-10 flex flex-col items-center px-3 md:px-[48px]"
+      aria-label="Agentic hero"
+    >
+      {/* Title block — vertically centered in viewport below navbar */}
+      <motion.div
+        className="mx-auto grid w-full max-w-[1480px] grid-cols-1 items-center gap-12 min-h-[calc(100vh-72px)] md:min-h-[calc(100vh-128px)] pt-24 md:pt-28 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:gap-16"
+        variants={prefersReducedMotion ? {} : staggerContainer}
+        initial="hidden"
+        animate="visible"
+        style={titleMotionStyle}
+      >
+        <motion.div
+          variants={prefersReducedMotion ? {} : fadeUp}
+          className="flex flex-col items-start"
+        >
+          <h1 className="font-superground text-[clamp(64px,9vw,160px)] font-normal uppercase leading-[0.95] tracking-[-0.02em] text-black">
+            <span className="block">SR</span>
+            <span className="block bg-gradient-to-r from-[#2a3e3e] via-[#3a4a4a] to-[#1f2d2d] bg-clip-text text-transparent">
+              AGENTIC
+            </span>
+          </h1>
+
+          <span aria-hidden className="mt-4 block h-px w-10 bg-black/60" />
+
+          <div className="mt-10 flex flex-wrap items-center gap-3">
+            <PillButton size="lg" showArrow className="pl-6 pr-5">
+              {AGENTIC_HERO.ctaPrimary}
+            </PillButton>
+            <PillButton variant="outline" size="lg" showArrow={false}>
+              {AGENTIC_HERO.ctaSecondary}
+            </PillButton>
+          </div>
+        </motion.div>
+
+        <motion.div
+          variants={prefersReducedMotion ? {} : fadeUp}
+          className="flex flex-col items-start"
+        >
+          <h2 className="max-w-[640px] text-[clamp(36px,4.4vw,68px)] font-normal leading-[1.05] tracking-[-0.02em] text-black">
+            {AGENTIC_HERO.headlinePrefix}
+            <span className="text-[#314344]">
+              {AGENTIC_HERO.headlineAccent}
+            </span>
+          </h2>
+
+          <p className="mt-6 max-w-[600px] text-base leading-6 text-black/70">
+            {AGENTIC_HERO.description}
+          </p>
+
+          <span className="mt-6 inline-flex items-center gap-2 rounded-full border border-black/10 bg-white/60 px-3 py-1.5 text-sm text-black/75 backdrop-blur-sm">
+            <Sparkles
+              className="size-4 text-[#5a7c7c]"
+              strokeWidth={1.8}
+              aria-hidden
+            />
+            {AGENTIC_HERO.badge}
+          </span>
+        </motion.div>
+      </motion.div>
+
+      <ScrollVideoReveal
+        className="mb-16 mt-4 max-w-[calc(100vw-24px)] md:max-w-[calc(100vw-96px)] md:mb-20"
+        targetRef={videoWrapperRef}
+      >
+        <div className="relative aspect-[1632/720] overflow-hidden rounded-3xl border border-black/10 bg-black/5 shadow-[0_32px_90px_rgba(0,0,0,0.18)]">
+          <AutoplayVideo
+            src={VIDEOS.hero}
+            ariaLabel="SR Agentic robotics task demonstration"
+            loadOnScroll
+          />
+        </div>
+
+        <p className="mx-auto mt-6 max-w-[760px] text-center text-sm leading-relaxed text-black/55 md:text-base">
+          {AGENTIC_HERO.videoCaption}
+        </p>
+      </ScrollVideoReveal>
+    </section>
+  );
+}

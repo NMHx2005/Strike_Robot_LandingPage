@@ -32,6 +32,7 @@ const config: Config = {
         body: ["var(--font-golos-text)", "sans-serif"],
         mono: ["var(--font-jetbrains-mono)", "monospace"],
         sans: ["var(--font-golos-text)", "sans-serif"],
+        superground: ["var(--font-super-ground)", "sans-serif"],
       },
       backgroundImage: {
         "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",

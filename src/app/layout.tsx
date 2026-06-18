@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Golos_Text, JetBrains_Mono } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 import { SITE_NAME, SITE_DESCRIPTION } from "@/lib/constants";
 import { SmoothScroll } from "@/components/ui/SmoothScroll";
@@ -18,6 +19,13 @@ const jetbrainsMono = JetBrains_Mono({
   display: "swap",
   preload: false,
   weight: ["400", "500", "600"],
+});
+
+const superGround = localFont({
+  src: "../../public/font/SuperGround-L3XZ4.ttf",
+  variable: "--font-super-ground",
+  display: "swap",
+  preload: false,
 });
 
 export const metadata: Metadata = {
@@ -51,7 +59,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${golosText.variable} ${jetbrainsMono.variable}`}
+      className={`${golosText.variable} ${jetbrainsMono.variable} ${superGround.variable}`}
     >
       <body className="bg-transparent text-text font-body antialiased min-h-screen">
         <SmoothScroll>{children}</SmoothScroll>
