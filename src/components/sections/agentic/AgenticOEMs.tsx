@@ -64,7 +64,7 @@ export function AgenticOEMs() {
           <h2 className="mt-4 text-[clamp(34px,3.6vw,52px)] font-normal leading-[1.08] tracking-[-0.02em] text-black">
             {AGENTIC_OEMS.headlinePart1}
             {AGENTIC_OEMS.headlinePart2}{" "}
-            <span className="font-superground font-normal uppercase tracking-[-0.01em] text-[#2a3e3e]">
+            <span className="font-superground font-normal tracking-[-0.01em] text-[#2a3e3e]">
               {AGENTIC_OEMS.headlineAccent}
             </span>
           </h2>

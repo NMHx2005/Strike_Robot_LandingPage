@@ -4,8 +4,11 @@ import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { motion, useReducedMotion } from "framer-motion";
 import { AGENTIC_LAYER_SECTION, AGENTIC_PARTS } from "@/lib/constants";
-import { fadeUp } from "@/components/animations/fadeUp";
-import { staggerContainer } from "@/components/animations/stagger";
+import { fadeUp, fadeUpScale } from "@/components/animations/fadeUp";
+import {
+  staggerContainer,
+  staggerContainerSlow,
+} from "@/components/animations/stagger";
 
 const EASE = [0.25, 0.1, 0.25, 1] as const;
 
@@ -156,10 +159,10 @@ export function AgenticLayer() {
             </motion.div>
           </div>
 
-          {/* Parts grid */}
+          {/* Parts grid — gentle A→B→C→D reveal (slower stagger) */}
           <motion.div
             className="grid grid-cols-1 gap-4 py-12 sm:grid-cols-2 md:pl-[60px] md:pr-[60px] lg:grid-cols-4 lg:gap-6"
-            variants={prefersReducedMotion ? {} : staggerContainer}
+            variants={prefersReducedMotion ? {} : staggerContainerSlow}
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, margin: "-100px" }}
@@ -167,7 +170,7 @@ export function AgenticLayer() {
             {AGENTIC_PARTS.map((part) => (
               <motion.article
                 key={part.id}
-                variants={prefersReducedMotion ? {} : fadeUp}
+                variants={prefersReducedMotion ? {} : fadeUpScale}
                 className="flex h-full flex-col overflow-hidden rounded-2xl bg-white shadow-[0_2px_16px_rgba(0,0,0,0.06)]"
               >
                 {/* Media visual — Figma 308×150 (≈2.05:1) */}

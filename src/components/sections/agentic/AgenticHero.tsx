@@ -48,9 +48,9 @@ export function AgenticHero() {
           variants={prefersReducedMotion ? {} : fadeUp}
           className="flex flex-col items-start"
         >
-          <h1 className="font-superground bg-gradient-to-r from-black to-[#314344] bg-clip-text text-[clamp(42px,8vw,78px)] font-normal uppercase leading-none tracking-normal text-transparent [filter:drop-shadow(0_14px_24px_rgba(0,0,0,0.28))]">
-            <span className="block">SR</span>
-            <span className="block">AGENTIC</span>
+          <h1 className="font-superground bg-gradient-to-r from-black to-[#314344] bg-clip-text text-[clamp(42px,8vw,78px)] font-normal leading-none tracking-normal text-transparent [filter:drop-shadow(0_14px_24px_rgba(0,0,0,0.28))]">
+            <span className="block">sr</span>
+            <span className="block">agentic</span>
           </h1>
 
           <span aria-hidden className="mt-4 block h-[6px] w-[44px] rounded-[2px] bg-[#020202]" />

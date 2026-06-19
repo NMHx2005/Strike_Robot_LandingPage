@@ -249,7 +249,7 @@ export const AGENTIC_OEMS = {
   tag: "DEVELOP WITH SR AGENTIC",
   headlinePart1: "Built for robotics teams ",
   headlinePart2: "and hardware",
-  headlineAccent: "OEMs",
+  headlineAccent: "oems",
   description:
     "Integrate the awareness layer and keep your own action policies closed. SR Agentic gives you deployable navigation intelligence without rebuilding spatial reasoning for every new environment.",
   bullets: [
@@ -283,7 +283,7 @@ export const AGENTIC_OEMS = {
 export const AGENTIC_CTA = {
   background: "/Vid.png",
   subtitle: "Give your robots real-world judgment with",
-  wordmark: "SR AGENTIC",
+  wordmark: "sr agentic",
   cta: "Build with SR Agentic",
   rotatingBadge: "STRIKE ROBOT • STRIKE ROBOT • STRIKE ROBOT • STRIKE ROBOT • ",
   sidebarLinks: [

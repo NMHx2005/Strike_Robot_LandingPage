@@ -74,7 +74,7 @@ export function AgenticCTA() {
 
           <motion.h2
             variants={prefersReducedMotion ? {} : fadeUp}
-            className="mt-2 font-superground text-[clamp(56px,10vw,140px)] font-normal uppercase leading-none tracking-[0.02em] text-white"
+            className="mt-2 font-superground text-[clamp(56px,10vw,140px)] font-normal leading-none tracking-[0.02em] text-white"
           >
             {AGENTIC_CTA.wordmark}
           </motion.h2>

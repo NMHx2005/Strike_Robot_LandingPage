@@ -253,7 +253,7 @@ export function Navbar() {
               aria-label="Open menu"
               aria-expanded={mobileOpen}
               aria-controls="mobile-menu-panel"
-              className="flex items-center justify-center size-8 cursor-pointer"
+              className="flex size-10 shrink-0 items-center justify-center rounded-[10px] border border-black/[0.06] bg-black/5 cursor-pointer"
             >
               <Menu className="size-5 text-black" strokeWidth={2} />
             </button>
@@ -323,7 +323,7 @@ export function Navbar() {
                 type="button"
                 onClick={() => setMobileOpen(false)}
                 aria-label="Close menu"
-                className="flex items-center justify-center size-8 cursor-pointer"
+                className="flex size-10 shrink-0 items-center justify-center rounded-[10px] border border-black/[0.06] bg-black/5 cursor-pointer"
               >
                 <X className="size-5 text-black" strokeWidth={2} />
               </button>
