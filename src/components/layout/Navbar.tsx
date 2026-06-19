@@ -26,6 +26,7 @@ export function Navbar() {
   const [activeItem, setActiveItem] = useState("Home");
   const [indicator, setIndicator] = useState<IndicatorStyle>({ left: 24, width: 24 });
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const prefersReducedMotion = useReducedMotion();
 
   const navInnerRef = useRef<HTMLDivElement>(null);
@@ -67,6 +68,14 @@ export function Navbar() {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [mobileOpen]);
+
+  // Mobile header morph: flat/edge at the top, floating glass pill once scrolled.
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 8);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   const navigateTo = (href: string) => {
     if (href === "#") {
@@ -190,17 +199,38 @@ export function Navbar() {
           </div>
         </div>
 
-        <div className="md:hidden p-3 pointer-events-auto">
+        <div
+          className={cn(
+            "md:hidden pointer-events-auto transition-all duration-300 ease-out",
+            scrolled ? "p-3" : "p-2"
+          )}
+        >
           <div
-            className="relative border-[1.4px] border-[#d9d9d9] rounded-[12px] flex items-center justify-between px-3 py-2"
-            style={{
-              background: PILL_BAR_BG,
-              backdropFilter: "blur(10px)",
-              WebkitBackdropFilter: "blur(10px)",
-              boxShadow: PILL_BAR_SHADOW,
-              transform: GPU_LAYER,
-              willChange: "backdrop-filter",
-            }}
+            className="relative flex items-center justify-between rounded-[12px] transition-all duration-300 ease-out"
+            style={
+              scrolled
+                ? {
+                    paddingInline: 12,
+                    paddingBlock: 8,
+                    border: "1.4px solid #d9d9d9",
+                    background: PILL_BAR_BG,
+                    backdropFilter: "blur(10px)",
+                    WebkitBackdropFilter: "blur(10px)",
+                    boxShadow: PILL_BAR_SHADOW,
+                    transform: GPU_LAYER,
+                    willChange: "backdrop-filter",
+                  }
+                : {
+                    paddingInline: 0,
+                    paddingBlock: 8,
+                    border: "1.4px solid transparent",
+                    background: "transparent",
+                    backdropFilter: "blur(0px)",
+                    WebkitBackdropFilter: "blur(0px)",
+                    boxShadow: "none",
+                    transform: GPU_LAYER,
+                  }
+            }
           >
             <Link
               href="/"
