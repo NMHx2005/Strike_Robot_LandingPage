@@ -3,30 +3,167 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { motion, useReducedMotion, AnimatePresence } from "framer-motion";
-import { ChevronDown, Menu, X, ArrowRight } from "lucide-react";
+import { motion, useReducedMotion, AnimatePresence, useScroll, useTransform, useSpring, useMotionTemplate } from "framer-motion";
+import { ChevronDown, X, ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { NAV_CTA, NAV_LINKS, SITE_NAME } from "@/lib/constants";
 import { PillButtonCta } from "@/components/ui/PillButton";
+import { GlassPill, METALLIC_BORDER_BG, PILL_BAR_BG, PILL_BAR_SHADOW, GPU_LAYER } from "@/components/ui/GlassPill";
+import { MenuIcon } from "@/components/ui/MenuIcon";
 
 interface IndicatorStyle {
   left: number;
   width: number;
 }
 
-const PILL_BAR_BG =
-  "linear-gradient(95deg, rgba(255,255,255,0.80) 4.23%, rgba(255,255,255,0.40) 56%, rgba(223,227,229,0.50) 99.91%)";
-const PILL_BAR_SHADOW =
-  "inset 0 4px 6px 0 rgba(255,255,255,0.20), inset 0 -2px 4px 0 rgba(255,255,255,0.30)";
-// translateZ(0) force GPU compositing layer cho element có backdrop-filter,
-// giúp scroll mượt hơn (không repaint blur mỗi frame).
-const GPU_LAYER = "translateZ(0)";
+function MobileMenuButton({
+  onClick,
+  label,
+  expanded,
+  variant = "light",
+}: {
+  onClick: () => void;
+  label: string;
+  expanded: boolean;
+  variant?: "light" | "dark";
+}) {
+  const isDark = variant === "dark";
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label={label}
+      aria-expanded={expanded}
+      className={cn(
+        "flex size-10 shrink-0 cursor-pointer items-center justify-center rounded-[10px] border",
+        isDark
+          ? "border-white/10 bg-white/[0.05]"
+          : "border-black/[0.06] bg-black/[0.05]"
+      )}
+    >
+      {expanded ? (
+        <X
+          className={cn("size-5", isDark ? "text-white" : "text-black")}
+          strokeWidth={2}
+        />
+      ) : (
+        <MenuIcon
+          className={cn("size-5", isDark ? "text-white" : "text-black")}
+        />
+      )}
+    </button>
+  );
+}
+
+function MobileLogo({ onClick }: { onClick?: () => void }) {
+  return (
+    <Link
+      href="/"
+      className="flex w-[84px] items-center"
+      aria-label={SITE_NAME}
+      onClick={onClick}
+    >
+      <Image
+        src="/Logo.png"
+        alt={SITE_NAME}
+        width={84}
+        height={32}
+        className="h-8 w-auto"
+        priority
+      />
+    </Link>
+  );
+}
+
+const MOBILE_SCROLL_RANGE = 120;
+const MOBILE_HEADER_SPRING = { stiffness: 90, damping: 22, mass: 0.5 };
+
+function MobileScrollHeader({
+  mobileOpen,
+  onOpenMenu,
+  prefersReducedMotion,
+}: {
+  mobileOpen: boolean;
+  onOpenMenu: () => void;
+  prefersReducedMotion: boolean | null;
+}) {
+  const { scrollY } = useScroll();
+  const rawProgress = useTransform(scrollY, [0, MOBILE_SCROLL_RANGE], [0, 1], {
+    clamp: true,
+  });
+  const progress = useSpring(
+    rawProgress,
+    prefersReducedMotion
+      ? { stiffness: 1000, damping: 100, mass: 0.1 }
+      : MOBILE_HEADER_SPRING
+  );
+
+  const paddingTop = useTransform(progress, [0, 1], [12, 12]);
+  const paddingBottom = useTransform(progress, [0, 1], [0, 12]);
+  const innerPy = useTransform(progress, [0, 1], [0, 12]);
+  const innerPx = useTransform(progress, [0, 1], [0, 12]);
+  const borderRadius = useTransform(progress, [0, 1], [0, 12]);
+  const innerRadius = useTransform(progress, [0, 1], [0, 10.6]);
+  const blurPx = useTransform(progress, [0, 1], [0, 10]);
+  const backdropFilter = useMotionTemplate`blur(${blurPx}px)`;
+
+  return (
+    <motion.div
+      className="pointer-events-auto px-3 md:hidden"
+      style={{ paddingTop, paddingBottom }}
+    >
+      <div className="relative">
+        <motion.div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 p-[1.4px]"
+          style={{
+            opacity: progress,
+            borderRadius,
+            background: METALLIC_BORDER_BG,
+          }}
+        />
+        <motion.div
+          aria-hidden
+          className="pointer-events-none absolute inset-[1.4px]"
+          style={{
+            opacity: progress,
+            borderRadius: innerRadius,
+            background: PILL_BAR_BG,
+            backdropFilter,
+            WebkitBackdropFilter: backdropFilter,
+            boxShadow: PILL_BAR_SHADOW,
+            transform: GPU_LAYER,
+          }}
+        />
+        <motion.div
+          className="relative flex items-center justify-between"
+          style={{
+            paddingTop: innerPy,
+            paddingBottom: innerPy,
+            paddingLeft: innerPx,
+            paddingRight: innerPx,
+          }}
+        >
+          <MobileLogo />
+          <MobileMenuButton
+            onClick={onOpenMenu}
+            label="Open menu"
+            expanded={mobileOpen}
+          />
+        </motion.div>
+      </div>
+    </motion.div>
+  );
+}
 
 export function Navbar() {
   const [activeItem, setActiveItem] = useState("Home");
-  const [indicator, setIndicator] = useState<IndicatorStyle>({ left: 24, width: 24 });
+  const [indicator, setIndicator] = useState<IndicatorStyle>({
+    left: 24,
+    width: 24,
+  });
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
   const prefersReducedMotion = useReducedMotion();
 
   const navInnerRef = useRef<HTMLDivElement>(null);
@@ -69,14 +206,6 @@ export function Navbar() {
     return () => window.removeEventListener("keydown", onKey);
   }, [mobileOpen]);
 
-  // Mobile header morph: flat/edge at the top, floating glass pill once scrolled.
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 8);
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
   const navigateTo = (href: string) => {
     if (href === "#") {
       window.scrollTo({ top: 0, behavior: "smooth" });
@@ -99,11 +228,12 @@ export function Navbar() {
 
   return (
     <>
-      <header className="fixed top-0 left-0 right-0 z-50 pointer-events-none">
-        <div className="hidden md:flex relative w-full mx-auto px-[48px] h-32 items-center justify-between gap-6 pointer-events-auto">
+      <header className="pointer-events-none fixed left-0 right-0 top-0 z-[1000]">
+        {/* Desktop */}
+        <div className="pointer-events-auto relative mx-auto hidden h-32 w-full items-center justify-between gap-6 px-[48px] md:flex">
           <Link
             href="/"
-            className="flex-shrink-0 w-[360px] flex items-center"
+            className="flex w-[360px] flex-shrink-0 items-center"
             aria-label={SITE_NAME}
           >
             <Image
@@ -116,25 +246,11 @@ export function Navbar() {
             />
           </Link>
 
-          <div
-            className="flex-shrink-0 rounded-[24px] p-[1.4px]"
-            style={{
-              background:
-                "linear-gradient(from 0deg at 50% 50%, #D9D9D9 0deg, #D9D9D9 65deg, #F2F2F2 150deg, #DFD0EA 176deg, #D9D9D9 204deg, #D9D9D9 255deg, #A6CEDA 285deg, #ECECEC 319deg, #D9D9D9 360deg)",
-            }}
-          >
+          <GlassPill radius={24} className="flex-shrink-0 rounded-[24px]">
             <div
               ref={navInnerRef}
               className="relative flex h-12 items-center overflow-hidden px-6"
-              style={{
-                borderRadius: 22.6,
-                background: PILL_BAR_BG,
-                backdropFilter: "blur(10px)",
-                WebkitBackdropFilter: "blur(10px)",
-                boxShadow: PILL_BAR_SHADOW,
-                transform: GPU_LAYER,
-                willChange: "backdrop-filter",
-              }}
+              style={{ borderRadius: 22.6 }}
             >
               <nav className="flex items-center gap-3" aria-label="Main navigation">
                 {NAV_LINKS.map((item) => {
@@ -147,7 +263,7 @@ export function Navbar() {
                       }}
                       onClick={() => handleItemClick(item.label, item.href)}
                       className={cn(
-                        "relative flex items-center gap-1 px-3 h-8 text-sm transition-colors duration-200 rounded-lg select-none cursor-pointer",
+                        "relative flex h-8 cursor-pointer select-none items-center gap-1 rounded-lg px-3 text-sm transition-colors duration-200",
                         !isActive && "font-medium text-[#4d4d4d] hover:text-black"
                       )}
                       style={
@@ -166,7 +282,7 @@ export function Navbar() {
                       {item.label}
                       {item.hasDropdown && (
                         <ChevronDown
-                          className="w-3 h-3 shrink-0 text-[#999]"
+                          className="h-3 w-3 shrink-0 text-[#999]"
                           strokeWidth={2}
                           aria-hidden="true"
                         />
@@ -182,83 +298,33 @@ export function Navbar() {
                   className="absolute rounded-full bg-black"
                   style={{ height: 4, bottom: -1 }}
                   animate={{ left: indicator.left, width: indicator.width }}
-                  transition={{ type: "spring", stiffness: 450, damping: 38, mass: 0.8 }}
+                  transition={{
+                    type: "spring",
+                    stiffness: 450,
+                    damping: 38,
+                    mass: 0.8,
+                  }}
                 />
               ) : (
                 <div
                   aria-hidden="true"
-                  className="absolute rounded-full bg-black h-1 w-6"
+                  className="absolute h-1 w-6 rounded-full bg-black"
                   style={{ bottom: -1, left: indicator.left }}
                 />
               )}
             </div>
-          </div>
+          </GlassPill>
 
-          <div className="flex-shrink-0 w-[360px] flex items-center justify-end">
+          <div className="flex w-[360px] flex-shrink-0 items-center justify-end">
             <PillButtonCta className="font-medium">{NAV_CTA}</PillButtonCta>
           </div>
         </div>
 
-        <div
-          className={cn(
-            "md:hidden pointer-events-auto transition-all duration-300 ease-out",
-            scrolled ? "p-3" : "p-2"
-          )}
-        >
-          <div
-            className="relative flex items-center justify-between rounded-[12px] transition-all duration-300 ease-out"
-            style={
-              scrolled
-                ? {
-                    paddingInline: 12,
-                    paddingBlock: 8,
-                    border: "1.4px solid #d9d9d9",
-                    background: PILL_BAR_BG,
-                    backdropFilter: "blur(10px)",
-                    WebkitBackdropFilter: "blur(10px)",
-                    boxShadow: PILL_BAR_SHADOW,
-                    transform: GPU_LAYER,
-                    willChange: "backdrop-filter",
-                  }
-                : {
-                    paddingInline: 0,
-                    paddingBlock: 8,
-                    border: "1.4px solid transparent",
-                    background: "transparent",
-                    backdropFilter: "blur(0px)",
-                    WebkitBackdropFilter: "blur(0px)",
-                    boxShadow: "none",
-                    transform: GPU_LAYER,
-                  }
-            }
-          >
-            <Link
-              href="/"
-              className="flex items-center w-[84px]"
-              aria-label={SITE_NAME}
-            >
-              <Image
-                src="/Logo.png"
-                alt={SITE_NAME}
-                width={84}
-                height={32}
-                className="h-8 w-auto"
-                priority
-              />
-            </Link>
-
-            <button
-              type="button"
-              onClick={() => setMobileOpen(true)}
-              aria-label="Open menu"
-              aria-expanded={mobileOpen}
-              aria-controls="mobile-menu-panel"
-              className="flex size-10 shrink-0 items-center justify-center rounded-[10px] border border-black/[0.06] bg-black/5 cursor-pointer"
-            >
-              <Menu className="size-5 text-black" strokeWidth={2} />
-            </button>
-          </div>
-        </div>
+        <MobileScrollHeader
+          mobileOpen={mobileOpen}
+          onOpenMenu={() => setMobileOpen(true)}
+          prefersReducedMotion={prefersReducedMotion}
+        />
       </header>
 
       <AnimatePresence>
@@ -268,76 +334,51 @@ export function Navbar() {
             role="dialog"
             aria-modal="true"
             aria-label="Main menu"
-            className="md:hidden fixed inset-0 z-[60] flex flex-col p-3 gap-2.5 overflow-hidden"
+            className="fixed inset-0 isolate z-[1001] flex flex-col gap-3 overflow-hidden p-3 md:hidden"
             style={{
               background:
-                "linear-gradient(180deg, #1f1f1f 0%, rgba(10,10,10,0.9) 100%)",
+                "linear-gradient(180deg, #1f1f1f 0%, #0a0a0a 100%)",
               backdropFilter: "blur(15px)",
               WebkitBackdropFilter: "blur(15px)",
-              transform: GPU_LAYER,
-              willChange: "backdrop-filter",
             }}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: prefersReducedMotion ? 0 : 0.2 }}
           >
-            <div className="pointer-events-none select-none absolute bottom-0 left-0 w-[525px] max-w-none opacity-5">
+            {/* Watermark — logo chạy ngang chân menu */}
+            <div className="pointer-events-none absolute bottom-0 left-0 w-[min(525px,120vw)] select-none opacity-[0.2]">
               <Image
                 src="/images/Logo.png"
                 alt=""
                 width={525}
                 height={200}
                 aria-hidden="true"
-                className="w-full h-auto"
+                className="h-auto w-full"
               />
             </div>
 
-            <div
-              className="relative border-[1.4px] border-[#d9d9d9] rounded-[12px] flex items-center justify-between px-3 py-2 h-12 shrink-0"
-              style={{
-                background: PILL_BAR_BG,
-                backdropFilter: "blur(10px)",
-                WebkitBackdropFilter: "blur(10px)",
-                boxShadow: PILL_BAR_SHADOW,
-                transform: GPU_LAYER,
-                willChange: "backdrop-filter",
-              }}
-            >
-              <Link
-                href="/"
-                className="flex items-center w-[84px]"
-                aria-label={SITE_NAME}
-                onClick={() => setMobileOpen(false)}
-              >
-                <Image
-                  src="/Logo.png"
-                  alt={SITE_NAME}
-                  width={84}
-                  height={32}
-                  className="h-8 w-auto"
+            <GlassPill>
+              <div className="flex items-center justify-between px-3 py-3">
+                <MobileLogo onClick={() => setMobileOpen(false)} />
+                <MobileMenuButton
+                  onClick={() => setMobileOpen(false)}
+                  label="Close menu"
+                  expanded
+                  variant="dark"
                 />
-              </Link>
+              </div>
+            </GlassPill>
 
-              <button
-                type="button"
-                onClick={() => setMobileOpen(false)}
-                aria-label="Close menu"
-                className="flex size-10 shrink-0 items-center justify-center rounded-[10px] border border-black/[0.06] bg-black/5 cursor-pointer"
-              >
-                <X className="size-5 text-black" strokeWidth={2} />
-              </button>
-            </div>
-
-            <div className="relative flex-1 flex flex-col justify-between w-full min-h-0">
-              <nav className="px-2 w-full" aria-label="Mobile navigation">
+            <div className="relative flex min-h-0 w-full flex-1 flex-col justify-between">
+              <nav className="w-full px-2" aria-label="Mobile navigation">
                 {NAV_LINKS.map((item, idx) => (
                   <button
                     key={item.label}
                     type="button"
                     onClick={() => handleMobileItemClick(item.label, item.href)}
                     className={cn(
-                      "flex items-center gap-6 px-3 py-5 w-full text-left text-white text-[20px] tracking-[-0.2px] cursor-pointer",
+                      "flex w-full cursor-pointer items-center gap-6 px-3 py-5 text-left text-[20px] tracking-[-0.2px] text-white",
                       idx > 0 && "border-t border-white/10"
                     )}
                   >
@@ -353,11 +394,11 @@ export function Navbar() {
                 ))}
               </nav>
 
-              <div className="flex items-center justify-center h-[110px] w-full">
+              <div className="flex h-[110px] w-full items-center justify-center">
                 <button
                   type="button"
                   onClick={() => setMobileOpen(false)}
-                  className="relative flex items-center justify-center gap-3 w-[276px] h-11 rounded-3xl border-2 border-[#0d0d0d] pl-6 pr-4 overflow-hidden cursor-pointer"
+                  className="relative flex h-11 w-[276px] cursor-pointer items-center justify-center gap-3 overflow-hidden rounded-3xl border-2 border-[#0d0d0d] pl-6 pr-4"
                   style={{
                     background:
                       "linear-gradient(136deg, #333 0.79%, #0d0d0d 35.22%, #262626 99.16%)",
@@ -365,7 +406,7 @@ export function Navbar() {
                       "inset 0 2px 4px 0 rgba(0,0,0,0.2), inset 0 -2px 4px 0 rgba(255,255,255,0.2)",
                   }}
                 >
-                  <span className="font-medium text-white text-base tracking-[-0.32px] whitespace-nowrap">
+                  <span className="whitespace-nowrap text-base font-medium tracking-[-0.32px] text-white">
                     {NAV_CTA}
                   </span>
                   <ArrowRight className="size-[18px] text-white" strokeWidth={2} />

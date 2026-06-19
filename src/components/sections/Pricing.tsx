@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import { COMMUNITY, VIDEOS } from "@/lib/constants";
@@ -7,80 +8,38 @@ import { AutoplayVideo } from "@/components/ui/AutoplayVideo";
 import { useVanillaTilt } from "@/hooks/useVanillaTilt";
 import { fadeUp } from "@/components/animations/fadeUp";
 import { staggerContainer } from "@/components/animations/stagger";
+import { cn } from "@/lib/utils";
 
-const MEDIA_HEIGHT = 264;
-const CORNER_BTN = 100;
+const MEDIA_HEIGHT_DESKTOP = 264;
+const MEDIA_HEIGHT_MOBILE = 173;
+const SVG_W = 1000;
 
-/**
- * Carves a circular notch out of the card's media area at the bottom-right,
- * so the white "go" button appears cut INTO the card. Matches the Figma cards
- * (node 28:434 / Tutorials).
- *
- * Geometry — button is at `bottom-6 right-12` (24px / 48px from article edges)
- * and 100px wide. The media area is at `inset-4` (16px), so the notch center
- * sits 82px from its right edge and 8px above its bottom edge, radius 60px.
- *
- * A plain `radial-gradient` cut leaves two sharp cusps where the circle meets
- * the frame's bottom edge. Instead we build an SVG mask whose notch blends
- * into the bottom edge with a smooth concave S-shaped (ogee) fillet on each
- * side — a small arc tangent to both the horizontal edge and the notch circle,
- * so the junction reverses curvature smoothly instead of forming a point.
- */
-const NOTCH_R = 60; // notch circle radius
-const NOTCH_X = 114; // notch center, px from media frame's right edge
-const NOTCH_Y = 8; // notch center, px above media frame's bottom edge
-const FILLET = 12; // S-fillet radius blending bottom edge -> notch
-const SVG_W = 1000; // mask width, wider than any card so it always covers
-
-function buildNotchMask(): string {
-  const H = MEDIA_HEIGHT;
-  const cx = SVG_W - NOTCH_X;
-  const cy = H - NOTCH_Y;
-  const dist = NOTCH_R + FILLET;
-
-  // Fillet center sits at y = H - FILLET (tangent to bottom edge) and is
-  // externally tangent to the notch circle (distance = NOTCH_R + FILLET),
-  // which is what produces the reverse-curvature (S) blend.
-  const half = Math.sqrt(dist * dist - (NOTCH_Y - FILLET) ** 2);
-  const yF = H - FILLET;
-
-  const xFR = cx + half; // right fillet: tangent point on the bottom edge
-  const xFL = cx - half; // left fillet: tangent point on the bottom edge
-
-  // Tangent points where each fillet meets the notch circle.
-  const uRx = (xFR - cx) / dist;
-  const uRy = (yF - cy) / dist;
-  const uLx = (xFL - cx) / dist;
-  const uLy = (yF - cy) / dist;
-  const TRx = cx + NOTCH_R * uRx;
-  const TRy = cy + NOTCH_R * uRy;
-  const TLx = cx + NOTCH_R * uLx;
-  const TLy = cy + NOTCH_R * uLy;
-
-  // Downward-pointing tangent (positive y) of the notch circle at each point,
-  // used as the bezier handle so the fillet joins the notch arc smoothly.
-  const perp = (ux: number, uy: number): [number, number] =>
-    ux > 0 ? [-uy, ux] : [uy, -ux];
-  const [pRx, pRy] = perp(uRx, uRy);
-  const [pLx, pLy] = perp(uLx, uLy);
-
-  const k = 9; // bezier control length for the fillet curves
-  const n = (v: number) => Math.round(v * 1000) / 1000;
-
-  const d = [
-    `M0 0 L${SVG_W} 0 L${SVG_W} ${H}`,
-    `L${n(xFR)} ${H}`,
-    `C${n(xFR - k)} ${H} ${n(TRx + k * pRx)} ${n(TRy + k * pRy)} ${n(TRx)} ${n(TRy)}`,
-    `A${NOTCH_R} ${NOTCH_R} 0 0 0 ${n(TLx)} ${n(TLy)}`,
-    `C${n(TLx + k * pLx)} ${n(TLy + k * pLy)} ${n(xFL + k)} ${H} ${n(xFL)} ${H}`,
-    `L0 ${H} Z`,
-  ].join(" ");
-
-  const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='${SVG_W}' height='${H}' viewBox='0 0 ${SVG_W} ${H}'><path fill='#fff' d='${d}'/></svg>`;
+const maskUrl = (d: string, h: number): string => {
+  const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='${SVG_W}' height='${h}' viewBox='0 0 ${SVG_W} ${h}'><path fill='#fff' d='${d}'/></svg>`;
   return `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
-}
+};
 
-const NOTCH_MASK = buildNotchMask();
+// Desktop notch — the Figma scoop (node 23:2982) scaled ×1.5625 to the 100px
+// button, centred 114px from the media's right edge. A wide, shallow cubic with
+// soft fillet shoulders so the two bottom contact points read smooth, not pinched.
+const NOTCH_MASK_DESKTOP = maskUrl(
+  "M0 0 L1000 0 L1000 264 L960.956 264 " +
+    "C954.416 264 949.147 258.794 947.798 252.392 " +
+    "C934.384 188.698 840.002 184.412 823.958 253.008 " +
+    "C822.523 259.145 817.347 264 811.045 264 L0 264 Z",
+  MEDIA_HEIGHT_DESKTOP
+);
+
+// Mobile notch — exact curve exported from Figma (node 23:2982), in the 1000×173
+// mask space, anchored to the media's right edge (maskPosition: right bottom);
+// notch centre sits ~87px from the right edge.
+const NOTCH_MASK_MOBILE = maskUrl(
+  "M0 0 L1000 0 L1000 173 L960.612 173 " +
+    "C956.426 173 953.054 169.545 952.191 165.448 " +
+    "C943.606 124.684 883.201 121.941 872.933 165.842 " +
+    "C872.015 169.77 868.702 173 864.669 173 L0 173 Z",
+  MEDIA_HEIGHT_MOBILE
+);
 
 type CommunityCardProps = {
   tag: string;
@@ -100,16 +59,40 @@ function CommunityCard({
   hoverLabel,
 }: CommunityCardProps) {
   const prefersReducedMotion = useReducedMotion();
-  const tiltRef = useVanillaTilt<HTMLElement>();
+  const [isPressing, setIsPressing] = useState(false);
+  const [isDesktop, setIsDesktop] = useState(false);
+  const isMobile = !isDesktop;
+
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 768px)");
+    const onChange = () => setIsDesktop(mq.matches);
+    onChange();
+    mq.addEventListener("change", onChange);
+    return () => mq.removeEventListener("change", onChange);
+  }, []);
+
+  const tiltRef = useVanillaTilt<HTMLElement>(undefined, isDesktop);
+
+  const handlePointerDown = () => {
+    if (isMobile) setIsPressing(true);
+  };
+
+  const handlePointerUp = () => {
+    setIsPressing(false);
+  };
 
   return (
     <motion.div
       variants={prefersReducedMotion ? {} : fadeUp}
-      className="h-[346px] w-full [perspective:1400px]"
+      className="w-full max-md:h-[239px] md:h-[346px] [perspective:1400px]"
     >
       <article
         ref={tiltRef}
-        className="group relative h-full w-full overflow-hidden rounded-[20px] p-2.5 will-change-transform transition-colors duration-300 ease-[cubic-bezier(0.25,0.1,0.25,1)] hover:bg-white md:p-4"
+        onPointerDown={handlePointerDown}
+        onPointerUp={handlePointerUp}
+        onPointerLeave={handlePointerUp}
+        onPointerCancel={handlePointerUp}
+        className="group relative h-full w-full rounded-[14px] p-2.5 will-change-transform transition-colors duration-300 ease-[cubic-bezier(0.25,0.1,0.25,1)] max-md:h-[193px] max-md:overflow-visible max-md:hover:bg-transparent md:overflow-hidden md:rounded-[20px] md:p-4 md:hover:bg-white"
       >
         {/* Card media area — notch-masked so the bottom-right circle is
             carved out for the button. On hover: container bg becomes white,
@@ -118,83 +101,92 @@ function CommunityCard({
             keeps working. */}
         <div
           aria-hidden
-          className="absolute inset-4 overflow-hidden rounded-2xl bg-[#dfdfdf] transition-colors duration-300 ease-[cubic-bezier(0.25,0.1,0.25,1)] group-hover:bg-white"
+          className={cn(
+            "absolute inset-2.5 h-[173px] overflow-hidden rounded-[10px] bg-surface-muted transition-colors duration-300 ease-[cubic-bezier(0.25,0.1,0.25,1)] md:inset-4 md:h-[264px] md:rounded-2xl md:group-hover:bg-white",
+            isPressing && "bg-white"
+          )}
           style={{
-            height: MEDIA_HEIGHT,
-            WebkitMaskImage: NOTCH_MASK,
-            maskImage: NOTCH_MASK,
+            WebkitMaskImage: isMobile ? NOTCH_MASK_MOBILE : NOTCH_MASK_DESKTOP,
+            maskImage: isMobile ? NOTCH_MASK_MOBILE : NOTCH_MASK_DESKTOP,
             WebkitMaskRepeat: "no-repeat",
             maskRepeat: "no-repeat",
             WebkitMaskPosition: "right bottom",
             maskPosition: "right bottom",
-            WebkitMaskSize: `${SVG_W}px ${MEDIA_HEIGHT}px`,
-            maskSize: `${SVG_W}px ${MEDIA_HEIGHT}px`,
+            WebkitMaskSize: `${SVG_W}px ${isMobile ? MEDIA_HEIGHT_MOBILE : MEDIA_HEIGHT_DESKTOP}px`,
+            maskSize: `${SVG_W}px ${isMobile ? MEDIA_HEIGHT_MOBILE : MEDIA_HEIGHT_DESKTOP}px`,
           }}
         >
           <AutoplayVideo
             src={videoSrc}
             objectPosition={objectPosition}
             ariaLabel={`${title} preview`}
+            playMode={isMobile ? "press" : "auto"}
+            isPressing={isPressing}
           />
-          {/* Default dark gradient — fades out on hover */}
+          {/* Default dark gradient — fades out on hover (desktop only) */}
           <div
-            className="absolute inset-0 transition-opacity duration-300 ease-[cubic-bezier(0.25,0.1,0.25,1)] group-hover:opacity-0"
-            style={{
-              background:
-                "linear-gradient(180deg, rgba(0,0,0,0) 60%, rgba(0,0,0,1) 100%)",
-            }}
+            className={cn(
+              "absolute inset-0 bg-gradient-to-b from-transparent from-60% to-black transition-opacity duration-300 ease-[cubic-bezier(0.25,0.1,0.25,1)] md:group-hover:opacity-0",
+              isPressing && "opacity-0"
+            )}
           />
         </div>
 
         {/* Text content layer (above the masked media). */}
-        <div
-          className="relative flex h-full flex-col p-6"
-          style={{ minHeight: MEDIA_HEIGHT }}
-        >
-          <div className="flex flex-1 flex-col">
-            <span
-              className="inline-flex w-fit shrink-0 items-center rounded-lg bg-[rgba(30,30,30,0.75)] px-2 py-1 text-sm font-normal text-[#cdcdcd]"
-              style={{ border: "1.5px solid rgba(255,255,255,0.1)" }}
-            >
+        <div className="relative flex h-full min-h-[173px] flex-col p-3.5 md:min-h-[264px] md:p-6">
+          <div className="flex flex-1 flex-col gap-2.5 md:gap-0">
+            <span className="inline-flex w-fit shrink-0 items-center rounded-[5px] border border-white/10 bg-black/20 px-1.5 py-0.5 text-xs font-normal leading-normal text-white/80 backdrop-blur-sm md:rounded-lg md:border-[1.5px] md:bg-black/75 md:px-2 md:py-1 md:text-sm">
               {tag}
             </span>
 
-            <div className="relative mt-4 flex h-[83px] w-6 shrink-0 items-start justify-center">
-              <div className="absolute top-0 h-1.5 w-1.5 rounded-full bg-white/30" />
+            <div className="relative flex h-[52px] w-4 shrink-0 items-start justify-center md:mt-4 md:h-[83px] md:w-6">
+              <div className="absolute top-0 size-1.5 rounded-full bg-white/30" />
               <div className="h-full w-px bg-white/30" />
-              <div className="absolute bottom-0 h-1.5 w-1.5 rounded-full bg-white/30" />
+              <div className="absolute bottom-0 size-1.5 rounded-full bg-white/30" />
             </div>
 
-            <h3 className="mt-4 min-h-[76px] max-w-[182px] shrink-0 text-[32px] font-medium leading-[1.15] tracking-[-0.01em] text-white">
+            <h3 className="max-w-[120px] shrink-0 text-xl font-medium leading-normal tracking-[-0.2px] text-white max-md:whitespace-pre-line md:mt-4 md:min-h-[76px] md:max-w-[182px] md:text-[32px] md:leading-[1.15] md:tracking-[-0.01em]">
               {title}
             </h3>
           </div>
 
-          <div
-            className="pointer-events-none absolute right-6 top-6 w-[250px] rounded-xl p-3 text-base leading-snug tracking-[-0.01em] text-white opacity-0 transition-opacity duration-200 ease-[cubic-bezier(0.25,0.1,0.25,1)] group-hover:opacity-100"
-            style={{ background: "rgba(20,20,20,0.88)" }}
+          <p
+            className={cn(
+              "pointer-events-none absolute rounded-[8px] bg-black/30 p-2 text-[13px] font-normal leading-normal tracking-[-0.13px] text-white opacity-0 backdrop-blur-md transition-opacity duration-200 ease-[cubic-bezier(0.25,0.1,0.25,1)]",
+              "right-3.5 top-3.5 w-[56%] md:right-6 md:top-6 md:w-[250px] md:rounded-xl md:bg-black/90 md:p-3 md:text-base md:leading-snug md:tracking-[-0.01em] md:group-hover:opacity-100",
+              isPressing && "opacity-100"
+            )}
             aria-hidden
           >
             {description}
-          </div>
+          </p>
         </div>
 
         {/* Circle button — default: white + arrow.
             On card hover: switches to black bg with the 2-line label (Figma 35:92). */}
-        <div className="absolute bottom-6 right-20 z-20">
+        <div className="absolute -bottom-[22px] right-[65px] z-20 md:bottom-4 md:right-20">
           <button
             type="button"
             aria-label={`Open ${title}`}
-            className="relative flex cursor-pointer items-center justify-center rounded-full bg-white shadow-[0_4px_20px_rgba(0,0,0,0.14)] transition-[background-color,box-shadow] duration-300 ease-[cubic-bezier(0.25,0.1,0.25,1)] hover:shadow-[0_6px_28px_rgba(0,0,0,0.18)] group-hover:bg-black group-hover:shadow-[0_6px_28px_rgba(0,0,0,0.25)]"
-            style={{ width: CORNER_BTN, height: CORNER_BTN }}
+            className={cn(
+              "relative flex size-16 cursor-pointer items-center justify-center rounded-full bg-white shadow-[0_4px_20px_rgba(0,0,0,0.14)] transition-[background-color,box-shadow] duration-300 ease-[cubic-bezier(0.25,0.1,0.25,1)]",
+              "md:size-[100px] md:hover:shadow-[0_6px_28px_rgba(0,0,0,0.18)] md:group-hover:bg-black md:group-hover:shadow-[0_6px_28px_rgba(0,0,0,0.25)]",
+              isPressing && "bg-black shadow-[0_6px_28px_rgba(0,0,0,0.25)]"
+            )}
           >
             <ArrowRight
-              className="h-7 w-7 text-black transition-opacity duration-300 ease-[cubic-bezier(0.25,0.1,0.25,1)] group-hover:opacity-0"
+              className={cn(
+                "size-[18px] text-black transition-opacity duration-300 ease-[cubic-bezier(0.25,0.1,0.25,1)] md:size-7 md:group-hover:opacity-0",
+                isPressing && "opacity-0"
+              )}
               strokeWidth={2.2}
               aria-hidden="true"
             />
             <span
-              className="absolute inset-0 flex flex-col items-center justify-center text-center text-[16px] font-medium leading-[1.15] tracking-[-0.32px] text-white opacity-0 transition-opacity duration-300 ease-[cubic-bezier(0.25,0.1,0.25,1)] group-hover:opacity-100"
+              className={cn(
+                "absolute inset-0 flex flex-col items-center justify-center text-center text-xs font-medium leading-normal tracking-[-0.24px] text-white opacity-0 transition-opacity duration-300 ease-[cubic-bezier(0.25,0.1,0.25,1)] md:text-base md:leading-[1.15] md:tracking-[-0.32px] md:group-hover:opacity-100",
+                isPressing && "opacity-100"
+              )}
               aria-hidden="true"
             >
               {hoverLabel.split(" ").map((word, i) => (
@@ -216,7 +208,7 @@ export function Pricing() {
   return (
     <section
       id="community"
-      className="relative pb-16 pt-8 cv-auto"
+      className="relative max-md:rounded-t-3xl max-md:pt-12 max-md:pb-8 cv-auto md:pb-16 md:pt-8"
       aria-label="Community section"
     >
       <motion.div
@@ -224,7 +216,7 @@ export function Pricing() {
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, margin: "-100px" }}
-        className="mx-auto grid max-w-[1280px] grid-cols-1 gap-4 px-3 md:grid-cols-2 md:grid-rows-1 md:px-6"
+        className="mx-auto grid max-w-[1280px] grid-cols-1 gap-0 px-3 max-md:gap-0 md:grid-cols-2 md:grid-rows-1 md:gap-4 md:px-6"
       >
         <CommunityCard
           tag={COMMUNITY.explore.tag}

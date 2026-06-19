@@ -14,11 +14,11 @@ export function CTA() {
   return (
     <section
       id="cta"
-      className="relative px-3 pb-16 pt-4 md:px-12 cv-auto"
+      className="relative md:px-12 cv-auto"
       aria-label="Call to action section"
     >
       <motion.div
-        className="relative mx-auto max-w-[1632px] overflow-hidden rounded-3xl bg-black"
+        className="relative mx-auto max-w-[1632px] overflow-hidden rounded-3xl bg-black max-md:rounded-tl-[50px] max-md:rounded-tr-none max-md:rounded-bl-none max-md:rounded-br-none"
         style={{ minHeight: 423 }}
         initial={prefersReducedMotion ? undefined : { opacity: 0, y: 24 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -39,32 +39,17 @@ export function CTA() {
           className="absolute inset-0 bg-gradient-to-r from-black/55 via-black/25 to-black/45"
         /> */}
 
-        <nav
-          aria-label="Footer quick links"
-          className="absolute left-6 top-1/2 z-10 hidden -translate-y-1/2 flex-col gap-2 text-[13px] text-white/75 md:flex lg:left-12"
-        >
-          {VIDEO_CTA.sidebarLinks.map((link, i) => (
-            <a
-              key={`${link.label}-${i}`}
-              href={link.href}
-              className="transition-colors hover:text-white"
-            >
-              {link.label}
-            </a>
-          ))}
-        </nav>
-
         <CircularText
           text={VIDEO_CTA.rotatingBadge}
           diameter={264}
           fontSize={18}
           letterSpacing={0.22}
           durationSeconds={28}
-          className="absolute right-[-10%] top-[25%] z-[5] hidden h-[140px] w-[140px] -translate-x-1/2 -translate-y-1/2 text-white opacity-60 sm:block md:h-[180px] md:w-[180px] lg:h-[220px] lg:w-[220px] xl:h-[264px] xl:w-[264px]"
+          className="absolute right-[-20%] top-[55%] z-[5] block h-[240px] w-[240px] -translate-x-1/2 -translate-y-1/2 text-white opacity-60 md:right-[-10%] md:top-[25%] md:h-[180px] md:w-[180px] lg:h-[220px] lg:w-[220px] xl:h-[264px] xl:w-[264px]"
         />
 
         <motion.div
-          className="relative z-10 flex min-h-[423px] flex-col items-center justify-center px-8 py-16 text-center"
+          className="relative z-10 flex flex-col items-start px-7 py-16 text-left md:min-h-[423px] md:items-center md:justify-center md:px-8 md:text-center"
           variants={prefersReducedMotion ? {} : staggerContainer}
           initial="hidden"
           whileInView="visible"
@@ -72,14 +57,14 @@ export function CTA() {
         >
           <motion.p
             variants={prefersReducedMotion ? {} : fadeUp}
-            className="text-base font-normal text-white/85 md:text-lg"
+            className="text-[20px] font-normal tracking-[-0.4px] text-white md:text-lg md:tracking-normal md:text-white/85"
           >
             {VIDEO_CTA.subtitle}
           </motion.p>
 
           <motion.h2
             variants={prefersReducedMotion ? {} : fadeUp}
-            className="mt-2 text-[clamp(56px,10vw,140px)] font-medium uppercase leading-none tracking-[0.04em] text-white"
+            className="mt-2 text-[32px] font-medium uppercase leading-[1.05] tracking-[0.04em] text-white md:text-[clamp(56px,10vw,140px)] md:leading-none"
           >
             {VIDEO_CTA.wordmark}
           </motion.h2>
@@ -90,6 +75,22 @@ export function CTA() {
           >
             <PillButtonCta showShadow>{VIDEO_CTA.cta}</PillButtonCta>
           </motion.div>
+
+          <motion.nav
+            aria-label="Footer quick links"
+            variants={prefersReducedMotion ? {} : fadeUp}
+            className="z-10 mt-10 flex w-full flex-col gap-6 text-[16px] tracking-[-0.16px] text-white/70 md:absolute md:bottom-10 md:left-6 md:mt-0 md:w-auto md:flex-col md:gap-4 md:text-[13px] md:tracking-normal md:text-white/75 lg:left-12"
+          >
+            {VIDEO_CTA.sidebarLinks.map((link, i) => (
+              <a
+                key={`${link.label}-${i}`}
+                href={link.href}
+                className="transition-colors text-left hover:text-white"
+              >
+                {link.label}
+              </a>
+            ))}
+          </motion.nav>
         </motion.div>
       </motion.div>
     </section>

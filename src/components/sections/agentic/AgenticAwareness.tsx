@@ -5,11 +5,13 @@ import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { AGENTIC_AWARENESS } from "@/lib/constants";
 import { AutoplayVideo } from "@/components/ui/AutoplayVideo";
-import { fadeUp } from "@/components/animations/fadeUp";
+import { fadeUp, fadeUpScale } from "@/components/animations/fadeUp";
 import { staggerContainer } from "@/components/animations/stagger";
 import { cn } from "@/lib/utils";
 
 const SLIDES = AGENTIC_AWARENESS.slides;
+
+const EASE = [0.25, 0.1, 0.25, 1] as const;
 
 export function AgenticAwareness() {
   const prefersReducedMotion = useReducedMotion();
@@ -25,16 +27,35 @@ export function AgenticAwareness() {
   return (
     <section
       id="awareness"
-      className="relative px-3 pb-20 pt-12 md:px-[48px] cv-auto"
+      className="relative px-3 pb-20 pt-16 md:px-[48px] cv-auto"
       aria-label="Awareness engine across deployments"
     >
       <motion.div
-        className="mx-auto w-full max-w-[1268px]"
+        aria-hidden
+        className="pointer-events-none absolute left-3 right-3 top-0 h-px bg-black/15 md:left-[48px] md:right-[48px]"
+        initial={prefersReducedMotion ? undefined : { scaleX: 0 }}
+        whileInView={{ scaleX: 1 }}
+        viewport={{ once: true, margin: "-60px" }}
+        transition={{ duration: 0.6, ease: EASE }}
+        style={{ transformOrigin: "50% 50%" }}
+      />
+
+      <motion.div
+        className="relative mx-auto w-full max-w-[1268px]"
         variants={prefersReducedMotion ? {} : staggerContainer}
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, margin: "-100px" }}
       >
+        {/* <motion.div
+          aria-hidden
+          className="pointer-events-none absolute top-0 bottom-0 hidden w-px bg-black/15 md:block"
+          initial={prefersReducedMotion ? undefined : { scaleY: 0 }}
+          whileInView={{ scaleY: 1 }}
+          viewport={{ once: true, margin: "-60px" }}
+          transition={{ duration: 0.7, ease: EASE, delay: 0.2 }}
+          style={{ left: LINE_LEFT, transformOrigin: "50% 0%" }}
+        /> */}
         <motion.span
           variants={prefersReducedMotion ? {} : fadeUp}
           className="block text-[11px] font-medium uppercase tracking-[0.22em] text-black/45"
@@ -57,7 +78,7 @@ export function AgenticAwareness() {
         </motion.p>
 
         <motion.div
-          variants={prefersReducedMotion ? {} : fadeUp}
+          variants={prefersReducedMotion ? {} : fadeUpScale}
           className="relative mt-12 overflow-hidden rounded-3xl border border-black/10 bg-black/5 shadow-[0_24px_70px_rgba(0,0,0,0.12)]"
         >
           <div className="relative aspect-[1268/640] w-full">

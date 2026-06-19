@@ -167,7 +167,7 @@ export function HowItWorks() {
     <section
       ref={sectionRef}
       id="how-it-works"
-      className="relative overflow-hidden pt-[150px]"
+      className="relative overflow-hidden pt-[150px] max-md:hidden"
       aria-label="Platform title section"
     >
       {/* Desktop: SVG full width, curve ở viewBox x≈1050→1440. */}

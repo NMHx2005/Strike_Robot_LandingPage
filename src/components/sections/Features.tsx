@@ -43,22 +43,26 @@ const LEFT_BRACKET_D =
 const RIGHT_BRACKET_D =
   "M12.5 0.311523L3.11307 12.0984C1.42121 14.2228 0.5 16.8582 0.5 19.574V153.049C0.5 155.765 1.42121 158.4 3.11307 160.525L12.5 172.312";
 
+const MOBILE_ITEM_ICON_CENTER = 28;
+
 function FeatureDescription({
   description,
   boldPhrase,
+  className,
 }: {
   description: string;
   boldPhrase?: string;
+  className?: string;
 }) {
   if (!boldPhrase || !description.includes(boldPhrase)) {
     return (
-      <p className="text-[16px] leading-[22px] text-[#3e424d]">{description}</p>
+      <p className={cn("text-[#3e424d]", className)}>{description}</p>
     );
   }
 
   const [before, after] = description.split(boldPhrase);
   return (
-    <p className="text-[16px] leading-[22px] text-[#3e424d]">
+    <p className={cn("text-[#3e424d]", className)}>
       {before}
       <span className="font-semibold">{boldPhrase}</span>
       {after}
@@ -93,13 +97,16 @@ function FeatureItem({
       onClick={onSelect}
       aria-expanded={isActive}
       className={cn(
-        "group relative w-full cursor-pointer text-left px-6 py-3 rounded-xl",
-        "outline-none focus-visible:ring-2 focus-visible:ring-black/15"
+        "group relative w-full cursor-pointer text-left outline-none focus-visible:ring-2 focus-visible:ring-black/15",
+        isActive
+          ? "max-md:flex max-md:flex-col max-md:gap-2 max-md:rounded-2xl max-md:border max-md:border-white/60 max-md:border-l-2 max-md:px-6 max-md:pb-6 max-md:pt-5 max-md:shadow-[inset_0_-1px_0_0_rgba(0,0,0,0.15)]"
+          : "max-md:border-t max-md:border-black/10 max-md:px-6 max-md:py-3",
+        "md:rounded-xl md:px-6 md:py-3"
       )}
     >
       <motion.span
         aria-hidden
-        className="pointer-events-none absolute left-0 right-0 top-0 h-px origin-center bg-black/10"
+        className="pointer-events-none absolute left-0 right-0 top-0 hidden h-px origin-center bg-black/10 md:block"
         initial={false}
         animate={{ opacity: showTopBorder ? 1 : 0 }}
         transition={
@@ -109,7 +116,10 @@ function FeatureItem({
 
       <motion.span
         aria-hidden
-        className="pointer-events-none absolute inset-0 rounded-xl border border-white/60 border-l-2 border-l-white/60"
+        className={cn(
+          "pointer-events-none absolute inset-0 border border-white/60 border-l-2 border-l-white/60",
+          isActive ? "max-md:rounded-2xl md:rounded-xl" : "md:rounded-xl"
+        )}
         style={{ background: ACTIVE_GRADIENT, willChange: "opacity" }}
         initial={false}
         animate={{ opacity: isActive ? 1 : 0 }}
@@ -118,18 +128,13 @@ function FeatureItem({
         }
       />
 
-      <div className="relative flex items-center gap-6">
-        <motion.span
+      <div className="relative flex items-center gap-4 max-md:gap-4 md:gap-6">
+        <span
           aria-hidden
-          className="relative block h-12 w-12 shrink-0"
-          initial={false}
-          animate={{ opacity: isActive ? 1 : 0.45 }}
-          transition={
-            prefersReducedMotion
-              ? { duration: 0 }
-              : { duration: 0.3, ease: EASE }
-          }
-          style={{ willChange: "opacity" }}
+          className={cn(
+            "relative block h-8 w-8 shrink-0 md:h-12 md:w-12",
+            isActive ? "opacity-100" : "opacity-60 md:opacity-[0.45]"
+          )}
         >
           {iconSrc && (
             <Image
@@ -137,16 +142,28 @@ function FeatureItem({
               alt=""
               width={96}
               height={96}
-              className="h-12 w-12 object-contain select-none"
+              className="h-full w-full object-contain select-none max-md:mix-blend-normal md:mix-blend-multiply"
               draggable={false}
               priority
-              style={{ mixBlendMode: "multiply" }}
             />
           )}
-        </motion.span>
+        </span>
 
+        {/* Mobile title — static sizes per Figma */}
+        <span
+          className={cn(
+            "block text-black leading-[1.2] md:hidden",
+            isActive
+              ? "text-[20px] font-medium tracking-[-0.2px]"
+              : "text-[18px] font-normal tracking-[-0.36px]"
+          )}
+        >
+          {feature.title}
+        </span>
+
+        {/* Desktop title — animated */}
         <motion.span
-          className="block text-black"
+          className="hidden text-black md:block"
           initial={false}
           animate={{
             fontSize: isActive ? "22px" : "20px",
@@ -159,10 +176,7 @@ function FeatureItem({
               ? { duration: 0 }
               : { duration: 0.3, ease: EASE }
           }
-          style={{
-            lineHeight: 1.2,
-            willChange: "font-size, font-weight",
-          }}
+          style={{ lineHeight: 1.2, willChange: "font-size, font-weight" }}
         >
           {feature.title}
         </motion.span>
@@ -185,23 +199,27 @@ function FeatureItem({
         }
         aria-hidden={!isActive}
       >
-        <div className="pl-[72px] pr-1 pt-3 pb-1">
+        <div
+          className={cn(
+            "max-md:border-t max-md:border-black/10 max-md:pb-4 max-md:pt-3",
+            "md:pb-1 md:pl-[72px] md:pr-1 md:pt-3"
+          )}
+        >
           <FeatureDescription
             description={feature.description}
             boldPhrase={feature.boldPhrase}
+            className="max-md:text-[14px] max-md:leading-5 md:text-[16px] md:leading-[22px]"
           />
         </div>
-        {/* Mobile/tablet inline video — full-width trong card (không indent
-            theo pl-72 của description). Chỉ mount khi isActive, ẩn ở lg+
-            (lg+ đã có cột phải). Container display:none ở lg+ → IO không
-            trigger video load. */}
         {isActive && videoSrc && (
-          <div className="lg:hidden mt-3 relative h-[200px] w-full overflow-hidden rounded-2xl border border-[#d9d9d9] bg-black/5 sm:h-[260px]">
-            <AutoplayVideo
-              src={videoSrc}
-              objectPosition="top center"
-              ariaLabel={`${feature.title} preview`}
-            />
+          <div className="relative max-md:pt-3 md:mt-3 lg:hidden">
+            <div className="relative h-[178px] w-full max-w-[334px] overflow-hidden rounded-xl border border-black/60 bg-black/5">
+              <AutoplayVideo
+                src={videoSrc}
+                objectPosition="top center"
+                ariaLabel={`${feature.title} preview`}
+              />
+            </div>
           </div>
         )}
       </motion.div>
@@ -228,7 +246,13 @@ export function Features() {
 
     const wrapperRect = wrapperEl.getBoundingClientRect();
     const itemRect = itemEl.getBoundingClientRect();
-    const iconCenterY = itemRect.top - wrapperRect.top + ITEM_ICON_CENTER_FROM_TOP;
+    const isDesktop =
+      typeof window !== "undefined" &&
+      window.matchMedia("(min-width: 768px)").matches;
+    const iconCenterY =
+      itemRect.top -
+      wrapperRect.top +
+      (isDesktop ? ITEM_ICON_CENTER_FROM_TOP : MOBILE_ITEM_ICON_CENTER);
     const top = iconCenterY - INDICATOR_HEIGHT / 2;
 
     setIndicator((prev) =>
@@ -278,7 +302,7 @@ export function Features() {
       className="relative bg-transparent pt-[80px] md:pt-[110px]"
       aria-label="Features section"
     >
-      <div ref={wrapperRef} className="relative mx-6 md:mx-[48px]">
+      <div ref={wrapperRef} className="relative px-3 md:mx-[48px] md:px-0">
         {/* Top horizontal line of header band — full frame width */}
         <motion.div
           aria-hidden
@@ -290,10 +314,10 @@ export function Features() {
           style={{ transformOrigin: "50% 50%" }}
         />
 
-        {/* Bottom horizontal line of header band — full frame width */}
+        {/* Bottom horizontal line of header band — desktop only */}
         <motion.div
           aria-hidden
-          className="pointer-events-none absolute left-0 right-0 h-px bg-black/15"
+          className="pointer-events-none absolute left-0 right-0 hidden h-px bg-black/15 md:block"
           style={{ top: HEADER_BAND_MIN_H, transformOrigin: "50% 50%" }}
           initial={prefersReducedMotion ? undefined : { scaleX: 0 }}
           whileInView={{ scaleX: 1 }}
@@ -301,7 +325,7 @@ export function Features() {
           transition={{ duration: 0.6, ease: EASE, delay: 0.05 }}
         />
 
-        {/* Left bracket SVG — at outer frame edge */}
+        {/* Left bracket — desktop only (outer frame) */}
         <motion.svg
           aria-hidden
           width="13"
@@ -318,7 +342,7 @@ export function Features() {
           <path d={LEFT_BRACKET_D} stroke="black" strokeOpacity="0.15" />
         </motion.svg>
 
-        {/* Right bracket SVG — at outer frame edge */}
+        {/* Right bracket — desktop only (outer frame) */}
         <motion.svg
           aria-hidden
           width="13"
@@ -342,7 +366,7 @@ export function Features() {
           {/* Single continuous vertical line — sits 50px left of content text */}
           <motion.div
             aria-hidden
-            className="pointer-events-none absolute top-0 bottom-0 w-px bg-black/15 hidden md:block"
+            className="pointer-events-none absolute top-0 bottom-0 hidden w-px bg-black/15 md:block"
             style={{ left: LINE_LEFT, transformOrigin: "50% 0%" }}
             initial={prefersReducedMotion ? undefined : { scaleY: 0 }}
             whileInView={{ scaleY: 1 }}
@@ -353,7 +377,7 @@ export function Features() {
           {/* Animated black indicator on the vertical line */}
           <motion.div
             aria-hidden
-            className="pointer-events-none absolute hidden md:block rounded-full bg-black"
+            className="pointer-events-none absolute hidden rounded-full bg-black md:block"
             style={{
               left: LINE_LEFT,
               x: "-50%",
@@ -377,34 +401,50 @@ export function Features() {
           />
 
           {/* Header band content */}
-          <div
-            className="relative md:pl-[60px] md:pr-[60px]"
-            style={{ minHeight: HEADER_BAND_MIN_H }}
+          <div className="relative max-md:border-y max-md:border-black/15 max-md:px-5 max-md:pb-6 max-md:pt-12 md:min-h-[206px] md:pl-[60px] md:pr-[60px]">
+          {/* Mobile brackets — centered on header band, flush to screen edges */}
+          <svg
+            aria-hidden
+            viewBox="0 0 13 173"
+            fill="none"
+            className="pointer-events-none absolute top-1/2 h-[172px] w-3 -translate-y-1/2 max-md:left-[-12px] md:hidden"
+            preserveAspectRatio="none"
           >
+            <path d={LEFT_BRACKET_D} stroke="black" strokeOpacity="0.15" />
+          </svg>
+          <svg
+            aria-hidden
+            viewBox="0 0 13 173"
+            fill="none"
+            className="pointer-events-none absolute top-1/2 h-[172px] w-3 -translate-y-1/2 max-md:right-[-12px] md:hidden"
+            preserveAspectRatio="none"
+          >
+            <path d={RIGHT_BRACKET_D} stroke="black" strokeOpacity="0.15" />
+          </svg>
           <motion.div
             variants={prefersReducedMotion ? {} : staggerContainer}
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, margin: "-100px" }}
-            className="py-12 max-w-[913px]"
+            className="max-w-[913px] max-md:flex max-md:flex-col max-md:gap-4 md:py-12"
           >
             <motion.h2
               variants={prefersReducedMotion ? {} : fadeUp}
-              className="text-[clamp(36px,4vw,64px)] font-normal leading-[1.1] tracking-[-0.02em] text-black"
+              className="max-md:text-[32px] max-md:font-medium max-md:leading-normal max-md:tracking-[-0.04em] md:text-[clamp(36px,4vw,64px)] md:font-normal md:leading-[1.1] md:tracking-[-0.02em] text-black"
             >
               {FEATURES_SECTION.headline}
             </motion.h2>
             <motion.p
               variants={prefersReducedMotion ? {} : fadeUp}
-              className="mt-4 max-w-[913px] text-base leading-6 text-[#3e424d]/70"
+              className="max-md:text-sm max-md:leading-normal max-md:text-[#3e424d]/70 md:mt-4 md:text-base md:leading-6 text-[#3e424d]/70 max-w-[913px]"
             >
               {FEATURES_SECTION.description}
             </motion.p>
           </motion.div>
         </div>
 
-        {/* Features content */}
-        <div className="flex flex-col items-start gap-12 py-8 md:py-[64px] lg:flex-row lg:gap-12 md:pl-[60px] md:pr-[60px]">
+        {/* Features content — Figma 23:2855: p-24 mobile */}
+        <div className="flex flex-col items-start gap-12 max-md:mt-2.5 max-md:px-3 max-md:py-6 md:py-[64px] lg:flex-row lg:gap-12 md:pl-[60px] md:pr-[60px]">
           <motion.div
             className="w-full shrink-0 lg:w-[462px]"
             initial={prefersReducedMotion ? undefined : { opacity: 0, y: 20 }}
@@ -412,7 +452,7 @@ export function Features() {
             viewport={{ once: true, margin: "-100px" }}
             transition={{ duration: 0.6, ease: EASE }}
           >
-            <div className="flex flex-col">
+            <div className="flex w-full flex-col max-md:pt-0 md:pt-0">
               {FEATURES.map((feature, index) => {
                 const isActive = feature.id === activeId;
                 const prev = index > 0 ? FEATURES[index - 1] : null;
@@ -432,8 +472,8 @@ export function Features() {
               })}
             </div>
 
-            <div className="pt-6">
-              <PillButtonCta>{FEATURES_SECTION.cta}</PillButtonCta>
+            <div className="flex justify-center pt-4 md:pt-6">
+              <PillButtonCta className="max-md:w-[276px]">{FEATURES_SECTION.cta}</PillButtonCta>
             </div>
           </motion.div>
 

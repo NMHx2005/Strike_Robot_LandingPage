@@ -20,7 +20,10 @@ const DEFAULT_OPTIONS: TiltOptions = {
   easing: "cubic-bezier(0.25, 0.1, 0.25, 1)",
 };
 
-export function useVanillaTilt<T extends HTMLElement>(options?: Partial<TiltOptions>) {
+export function useVanillaTilt<T extends HTMLElement>(
+  options?: Partial<TiltOptions>,
+  enabled = true
+) {
   const ref = useRef<T>(null);
   const prefersReducedMotion = useReducedMotion();
   const optionsRef = useRef(options);
@@ -28,14 +31,14 @@ export function useVanillaTilt<T extends HTMLElement>(options?: Partial<TiltOpti
 
   useEffect(() => {
     const el = ref.current as TiltElement | null;
-    if (!el || prefersReducedMotion) return;
+    if (!el || prefersReducedMotion || !enabled) return;
 
     VanillaTilt.init(el, { ...DEFAULT_OPTIONS, ...optionsRef.current });
 
     return () => {
       el.vanillaTilt?.destroy();
     };
-  }, [prefersReducedMotion]);
+  }, [enabled, prefersReducedMotion]);
 
   return ref;
 }

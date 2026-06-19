@@ -13,6 +13,10 @@ type AutoplayVideoProps = {
   eager?: boolean;
   /** Defer loading until the user has scrolled (scrollY > 0) */
   loadOnScroll?: boolean;
+  /** `press` — load/play only while user is pressing (mobile-friendly) */
+  playMode?: "auto" | "press";
+  /** Required when playMode is `press` */
+  isPressing?: boolean;
 };
 
 export function AutoplayVideo({
@@ -22,11 +26,14 @@ export function AutoplayVideo({
   ariaLabel,
   eager = false,
   loadOnScroll = false,
+  playMode = "auto",
+  isPressing = false,
 }: AutoplayVideoProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const prefersReducedMotion = useReducedMotion();
-  const [shouldLoad, setShouldLoad] = useState(eager);
+  const isPressMode = playMode === "press";
+  const [shouldLoad, setShouldLoad] = useState(eager && !isPressMode);
 
   useEffect(() => {
     if (loadOnScroll && prefersReducedMotion) {
@@ -68,7 +75,7 @@ export function AutoplayVideo({
   }, [eager, loadOnScroll, shouldLoad]);
 
   useEffect(() => {
-    if (!shouldLoad) return;
+    if (!shouldLoad || isPressMode) return;
     const video = videoRef.current;
     const container = containerRef.current;
     if (!video || !container || prefersReducedMotion) return;
@@ -93,7 +100,40 @@ export function AutoplayVideo({
       observer.disconnect();
       video.removeEventListener("loadeddata", tryPlay);
     };
-  }, [shouldLoad, prefersReducedMotion, src]);
+  }, [isPressMode, shouldLoad, prefersReducedMotion, src]);
+
+  useEffect(() => {
+    if (!isPressMode || !shouldLoad) return;
+    const video = videoRef.current;
+    if (!video || prefersReducedMotion) return;
+
+    const pauseAtStart = () => {
+      video.pause();
+      if (video.readyState >= 1) {
+        try {
+          video.currentTime = 0;
+        } catch {
+          /* ignore seek errors before metadata */
+        }
+      }
+    };
+
+    const onLoaded = () => {
+      if (!isPressing) pauseAtStart();
+    };
+
+    video.addEventListener("loadeddata", onLoaded);
+
+    if (isPressing) {
+      void video.play();
+    } else {
+      pauseAtStart();
+    }
+
+    return () => {
+      video.removeEventListener("loadeddata", onLoaded);
+    };
+  }, [isPressMode, isPressing, shouldLoad, prefersReducedMotion, src]);
 
   return (
     <div ref={containerRef} className={cn("h-full w-full", className)}>
@@ -103,11 +143,11 @@ export function AutoplayVideo({
           src={src}
           className="h-full w-full object-cover"
           style={{ objectPosition }}
-          autoPlay={!prefersReducedMotion}
+          autoPlay={!prefersReducedMotion && !isPressMode}
           loop
           muted
           playsInline
-          preload="metadata"
+          preload={isPressMode ? "auto" : "metadata"}
           aria-label={ariaLabel}
         />
       )}

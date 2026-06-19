@@ -175,13 +175,22 @@ export function AgenticLayer() {
               >
                 {/* Media visual — Figma 308×150 (≈2.05:1) */}
                 <div className="relative aspect-[308/150] w-full">
-                  <Image
-                    src={part.media}
-                    alt=""
-                    fill
-                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                    className="object-cover"
-                  />
+                  {part.media.endsWith(".gif") ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={part.media}
+                      alt=""
+                      className="absolute inset-0 h-full w-full object-cover"
+                    />
+                  ) : (
+                    <Image
+                      src={part.media}
+                      alt=""
+                      fill
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                      className="object-cover"
+                    />
+                  )}
                 </div>
 
                 {/* Text — padding 20/16/20/24, centered (Figma) */}

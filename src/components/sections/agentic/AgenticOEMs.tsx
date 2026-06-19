@@ -3,11 +3,15 @@
 import Image from "next/image";
 import { motion, useReducedMotion } from "framer-motion";
 import { AGENTIC_OEMS } from "@/lib/constants";
-import { fadeUp } from "@/components/animations/fadeUp";
-import { staggerContainer } from "@/components/animations/stagger";
+import { fadeUp, fadeUpScale } from "@/components/animations/fadeUp";
+import {
+  staggerContainer,
+  staggerContainerSlow,
+} from "@/components/animations/stagger";
 
 export function AgenticOEMs() {
   const prefersReducedMotion = useReducedMotion();
+  const EASE = [0.25, 0.1, 0.25, 1] as const;
 
   return (
     <section
@@ -16,20 +20,40 @@ export function AgenticOEMs() {
       aria-label="Built for robotics teams and OEMs"
     >
       <motion.div
-        className="mx-auto grid w-full max-w-[1268px] grid-cols-1 gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,420px)] lg:gap-16"
+        aria-hidden
+        className="pointer-events-none absolute left-3 right-3 top-0 h-px bg-black/15 md:left-[48px] md:right-[48px]"
+        initial={prefersReducedMotion ? undefined : { scaleX: 0 }}
+        whileInView={{ scaleX: 1 }}
+        viewport={{ once: true, margin: "-60px" }}
+        transition={{ duration: 0.6, ease: EASE }}
+        style={{ transformOrigin: "50% 50%" }}
+      />
+
+      <motion.div
+        className="relative mx-auto grid w-full max-w-[1268px] grid-cols-1 gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,420px)] lg:gap-16"
         variants={prefersReducedMotion ? {} : staggerContainer}
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, margin: "-100px" }}
       >
+        {/* <motion.div
+          aria-hidden
+          className="pointer-events-none absolute top-0 bottom-0 hidden w-px bg-black/15 md:block"
+          initial={prefersReducedMotion ? undefined : { scaleY: 0 }}
+          whileInView={{ scaleY: 1 }}
+          viewport={{ once: true, margin: "-60px" }}
+          transition={{ duration: 0.7, ease: EASE, delay: 0.2 }}
+          style={{ left: LINE_LEFT, transformOrigin: "50% 0%" }}
+        /> */}
+
         <motion.div
-          variants={prefersReducedMotion ? {} : fadeUp}
+          variants={prefersReducedMotion ? {} : staggerContainerSlow}
           className="flex flex-col gap-7 lg:order-1"
         >
           {AGENTIC_OEMS.bullets.map((bullet) => (
             <motion.div
               key={bullet.title}
-              variants={prefersReducedMotion ? {} : fadeUp}
+              variants={prefersReducedMotion ? {} : fadeUpScale}
               className="flex gap-4"
             >
               <div className="relative flex size-[72px] shrink-0 items-center justify-center">

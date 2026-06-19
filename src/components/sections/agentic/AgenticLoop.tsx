@@ -2,31 +2,44 @@
 
 import { motion, useReducedMotion } from "framer-motion";
 import { AGENTIC_LOOP } from "@/lib/constants";
-import { fadeUp } from "@/components/animations/fadeUp";
-import { staggerContainer } from "@/components/animations/stagger";
+import { fadeUp, fadeUpScale } from "@/components/animations/fadeUp";
+import {
+  staggerContainer,
+  staggerContainerSlow,
+} from "@/components/animations/stagger";
 import { useVanillaTilt } from "@/hooks/useVanillaTilt";
-
-const PANEL_BG =
-  "linear-gradient(135deg, rgba(20,22,26,0.96) 0%, rgba(14,16,20,0.96) 100%)";
-
-const NODE_BG = "rgba(255,255,255,0.04)";
-
-// Node positions inside a 452×454 panel (Figma 1:1195 metadata, normalized).
-// EDGE — Sensors(top-left) → Obstacle(mid-right) → Safety(bottom-center)
-const EDGE_NODES = [
-  { left: "3.6%", top: "24.6%", width: "54%" },   // Sensors + local SLAM
-  { left: "37.8%", top: "47.5%", width: "50%" },  // Obstacle avoidance
-  { left: "20.1%", top: "70.9%", width: "59.9%" }, // Safety governor
-];
-
-// CLOUD — Open-vocab(top-left) → Build TC-SG(mid-center) → Reasoning(bottom-right)
-const CLOUD_NODES = [
-  { left: "5.4%", top: "22.6%", width: "57.9%" },  // Open-vocab perception
-  { left: "18.4%", top: "46.3%", width: "61%" },   // Build TC-SG
-  { left: "37.5%", top: "71%", width: "52.6%" },   // Reasoning + planner
-];
+import { cn } from "@/lib/utils";
 
 type Side = "edge" | "cloud";
+
+const PANEL_BG_GIF = "/SR%20Agentic%20Assets/Effect%20Card%20Final.gif";
+
+const PANEL_OVERLAYS: Record<Side, string> = {
+  edge:
+    "linear-gradient(102.41deg, rgba(0, 0, 0, 0.32) 10.83%, rgba(45, 45, 45, 0.28) 57.02%, rgba(0, 0, 0, 0.22) 96.19%)",
+  cloud:
+    "linear-gradient(222.71deg, rgba(0, 0, 0, 0.22) 5.13%, rgba(45, 45, 45, 0.26) 56.46%, rgba(0, 0, 0, 0.16) 100%)",
+};
+
+type NodeLayout = {
+  left: number;
+  top: number;
+  centerX?: boolean;
+};
+
+// Figma 23:1663 (EDGE) — absolute chip positions inside 452×454 section
+const EDGE_NODES: NodeLayout[] = [
+  { left: 14.4, top: 111 },
+  { left: 169, top: 215 },
+  { left: 225, top: 321, centerX: true },
+];
+
+// Figma 23:1684 (CLOUD)
+const CLOUD_NODES: NodeLayout[] = [
+  { left: 22.37, top: 101.72 },
+  { left: 81.28, top: 209.32 },
+  { left: 167.4, top: 321.46 },
+];
 
 function PanelHeader({
   label,
@@ -38,17 +51,17 @@ function PanelHeader({
   timing: string;
 }) {
   return (
-    <div className="absolute left-[7%] right-[7%] top-[7%] z-[2] flex flex-col gap-1">
-      <div className="flex items-center gap-3">
-        <span className="text-[15px] font-semibold uppercase tracking-[0.16em] text-white">
+    <div className="absolute left-[30px] top-[31px] z-[2] flex w-[calc(100%-60px)] max-w-[389px] flex-col gap-2">
+      <div className="flex items-center gap-2">
+        <span className="font-superground text-[20px] lowercase tracking-[0.08em] text-white">
           {label}
         </span>
-        <span aria-hidden className="h-px w-8 bg-white/30" />
-        <span className="text-[14px] text-white/55">{subtitle}</span>
+        <span aria-hidden className="h-px w-8 shrink-0 bg-white/30" />
+        <span className="text-[22px] font-medium tracking-[-0.22px] text-white">
+          {subtitle}
+        </span>
       </div>
-      <span className="text-[11.5px] uppercase tracking-[0.14em] text-white/45">
-        {timing}
-      </span>
+      <span className="text-[14px] text-[#7aa297]">{timing}</span>
     </div>
   );
 }
@@ -56,29 +69,29 @@ function PanelHeader({
 function NodeChip({
   title,
   subtitle,
-  pos,
+  layout,
 }: {
   title: string;
   subtitle: string;
-  pos: { left: string; top: string; width: string };
+  layout: NodeLayout;
 }) {
   return (
     <div
-      className="absolute rounded-xl border border-white/10 px-4 py-3 text-center"
+      className={cn(
+        "absolute z-[2] flex h-[92px] flex-col items-center justify-center gap-2 rounded-2xl border border-[rgba(217,217,217,0.1)] px-5 py-4 text-center backdrop-blur-[10px]",
+        layout.centerX && "-translate-x-1/2"
+      )}
       style={{
-        left: pos.left,
-        top: pos.top,
-        width: pos.width,
-        background: NODE_BG,
-        backdropFilter: "blur(2px)",
+        left: layout.centerX ? "50%" : layout.left,
+        top: layout.top,
+        background:
+          "linear-gradient(180deg, #393839 0%, rgba(57, 56, 57, 0.5) 100%)",
       }}
     >
-      <div className="text-[14px] font-medium leading-tight text-white">
+      <div className="text-[20px] font-medium tracking-[-0.2px] text-white">
         {title}
       </div>
-      <div className="mt-1.5 text-[11.5px] leading-tight text-white/50">
-        {subtitle}
-      </div>
+      <div className="text-[16px] leading-[22px] text-[#a5adc5]">{subtitle}</div>
     </div>
   );
 }
@@ -102,9 +115,21 @@ function LoopPanel({
   return (
     <div
       ref={tiltRef}
-      className="relative aspect-square w-full overflow-hidden rounded-2xl border border-white/10 will-change-transform"
-      style={{ background: PANEL_BG }}
+      className="relative isolate box-border aspect-[452/454] w-full overflow-hidden rounded-3xl border border-white/60 border-l-2 will-change-transform"
     >
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={PANEL_BG_GIF}
+        alt=""
+        aria-hidden
+        className="pointer-events-none absolute inset-0 h-full w-full object-cover"
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 backdrop-blur-[4px]"
+        style={{ background: PANEL_OVERLAYS[side] }}
+      />
+
       <PanelHeader label={label} subtitle={subtitle} timing={timing} />
 
       {nodes.map((node, i) => (
@@ -112,7 +137,7 @@ function LoopPanel({
           key={node.title}
           title={node.title}
           subtitle={node.subtitle}
-          pos={positions[i]}
+          layout={positions[i]}
         />
       ))}
     </div>
@@ -367,28 +392,44 @@ export function AgenticLoop() {
           {AGENTIC_LOOP.description}
         </motion.p>
 
-        <div className="relative isolate mx-auto mt-14 grid w-full max-w-[922px] grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-4">
-          <LoopPanel
-            label={AGENTIC_LOOP.edge.label}
-            subtitle={AGENTIC_LOOP.edge.subtitle}
-            timing={AGENTIC_LOOP.edge.timing}
-            nodes={AGENTIC_LOOP.edge.nodes}
-            side="edge"
-          />
+        <motion.div
+          className="relative isolate mx-auto mt-14 grid w-full max-w-[920px] grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-4"
+          variants={prefersReducedMotion ? {} : staggerContainerSlow}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-80px" }}
+        >
+          <motion.div
+            variants={prefersReducedMotion ? {} : fadeUpScale}
+            className="w-full"
+          >
+            <LoopPanel
+              label={AGENTIC_LOOP.edge.label}
+              subtitle={AGENTIC_LOOP.edge.subtitle}
+              timing={AGENTIC_LOOP.edge.timing}
+              nodes={AGENTIC_LOOP.edge.nodes}
+              side="edge"
+            />
+          </motion.div>
 
-          <LoopPanel
-            label={AGENTIC_LOOP.cloud.label}
-            subtitle={AGENTIC_LOOP.cloud.subtitle}
-            timing={AGENTIC_LOOP.cloud.timing}
-            nodes={AGENTIC_LOOP.cloud.nodes}
-            side="cloud"
-          />
+          <motion.div
+            variants={prefersReducedMotion ? {} : fadeUpScale}
+            className="w-full"
+          >
+            <LoopPanel
+              label={AGENTIC_LOOP.cloud.label}
+              subtitle={AGENTIC_LOOP.cloud.subtitle}
+              timing={AGENTIC_LOOP.cloud.timing}
+              nodes={AGENTIC_LOOP.cloud.nodes}
+              side="cloud"
+            />
+          </motion.div>
 
           {/* Cross-panel curved arrows — only on lg+ where panels sit side-by-side */}
           <div className="pointer-events-none absolute inset-0 hidden lg:block">
             <CrossArrows />
           </div>
-        </div>
+        </motion.div>
       </motion.div>
     </section>
   );

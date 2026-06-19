@@ -21,6 +21,7 @@ export const VIDEOS = {
 } as const;
 
 export const HERO_BACKGROUND = "/Background.png";
+export const HERO_BACKGROUND_MOBILE = "/Top%20Bg_Sticky.png";
 
 export const HERO = {
   badge1: { label: "3D Spatial Creation", color: "#317e6a" },
@@ -161,28 +162,28 @@ export const AGENTIC_PARTS = [
     title: "Task-Conditioned Scene Graph",
     description:
       "Builds a Task-Conditioned Scene Graph (TC-SG) — picking or synthesizing the right spatial ontology before it maps. The map is a function of the task, not a fixed universal schema.",
-    media: "/agentic/parts/tcsg.png",
+    media: "/SR%20Agentic%20Assets/S1.webp",
   },
   {
     id: "open-vocab",
     title: "Open-vocabulary perception",
     description:
       "Detects and grounds objects it was never explicitly trained on, fusing detection, segmentation, and captioning into the live scene understanding.",
-    media: "/agentic/parts/open-vocab.png",
+    media: "/SR%20Agentic%20Assets/S2.webp",
   },
   {
     id: "realtime",
     title: "Real-time adaptation",
     description:
       "Change detection updates the world model as the environment shifts; the planner re-plans on the fly instead of acting on a stale snapshot.",
-    media: "/agentic/parts/realtime.png",
+    media: "/SR%20Agentic%20Assets/S3.gif",
   },
   {
     id: "trust",
     title: "Trust & anti-hallucination",
     description:
       "Confidence gating, grounded retrieval, and visual verification mean the robot abstains and re-checks rather than acting on a confident guess.",
-    media: "/agentic/parts/trust.png",
+    media: "/SR%20Agentic%20Assets/S4.gif",
   },
 ];
 
