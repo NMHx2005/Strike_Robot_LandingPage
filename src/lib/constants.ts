@@ -161,28 +161,28 @@ export const AGENTIC_PARTS = [
     title: "Task-Conditioned Scene Graph",
     description:
       "Builds a Task-Conditioned Scene Graph (TC-SG) — picking or synthesizing the right spatial ontology before it maps. The map is a function of the task, not a fixed universal schema.",
-    icon: "/icons/features/asset-creation.png",
+    media: "/agentic/parts/tcsg.png",
   },
   {
     id: "open-vocab",
     title: "Open-vocabulary perception",
     description:
       "Detects and grounds objects it was never explicitly trained on, fusing detection, segmentation, and captioning into the live scene understanding.",
-    icon: "/icons/features/spatial-layout.png",
+    media: "/agentic/parts/open-vocab.png",
   },
   {
     id: "realtime",
     title: "Real-time adaptation",
     description:
       "Change detection updates the world model as the environment shifts; the planner re-plans on the fly instead of acting on a stale snapshot.",
-    icon: "/icons/features/stimulation.png",
+    media: "/agentic/parts/realtime.png",
   },
   {
     id: "trust",
     title: "Trust & anti-hallucination",
     description:
       "Confidence gating, grounded retrieval, and visual verification mean the robot abstains and re-checks rather than acting on a confident guess.",
-    icon: "/icons/features/realtime-edit.png",
+    media: "/agentic/parts/trust.png",
   },
 ];
 
@@ -257,25 +257,25 @@ export const AGENTIC_OEMS = {
       title: "Open-vocabulary perception",
       description:
         "Detects and grounds objects it was never explicitly trained on, fusing detection, segmentation, and captioning into the live scene understanding.",
-      icon: "/icons/features/spatial-layout.png",
+      icon: "/agentic/oems/perception.png",
     },
     {
       title: "Deploy across domains with reusable schema templates",
       description:
         "Indoor service, factory patrol, search-and-rescue — a new client scenario is a new schema template, not a new mapping system to build from scratch.",
-      icon: "/icons/features/asset-creation.png",
+      icon: "/agentic/oems/domains.png",
     },
     {
       title: "Edge-to-cloud, deployable out of the box",
       description:
         "Runs as a split edge/cloud stack: an always-on safety loop on Jetson-class hardware, event-triggered reasoning on an autoscaling GPU cluster.",
-      icon: "/icons/features/export-pipeline.png",
+      icon: "/agentic/oems/edge-cloud.png",
     },
     {
       title: "Security and reliability planes around every action",
       description:
         "Action allow-lists, a safety governor, sandboxed execution, and an immutable audit log bound what a robot can physically do in the field.",
-      icon: "/icons/features/stimulation.png",
+      icon: "/agentic/oems/security.png",
     },
   ],
 };

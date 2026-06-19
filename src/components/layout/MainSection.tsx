@@ -22,7 +22,22 @@ const TOP_FADE_MASK =
  * - KHÔNG có scroll-driven motion để giảm tải render
  *   (translateY toàn bộ main containing 4 sections quá nặng)
  */
-export function MainSection({ children }: { children: ReactNode }) {
+export function MainSection({
+  children,
+  transparent = false,
+}: {
+  children: ReactNode;
+  /**
+   * When true, render only the bare <main> wrapper without the white gradient
+   * + top-fade mask — lets a page-level sticky background show through (used
+   * on the Agentic page, where the hero bg spans the whole page).
+   */
+  transparent?: boolean;
+}) {
+  if (transparent) {
+    return <main className="relative z-20 overflow-hidden">{children}</main>;
+  }
+
   return (
     <main
       className="relative z-20 overflow-hidden"

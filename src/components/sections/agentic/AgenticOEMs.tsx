@@ -32,21 +32,20 @@ export function AgenticOEMs() {
               variants={prefersReducedMotion ? {} : fadeUp}
               className="flex gap-4"
             >
-              <div className="relative flex size-12 shrink-0 items-center justify-center">
+              <div className="relative flex size-[72px] shrink-0 items-center justify-center">
                 <Image
                   src={bullet.icon}
                   alt=""
-                  width={64}
-                  height={64}
-                  className="h-10 w-10 object-contain"
-                  style={{ mixBlendMode: "multiply" }}
+                  width={144}
+                  height={144}
+                  className="h-[72px] w-[72px] object-contain"
                 />
               </div>
               <div className="flex-1">
-                <h3 className="text-[17px] font-medium leading-snug text-black">
+                <h3 className="text-[20px] font-medium leading-[1.2] tracking-[-0.2px] text-black">
                   {bullet.title}
                 </h3>
-                <p className="mt-2 max-w-[460px] text-[13.5px] leading-[1.55] text-[#3e424d]/75">
+                <p className="mt-3 max-w-[460px] text-[14px] leading-[22px] text-[#3e424d]/75">
                   {bullet.description}
                 </p>
               </div>

@@ -84,22 +84,45 @@ export function AgenticAwareness() {
             </div>
 
             <div className="absolute bottom-6 left-6 right-6 flex items-end justify-between gap-6 md:bottom-8 md:left-8 md:right-8">
-              <div
-                className="max-w-[560px] rounded-2xl border border-white/10 p-6 md:p-7"
-                style={{
-                  background: "rgba(10,12,16,0.55)",
-                  backdropFilter: "blur(14px) saturate(120%)",
-                  WebkitBackdropFilter: "blur(14px) saturate(120%)",
-                  boxShadow:
-                    "0 24px 60px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.06)",
-                }}
-              >
-                <h3 className="text-[clamp(24px,2.4vw,36px)] font-medium leading-[1.05] tracking-[-0.01em] text-white">
-                  {slide.title}
-                </h3>
-                <p className="mt-4 text-sm leading-[1.55] text-white/80 md:text-[15px]">
-                  {slide.description}
-                </p>
+              {/* Left column: info card on top, slide indicator 72px below it */}
+              <div className="flex max-w-[560px] flex-col gap-[72px]">
+                <div
+                  className="rounded-2xl border border-white/10 p-6 md:p-7"
+                  style={{
+                    background: "rgba(10,12,16,0.55)",
+                    backdropFilter: "blur(14px) saturate(120%)",
+                    WebkitBackdropFilter: "blur(14px) saturate(120%)",
+                    boxShadow:
+                      "0 24px 60px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.06)",
+                  }}
+                >
+                  <h3 className="text-[clamp(24px,2.4vw,36px)] font-medium leading-[1.05] tracking-[-0.01em] text-white">
+                    {slide.title}
+                  </h3>
+                  <p className="mt-4 text-sm leading-[1.55] text-white/80 md:text-[15px]">
+                    {slide.description}
+                  </p>
+                </div>
+
+                {/* Slide indicator — separated from the card (Figma 416×4,
+                    gap 6, pad-left 4). Active segment slides + grows brighter;
+                    others shrink/dim. */}
+                <div className="flex w-full max-w-[416px] items-center gap-1.5 pl-1">
+                  {SLIDES.map((s, i) => (
+                    <button
+                      key={s.id}
+                      type="button"
+                      aria-label={`Go to slide ${i + 1}`}
+                      onClick={() => goTo(i)}
+                      className={cn(
+                        "h-1 cursor-pointer rounded-full transition-all duration-500 ease-out",
+                        i === index
+                          ? "flex-[3] bg-white"
+                          : "flex-1 bg-white/30 hover:bg-white/50"
+                      )}
+                    />
+                  ))}
+                </div>
               </div>
 
               <div className="hidden shrink-0 items-center gap-3 md:flex">
@@ -109,7 +132,7 @@ export function AgenticAwareness() {
                   onClick={() => goTo(index - 1)}
                   className="flex size-11 cursor-pointer items-center justify-center rounded-full border border-white/30 bg-white/10 text-white backdrop-blur-sm transition-colors hover:bg-white/20"
                 >
-                  <ChevronLeft className="size-5" strokeWidth={1.8} />
+                  <ChevronLeft className="size-5" strokeWidth={2.75} />
                 </button>
                 <button
                   type="button"
@@ -117,29 +140,11 @@ export function AgenticAwareness() {
                   onClick={() => goTo(index + 1)}
                   className="flex size-11 cursor-pointer items-center justify-center rounded-full border border-white/30 bg-white/10 text-white backdrop-blur-sm transition-colors hover:bg-white/20"
                 >
-                  <ChevronRight className="size-5" strokeWidth={1.8} />
+                  <ChevronRight className="size-5" strokeWidth={2.75} />
                 </button>
               </div>
             </div>
           </div>
-        </motion.div>
-
-        <motion.div
-          variants={prefersReducedMotion ? {} : fadeUp}
-          className="mt-6 flex items-center justify-center gap-2 md:hidden"
-        >
-          {SLIDES.map((s, i) => (
-            <button
-              key={s.id}
-              type="button"
-              aria-label={`Go to slide ${i + 1}`}
-              onClick={() => goTo(i)}
-              className={cn(
-                "h-1.5 rounded-full transition-all duration-300 cursor-pointer",
-                i === index ? "w-7 bg-black" : "w-1.5 bg-black/25"
-              )}
-            />
-          ))}
         </motion.div>
       </motion.div>
     </section>

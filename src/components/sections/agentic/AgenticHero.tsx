@@ -26,11 +26,10 @@ export function AgenticHero() {
   });
 
   const titleOpacity = useTransform(scrollYProgress, [0, 0.5, 1], [1, 0.7, 0]);
-  const titleScale = useTransform(scrollYProgress, [0, 1], [1, 0.92]);
 
   const titleMotionStyle = prefersReducedMotion
     ? undefined
-    : { opacity: titleOpacity, scale: titleScale };
+    : { opacity: titleOpacity };
 
   return (
     <section
@@ -39,7 +38,7 @@ export function AgenticHero() {
     >
       {/* Title block — vertically centered in viewport below navbar */}
       <motion.div
-        className="mx-auto grid w-full max-w-[1480px] grid-cols-1 items-center gap-12 min-h-[calc(100vh-72px)] md:min-h-[calc(100vh-128px)] pt-24 md:pt-28 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:gap-16"
+        className="grid w-full grid-cols-1 items-center gap-12 min-h-[calc(100vh-72px)] md:min-h-[calc(100vh-128px)] pt-24 md:pt-28 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:gap-16"
         variants={prefersReducedMotion ? {} : staggerContainer}
         initial="hidden"
         animate="visible"
@@ -49,14 +48,12 @@ export function AgenticHero() {
           variants={prefersReducedMotion ? {} : fadeUp}
           className="flex flex-col items-start"
         >
-          <h1 className="font-superground text-[clamp(64px,9vw,160px)] font-normal uppercase leading-[0.95] tracking-[-0.02em] text-black">
+          <h1 className="font-superground bg-gradient-to-r from-black to-[#314344] bg-clip-text text-[clamp(42px,8vw,78px)] font-normal uppercase leading-none tracking-normal text-transparent [filter:drop-shadow(0_14px_24px_rgba(0,0,0,0.28))]">
             <span className="block">SR</span>
-            <span className="block bg-gradient-to-r from-[#2a3e3e] via-[#3a4a4a] to-[#1f2d2d] bg-clip-text text-transparent">
-              AGENTIC
-            </span>
+            <span className="block">AGENTIC</span>
           </h1>
 
-          <span aria-hidden className="mt-4 block h-px w-10 bg-black/60" />
+          <span aria-hidden className="mt-4 block h-[6px] w-[44px] rounded-[2px] bg-[#020202]" />
 
           <div className="mt-10 flex flex-wrap items-center gap-3">
             <PillButton size="lg" showArrow className="pl-6 pr-5">
@@ -72,7 +69,7 @@ export function AgenticHero() {
           variants={prefersReducedMotion ? {} : fadeUp}
           className="flex flex-col items-start"
         >
-          <h2 className="max-w-[640px] text-[clamp(36px,4.4vw,68px)] font-normal leading-[1.05] tracking-[-0.02em] text-black">
+          <h2 className="max-w-[760px] text-[clamp(36px,4.4vw,68px)] font-normal leading-[1.05] tracking-[-0.02em] text-black">
             {AGENTIC_HERO.headlinePrefix}
             <span className="text-[#314344]">
               {AGENTIC_HERO.headlineAccent}

@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { motion, useReducedMotion } from "framer-motion";
 import { AGENTIC_LAYER_SECTION, AGENTIC_PARTS } from "@/lib/constants";
@@ -21,10 +22,36 @@ const RIGHT_BRACKET_D =
 export function AgenticLayer() {
   const prefersReducedMotion = useReducedMotion();
 
+  // Header band height drives the bottom line + side brackets so they always
+  // sit at the band's real bottom edge — the headline can wrap to multiple
+  // lines without the text overflowing past the bottom rule.
+  const headerRef = useRef<HTMLDivElement>(null);
+  const [bandHeight, setBandHeight] = useState(HEADER_BAND_MIN_H);
+
+  useEffect(() => {
+    const el = headerRef.current;
+    if (!el) return;
+    let rafId: number | null = null;
+    const ro = new ResizeObserver(() => {
+      if (rafId !== null) return;
+      rafId = requestAnimationFrame(() => {
+        rafId = null;
+        setBandHeight(el.offsetHeight);
+      });
+    });
+    ro.observe(el);
+    return () => {
+      if (rafId !== null) cancelAnimationFrame(rafId);
+      ro.disconnect();
+    };
+  }, []);
+
+  const bracketHeight = bandHeight - BRACKET_TOP * 2;
+
   return (
     <section
       id="intelligence-layer"
-      className="relative bg-transparent pt-[80px] md:pt-[110px] cv-auto"
+      className="relative bg-transparent pt-[80px] md:pt-[110px]"
       aria-label="Intelligence layer breakdown"
     >
       <div className="relative mx-6 md:mx-[48px]">
@@ -43,7 +70,7 @@ export function AgenticLayer() {
         <motion.div
           aria-hidden
           className="pointer-events-none absolute left-0 right-0 h-px bg-black/15"
-          style={{ top: HEADER_BAND_MIN_H, transformOrigin: "50% 50%" }}
+          style={{ top: bandHeight, transformOrigin: "50% 50%" }}
           initial={prefersReducedMotion ? undefined : { scaleX: 0 }}
           whileInView={{ scaleX: 1 }}
           viewport={{ once: true, margin: "-60px" }}
@@ -54,8 +81,9 @@ export function AgenticLayer() {
         <motion.svg
           aria-hidden
           width="13"
-          height={BRACKET_HEIGHT}
+          height={bracketHeight}
           viewBox="0 0 13 173"
+          preserveAspectRatio="none"
           fill="none"
           className="pointer-events-none absolute hidden md:block"
           style={{ left: 0, top: BRACKET_TOP }}
@@ -71,8 +99,9 @@ export function AgenticLayer() {
         <motion.svg
           aria-hidden
           width="13"
-          height={BRACKET_HEIGHT}
+          height={bracketHeight}
           viewBox="0 0 13 173"
+          preserveAspectRatio="none"
           fill="none"
           className="pointer-events-none absolute hidden md:block"
           style={{ right: 0, top: BRACKET_TOP }}
@@ -84,7 +113,9 @@ export function AgenticLayer() {
           <path d={RIGHT_BRACKET_D} stroke="black" strokeOpacity="0.15" />
         </motion.svg>
 
-        {/* Inner content — max 1268px, centered, with continuous left vertical line */}
+        {/* Inner content — locked at max 1268px, centered (matches Features.tsx
+            on the homepage). Contains the text, parts grid, and the vertical
+            line so it stays 50px from the content's left edge at any width. */}
         <div className="relative mx-auto w-full max-w-[1268px]">
           {/* Single continuous vertical line — 50px left of content text */}
           <motion.div
@@ -99,6 +130,7 @@ export function AgenticLayer() {
 
           {/* Header band content */}
           <div
+            ref={headerRef}
             className="relative md:pl-[60px] md:pr-[60px]"
             style={{ minHeight: HEADER_BAND_MIN_H }}
           >
@@ -136,25 +168,28 @@ export function AgenticLayer() {
               <motion.article
                 key={part.id}
                 variants={prefersReducedMotion ? {} : fadeUp}
-                className="group relative flex h-full flex-col items-start rounded-2xl border border-black/10 bg-white/60 p-5 backdrop-blur-sm transition-colors duration-300 hover:border-black/20 hover:bg-white/80"
+                className="flex h-full flex-col overflow-hidden rounded-2xl bg-white shadow-[0_2px_16px_rgba(0,0,0,0.06)]"
               >
-                <div className="relative flex h-16 w-16 items-center justify-center">
+                {/* Media visual — Figma 308×150 (≈2.05:1) */}
+                <div className="relative aspect-[308/150] w-full">
                   <Image
-                    src={part.icon}
+                    src={part.media}
                     alt=""
-                    width={96}
-                    height={96}
-                    className="h-14 w-14 object-contain"
-                    style={{ mixBlendMode: "multiply" }}
+                    fill
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                    className="object-cover"
                   />
                 </div>
 
-                <h3 className="mt-5 text-[17px] font-medium leading-[1.25] text-black">
-                  {part.title}
-                </h3>
-                <p className="mt-3 text-[13.5px] leading-[1.5] text-[#3e424d]/80">
-                  {part.description}
-                </p>
+                {/* Text — padding 20/16/20/24, centered (Figma) */}
+                <div className="flex flex-1 flex-col items-center px-5 pb-6 pt-4 text-center">
+                  <h3 className="text-[22px] font-medium leading-[1.2] tracking-[-0.22px] text-black">
+                    {part.title}
+                  </h3>
+                  <p className="mt-2 text-[14px] leading-[22px] text-[#3e424d]">
+                    {part.description}
+                  </p>
+                </div>
               </motion.article>
             ))}
           </motion.div>

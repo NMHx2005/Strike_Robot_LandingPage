@@ -4,13 +4,12 @@ import { motion, useReducedMotion } from "framer-motion";
 import { AGENTIC_LOOP } from "@/lib/constants";
 import { fadeUp } from "@/components/animations/fadeUp";
 import { staggerContainer } from "@/components/animations/stagger";
+import { useVanillaTilt } from "@/hooks/useVanillaTilt";
 
 const PANEL_BG =
   "linear-gradient(135deg, rgba(20,22,26,0.96) 0%, rgba(14,16,20,0.96) 100%)";
 
 const NODE_BG = "rgba(255,255,255,0.04)";
-
-const ARROW_DASH = "5 6";
 
 // Node positions inside a 452×454 panel (Figma 1:1195 metadata, normalized).
 // EDGE — Sensors(top-left) → Obstacle(mid-right) → Safety(bottom-center)
@@ -58,20 +57,13 @@ function NodeChip({
   title,
   subtitle,
   pos,
-  delay,
 }: {
   title: string;
   subtitle: string;
   pos: { left: string; top: string; width: string };
-  delay: number;
 }) {
-  const prefersReducedMotion = useReducedMotion();
   return (
-    <motion.div
-      initial={prefersReducedMotion ? undefined : { opacity: 0, y: 8 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-80px" }}
-      transition={{ duration: 0.45, ease: [0.25, 0.1, 0.25, 1], delay }}
+    <div
       className="absolute rounded-xl border border-white/10 px-4 py-3 text-center"
       style={{
         left: pos.left,
@@ -87,7 +79,7 @@ function NodeChip({
       <div className="mt-1.5 text-[11.5px] leading-tight text-white/50">
         {subtitle}
       </div>
-    </motion.div>
+    </div>
   );
 }
 
@@ -104,16 +96,13 @@ function LoopPanel({
   nodes: { title: string; subtitle: string }[];
   side: Side;
 }) {
-  const prefersReducedMotion = useReducedMotion();
   const positions = side === "edge" ? EDGE_NODES : CLOUD_NODES;
+  const tiltRef = useVanillaTilt<HTMLDivElement>();
 
   return (
-    <motion.div
-      initial={prefersReducedMotion ? undefined : { opacity: 0, y: 16 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-80px" }}
-      transition={{ duration: 0.55, ease: [0.25, 0.1, 0.25, 1] }}
-      className="relative aspect-square w-full overflow-hidden rounded-2xl border border-white/10"
+    <div
+      ref={tiltRef}
+      className="relative aspect-square w-full overflow-hidden rounded-2xl border border-white/10 will-change-transform"
       style={{ background: PANEL_BG }}
     >
       <PanelHeader label={label} subtitle={subtitle} timing={timing} />
@@ -124,10 +113,9 @@ function LoopPanel({
           title={node.title}
           subtitle={node.subtitle}
           pos={positions[i]}
-          delay={0.1 + i * 0.1}
         />
       ))}
-    </motion.div>
+    </div>
   );
 }
 
@@ -137,99 +125,192 @@ function LoopPanel({
  * gap = 16 between them (edge: x=0..452, cloud: x=468..920).
  * Node anchor points derived from EDGE_NODES / CLOUD_NODES positions above.
  */
+/** Subtle looping "flow" — drift toward the arrowhead + opacity pulse. */
+const FLOW_TRANSITION = {
+  duration: 2.6,
+  ease: "easeInOut" as const,
+  repeat: Infinity,
+};
+
+const LABEL_STYLE = { fontFamily: "ui-serif, Georgia, serif" } as const;
+
+/**
+ * The two Figma comet arrows crossing between the EDGE and CLOUD panels.
+ * Each is its own positioned SVG (native viewBox) so its gradient + drop
+ * shadow stay intact; positions are % of the grid overlay and approximate
+ * the original node anchor points.
+ */
 function CrossArrows() {
   const prefersReducedMotion = useReducedMotion();
 
   return (
-    <svg
-      aria-hidden
-      viewBox="0 0 920 452"
-      preserveAspectRatio="none"
-      className="pointer-events-none absolute inset-0 z-[3] h-full w-full"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <defs>
-        <marker
-          id="arrow-event"
-          viewBox="0 0 10 10"
-          refX="8"
-          refY="5"
-          markerWidth="7"
-          markerHeight="7"
-          orient="auto-start-reverse"
+    <>
+      {/* TOP — EDGE → CLOUD ("new event"), points right */}
+      <div
+        className="absolute -translate-x-1/2 -translate-y-1/2"
+        style={{ left: "41%", top: "34%", width: "29.2%" }}
+      >
+        <motion.svg
+          aria-hidden
+          viewBox="0 0 269 67"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          className="h-auto w-full overflow-visible"
+          animate={
+            prefersReducedMotion
+              ? undefined
+              : { x: [0, 7, 0], opacity: [0.78, 1, 0.78] }
+          }
+          transition={prefersReducedMotion ? undefined : FLOW_TRANSITION}
         >
-          <path d="M 0 0 L 10 5 L 0 10 z" fill="rgba(150,210,190,0.95)" />
-        </marker>
-        <marker
-          id="arrow-subgoals"
-          viewBox="0 0 10 10"
-          refX="8"
-          refY="5"
-          markerWidth="7"
-          markerHeight="7"
-          orient="auto-start-reverse"
-        >
-          <path d="M 0 0 L 10 5 L 0 10 z" fill="rgba(170,200,230,0.95)" />
-        </marker>
-      </defs>
+          <g filter="url(#loopArrowTopShadow)">
+            <path
+              d="M72.4268 10.0981C94.8176 9.41929 118.411 12.2217 138.322 19.6011C183.623 36.3903 220.85 34.6379 240.442 31.5601L238.252 23.3833L256.853 34.0425L245.997 52.2886L244.085 45.1519C222.991 48.6692 182.556 50.926 133.457 32.729C115.664 26.1345 93.9584 23.4513 72.8506 24.0913C51.7176 24.7321 31.7971 28.6844 17.5762 34.8599L12 22.0181C28.2825 14.9474 50.061 10.7763 72.4268 10.0981Z"
+              fill="url(#loopArrowTopGrad)"
+            />
+          </g>
+          <defs>
+            <filter
+              id="loopArrowTopShadow"
+              x="0"
+              y="0"
+              width="268.853"
+              height="66.2886"
+              filterUnits="userSpaceOnUse"
+              colorInterpolationFilters="sRGB"
+            >
+              <feFlood floodOpacity="0" result="BackgroundImageFix" />
+              <feColorMatrix
+                in="SourceAlpha"
+                type="matrix"
+                values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
+                result="hardAlpha"
+              />
+              <feOffset dy="2" />
+              <feGaussianBlur stdDeviation="6" />
+              <feComposite in2="hardAlpha" operator="out" />
+              <feColorMatrix
+                type="matrix"
+                values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.3 0"
+              />
+              <feBlend
+                mode="normal"
+                in2="BackgroundImageFix"
+                result="effect1_dropShadow"
+              />
+              <feBlend
+                mode="normal"
+                in="SourceGraphic"
+                in2="effect1_dropShadow"
+                result="shape"
+              />
+            </filter>
+            <linearGradient
+              id="loopArrowTopGrad"
+              x1="12"
+              y1="31.1439"
+              x2="256.853"
+              y2="31.1439"
+              gradientUnits="userSpaceOnUse"
+            >
+              <stop stopColor="#7AA297" stopOpacity="0" />
+              <stop offset="0.215195" stopColor="#8CAFA5" />
+              <stop offset="1" stopColor="white" />
+            </linearGradient>
+          </defs>
+        </motion.svg>
+      </div>
 
-      {/* TOP arrow — Sensors right edge → Open-vocab left edge
-          Sensors center ~y=160, Open-vocab center ~y=145; gentle dip-down then up. */}
-      <motion.path
-        d="M 260 160 C 360 200, 410 200, 492 148"
-        stroke="rgba(150,210,190,0.9)"
-        strokeWidth="1.6"
-        strokeDasharray={ARROW_DASH}
-        markerEnd="url(#arrow-event)"
-        initial={prefersReducedMotion ? undefined : { strokeDashoffset: 60 }}
-        animate={prefersReducedMotion ? undefined : { strokeDashoffset: 0 }}
-        transition={
-          prefersReducedMotion
-            ? undefined
-            : { duration: 2.2, ease: "linear", repeat: Infinity }
-        }
-      />
-      <text
-        x="376"
-        y="155"
-        textAnchor="middle"
-        className="fill-white/70"
-        fontSize="13"
-        fontStyle="italic"
-        fontFamily="ui-serif, Georgia, serif"
+      {/* BOTTOM — CLOUD → EDGE ("subgoals"), points left */}
+      <div
+        className="absolute -translate-x-1/2 -translate-y-1/2"
+        style={{ left: "54%", top: "76%", width: "34%" }}
+      >
+        <motion.svg
+          aria-hidden
+          viewBox="0 0 313 65"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          className="h-auto w-full overflow-visible"
+          animate={
+            prefersReducedMotion
+              ? undefined
+              : { x: [0, -7, 0], opacity: [0.78, 1, 0.78] }
+          }
+          transition={prefersReducedMotion ? undefined : FLOW_TRANSITION}
+        >
+          <g filter="url(#loopArrowBottomShadow)">
+            <path
+              d="M25.2705 19.8625C70.5001 7.51209 123.436 6.58178 162.676 18.0861C209.618 31.8484 239.1 35.9922 258.748 36.3478C278.231 36.7004 288.139 33.38 297.154 31.4318L300.111 45.1154C291.741 46.9242 279.98 50.7347 258.494 50.3459C237.172 49.9599 206.384 45.4898 158.736 31.5207C122.219 20.8147 71.6718 21.5882 28.3945 33.5207L30.1289 41.0998L12 30.049L23.4561 11.9279L25.2705 19.8625Z"
+              fill="url(#loopArrowBottomGrad)"
+            />
+          </g>
+          <defs>
+            <filter
+              id="loopArrowBottomShadow"
+              x="0"
+              y="0"
+              width="312.111"
+              height="64.373"
+              filterUnits="userSpaceOnUse"
+              colorInterpolationFilters="sRGB"
+            >
+              <feFlood floodOpacity="0" result="BackgroundImageFix" />
+              <feColorMatrix
+                in="SourceAlpha"
+                type="matrix"
+                values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
+                result="hardAlpha"
+              />
+              <feOffset dy="2" />
+              <feGaussianBlur stdDeviation="6" />
+              <feComposite in2="hardAlpha" operator="out" />
+              <feColorMatrix
+                type="matrix"
+                values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.3 0"
+              />
+              <feBlend
+                mode="normal"
+                in2="BackgroundImageFix"
+                result="effect1_dropShadow"
+              />
+              <feBlend
+                mode="normal"
+                in="SourceGraphic"
+                in2="effect1_dropShadow"
+                result="shape"
+              />
+            </filter>
+            <linearGradient
+              id="loopArrowBottomGrad"
+              x1="22.4414"
+              y1="31.7529"
+              x2="306.296"
+              y2="31.7529"
+              gradientUnits="userSpaceOnUse"
+            >
+              <stop stopColor="#7AA297" />
+              <stop offset="0.793241" stopColor="#EEF3F2" />
+              <stop offset="0.960824" stopColor="white" stopOpacity="0" />
+            </linearGradient>
+          </defs>
+        </motion.svg>
+      </div>
+
+      {/* Flow labels */}
+      <span
+        className="absolute -translate-x-1/2 -translate-y-full text-[13px] italic text-white/70"
+        style={{ left: "41%", top: "30%", ...LABEL_STYLE }}
       >
         new event
-      </text>
-
-      {/* BOTTOM arrow — Reasoning left edge → Safety right edge
-          Reasoning center ~y=352, Safety center ~y=352; gentle dip-down then up. */}
-      <motion.path
-        d="M 638 352 C 540 400, 460 400, 362 352"
-        stroke="rgba(170,200,230,0.9)"
-        strokeWidth="1.6"
-        strokeDasharray={ARROW_DASH}
-        markerEnd="url(#arrow-subgoals)"
-        initial={prefersReducedMotion ? undefined : { strokeDashoffset: -60 }}
-        animate={prefersReducedMotion ? undefined : { strokeDashoffset: 0 }}
-        transition={
-          prefersReducedMotion
-            ? undefined
-            : { duration: 2.4, ease: "linear", repeat: Infinity }
-        }
-      />
-      <text
-        x="500"
-        y="347"
-        textAnchor="middle"
-        className="fill-white/70"
-        fontSize="13"
-        fontStyle="italic"
-        fontFamily="ui-serif, Georgia, serif"
+      </span>
+      <span
+        className="absolute -translate-x-1/2 -translate-y-full text-[13px] italic text-white/70"
+        style={{ left: "54%", top: "72%", ...LABEL_STYLE }}
       >
         subgoals
-      </text>
-    </svg>
+      </span>
+    </>
   );
 }
 
@@ -242,13 +323,35 @@ export function AgenticLoop() {
       className="relative px-3 pb-24 pt-16 md:px-[48px] cv-auto"
       aria-label="Edge and cloud loop architecture"
     >
+      {/* Top horizontal rule — spans the page frame (48px gutters) */}
       <motion.div
-        className="mx-auto w-full max-w-[1268px]"
+        aria-hidden
+        className="pointer-events-none absolute left-3 right-3 top-0 h-px bg-black/15 md:left-[48px] md:right-[48px]"
+        initial={prefersReducedMotion ? undefined : { scaleX: 0 }}
+        whileInView={{ scaleX: 1 }}
+        viewport={{ once: true, margin: "-60px" }}
+        transition={{ duration: 0.6, ease: [0.25, 0.1, 0.25, 1] }}
+        style={{ transformOrigin: "50% 50%" }}
+      />
+
+      <motion.div
+        className="relative mx-auto w-full max-w-[1268px]"
         variants={prefersReducedMotion ? {} : staggerContainer}
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, margin: "-100px" }}
       >
+        {/* Left vertical rule — 10px inside the content box (matches AgenticLayer) */}
+        <motion.div
+          aria-hidden
+          className="pointer-events-none absolute top-0 bottom-0 hidden w-px bg-black/15 md:block"
+          initial={prefersReducedMotion ? undefined : { scaleY: 0 }}
+          whileInView={{ scaleY: 1 }}
+          viewport={{ once: true, margin: "-60px" }}
+          transition={{ duration: 0.7, ease: [0.25, 0.1, 0.25, 1], delay: 0.2 }}
+          style={{ left: 10, transformOrigin: "50% 0%" }}
+        />
+
         <motion.h2
           variants={prefersReducedMotion ? {} : fadeUp}
           className="text-center text-[clamp(32px,3.8vw,52px)] font-normal leading-[1.15] tracking-[-0.02em] text-black"
@@ -264,10 +367,7 @@ export function AgenticLoop() {
           {AGENTIC_LOOP.description}
         </motion.p>
 
-        <motion.div
-          variants={prefersReducedMotion ? {} : fadeUp}
-          className="relative mx-auto mt-14 grid w-full max-w-[920px] grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-4"
-        >
+        <div className="relative isolate mx-auto mt-14 grid w-full max-w-[922px] grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-4">
           <LoopPanel
             label={AGENTIC_LOOP.edge.label}
             subtitle={AGENTIC_LOOP.edge.subtitle}
@@ -288,7 +388,7 @@ export function AgenticLoop() {
           <div className="pointer-events-none absolute inset-0 hidden lg:block">
             <CrossArrows />
           </div>
-        </motion.div>
+        </div>
       </motion.div>
     </section>
   );

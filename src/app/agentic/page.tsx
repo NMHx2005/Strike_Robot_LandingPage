@@ -21,6 +21,8 @@ export default function AgenticPage() {
   return (
     <>
       <div className="relative">
+        {/* Sticky hero background — spans the WHOLE agentic page (stays pinned
+            behind every section as you scroll), so MainSection is transparent. */}
         <div
           aria-hidden
           className="pointer-events-none sticky top-0 -z-10 h-screen w-full"
@@ -37,16 +39,16 @@ export default function AgenticPage() {
         <div className="relative z-10 -mt-[100vh]">
           <Navbar />
           <AgenticHero />
+          <MainSection transparent>
+            <AgenticLayer />
+            <AgenticLoop />
+            <AgenticAwareness />
+            <AgenticOEMs />
+            <AgenticCTA />
+            <Footer />
+          </MainSection>
         </div>
       </div>
-      <MainSection>
-        <AgenticLayer />
-        <AgenticLoop />
-        <AgenticAwareness />
-        <AgenticOEMs />
-        <AgenticCTA />
-        <Footer />
-      </MainSection>
     </>
   );
 }
