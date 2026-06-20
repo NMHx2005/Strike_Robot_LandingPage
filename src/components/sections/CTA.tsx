@@ -66,7 +66,11 @@ export function CTA({ variant = "platform" }: CTAProps) {
             className="text-[20px] font-normal tracking-[-0.4px] text-white md:text-lg md:tracking-normal md:text-white/85"
           >
             {subtitleLines.map((line, i) => (
-              <span key={line} className={i > 0 ? "block" : undefined}>
+              <span
+                key={line}
+                className={i > 0 ? "block md:inline md:opacity-50" : undefined}
+              >
+                {i > 0 ? " " : null}
                 {line}
               </span>
             ))}
