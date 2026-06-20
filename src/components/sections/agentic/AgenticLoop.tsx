@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { AGENTIC_LOOP } from "@/lib/constants";
 import { fadeUp, fadeUpScale } from "@/components/animations/fadeUp";
@@ -12,6 +13,19 @@ import { cn } from "@/lib/utils";
 
 type Side = "edge" | "cloud";
 
+/** True at the lg breakpoint (≥1024px). Drives desktop-only hover tilt. */
+function useIsDesktop() {
+  const [isDesktop, setIsDesktop] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 1024px)");
+    const update = () => setIsDesktop(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
+  return isDesktop;
+}
+
 const PANEL_BG_GIF = "/SR%20Agentic%20Assets/Effect%20Card%20Final.gif";
 
 const PANEL_OVERLAYS: Record<Side, string> = {
@@ -22,23 +36,25 @@ const PANEL_OVERLAYS: Record<Side, string> = {
 };
 
 type NodeLayout = {
-  left: number;
-  top: number;
+  left: string;
+  top: string;
   centerX?: boolean;
 };
 
-// Figma 23:1663 (EDGE) — absolute chip positions inside 452×454 section
+// Chip positions as % of the 452×454 panel so the scattered layout scales
+// down on mobile (at the 452px desktop width these % equal the Figma px).
+// Figma node 23:2181 (EDGE) — chip top-left x/y over 452×454.
 const EDGE_NODES: NodeLayout[] = [
-  { left: 14.4, top: 111 },
-  { left: 169, top: 215 },
-  { left: 225, top: 321, centerX: true },
+  { left: "3.63%", top: "24.67%" },
+  { left: "37.83%", top: "47.58%" },
+  { left: "50%", top: "70.93%", centerX: true },
 ];
 
-// Figma 23:1684 (CLOUD)
+// Figma node 23:2202 (CLOUD)
 const CLOUD_NODES: NodeLayout[] = [
-  { left: 22.37, top: 101.72 },
-  { left: 81.28, top: 209.32 },
-  { left: 167.4, top: 321.46 },
+  { left: "5.39%", top: "22.63%" },
+  { left: "18.42%", top: "46.33%" },
+  { left: "37.48%", top: "71.03%" },
 ];
 
 function PanelHeader({
@@ -51,7 +67,7 @@ function PanelHeader({
   timing: string;
 }) {
   return (
-    <div className="absolute left-[30px] top-[31px] z-[2] flex w-[calc(100%-60px)] max-w-[389px] flex-col gap-2">
+    <div className="absolute left-[6.64%] top-[6.83%] z-[2] flex w-[calc(100%-13.28%)] max-w-[86.06%] flex-col gap-2">
       <div className="flex items-center gap-2">
         <span className="font-superground text-[20px] lowercase tracking-[0.08em] text-white">
           {label}
@@ -78,7 +94,7 @@ function NodeChip({
   return (
     <div
       className={cn(
-        "absolute z-[2] flex h-[92px] flex-col items-center justify-center gap-2 rounded-2xl border border-[rgba(217,217,217,0.1)] px-5 py-4 text-center backdrop-blur-[10px]",
+        "absolute z-[2] flex w-[min(60%,230px)] flex-col items-center justify-center gap-1 rounded-2xl border border-[rgba(217,217,217,0.1)] px-3.5 py-2.5 text-center backdrop-blur-[10px] sm:px-4 sm:py-3 lg:h-[92px] lg:w-auto lg:gap-2 lg:px-5 lg:py-4",
         layout.centerX && "-translate-x-1/2"
       )}
       style={{
@@ -88,10 +104,12 @@ function NodeChip({
           "linear-gradient(180deg, #393839 0%, rgba(57, 56, 57, 0.5) 100%)",
       }}
     >
-      <div className="text-[20px] font-medium tracking-[-0.2px] text-white">
+      <div className="text-[clamp(14px,4.4vw,20px)] font-medium leading-tight tracking-[-0.2px] text-white">
         {title}
       </div>
-      <div className="text-[16px] leading-[22px] text-[#a5adc5]">{subtitle}</div>
+      <div className="text-[clamp(12px,3.5vw,16px)] leading-snug text-[#a5adc5] sm:leading-[22px]">
+        {subtitle}
+      </div>
     </div>
   );
 }
@@ -110,36 +128,55 @@ function LoopPanel({
   side: Side;
 }) {
   const positions = side === "edge" ? EDGE_NODES : CLOUD_NODES;
-  const tiltRef = useVanillaTilt<HTMLDivElement>();
+  // Hover-tilt only makes sense on desktop. Disabling vanilla-tilt below lg
+  // stops it from overwriting the static mobile tilt with a flat transform.
+  const isDesktop = useIsDesktop();
+  const tiltRef = useVanillaTilt<HTMLDivElement>(undefined, isDesktop);
+
+  // Mobile has no hover, so the card rests at a fixed inward tilt instead.
+  // Desktop keeps the hover-driven vanilla-tilt, so this static transform +
+  // its perspective are gated to max-lg only and never touch the desktop look.
+  const restTilt =
+    side === "edge"
+      ? "max-lg:[transform:rotateX(3deg)_rotateY(-8deg)]"
+      : "max-lg:[transform:rotateX(3deg)_rotateY(8deg)]";
 
   return (
-    <div
-      ref={tiltRef}
-      className="relative isolate box-border aspect-[452/454] w-full overflow-hidden rounded-3xl border border-white/60 border-l-2 will-change-transform"
-    >
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src={PANEL_BG_GIF}
-        alt=""
-        aria-hidden
-        className="pointer-events-none absolute inset-0 h-full w-full object-cover"
-      />
+    <div className="w-full max-lg:[perspective:1400px]">
       <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 backdrop-blur-[4px]"
-        style={{ background: PANEL_OVERLAYS[side] }}
-      />
-
-      <PanelHeader label={label} subtitle={subtitle} timing={timing} />
-
-      {nodes.map((node, i) => (
-        <NodeChip
-          key={node.title}
-          title={node.title}
-          subtitle={node.subtitle}
-          layout={positions[i]}
+        ref={tiltRef}
+        className={cn(
+          // Mobile: fixed-height portrait so the % chip positions have room to
+          // spread (auto-height chips wrap to 2 lines and would overlap on a
+          // square card). Desktop keeps the exact 452×454 Figma aspect.
+          "relative isolate box-border min-h-[480px] w-full overflow-hidden rounded-3xl border border-white/60 border-l-2 will-change-transform [transform-style:preserve-3d] lg:min-h-0 lg:aspect-[452/454]",
+          restTilt
+        )}
+      >
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={PANEL_BG_GIF}
+          alt=""
+          aria-hidden
+          className="pointer-events-none absolute inset-0 h-full w-full object-cover"
         />
-      ))}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 backdrop-blur-[4px]"
+          style={{ background: PANEL_OVERLAYS[side] }}
+        />
+
+        <PanelHeader label={label} subtitle={subtitle} timing={timing} />
+
+        {nodes.map((node, i) => (
+          <NodeChip
+            key={node.title}
+            title={node.title}
+            subtitle={node.subtitle}
+            layout={positions[i]}
+          />
+        ))}
+      </div>
     </div>
   );
 }
@@ -393,7 +430,7 @@ export function AgenticLoop() {
         </motion.p>
 
         <motion.div
-          className="relative isolate mx-auto mt-14 grid w-full max-w-[920px] grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-4"
+          className="relative isolate mx-auto mt-14 grid w-full max-w-[920px] grid-cols-1 gap-6 overflow-visible py-2 lg:grid-cols-2 lg:gap-4"
           variants={prefersReducedMotion ? {} : staggerContainerSlow}
           initial="hidden"
           whileInView="visible"

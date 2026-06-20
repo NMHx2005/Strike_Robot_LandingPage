@@ -7,7 +7,7 @@ import { AgenticLayer } from "@/components/sections/agentic/AgenticLayer";
 import { AgenticLoop } from "@/components/sections/agentic/AgenticLoop";
 import { AgenticAwareness } from "@/components/sections/agentic/AgenticAwareness";
 import { AgenticOEMs } from "@/components/sections/agentic/AgenticOEMs";
-import { AgenticCTA } from "@/components/sections/agentic/AgenticCTA";
+import { CTA } from "@/components/sections/CTA";
 import { Footer } from "@/components/sections/Footer";
 
 export const metadata: Metadata = {
@@ -29,7 +29,7 @@ export default function AgenticPage() {
             <AgenticLoop />
             <AgenticAwareness />
             <AgenticOEMs />
-            <AgenticCTA />
+            <CTA variant="agentic" />
             <Footer />
           </MainSection>
         </div>

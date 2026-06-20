@@ -2,14 +2,20 @@
 
 import Image from "next/image";
 import { motion, useReducedMotion } from "framer-motion";
-import { VIDEO_CTA } from "@/lib/constants";
+import { CTA_VARIANTS, type CtaVariant, VIDEO_CTA } from "@/lib/constants";
 import { PillButtonCta } from "@/components/ui/PillButton";
 import { CircularText } from "@/components/ui/CircularText";
 import { fadeUp } from "@/components/animations/fadeUp";
 import { staggerContainer } from "@/components/animations/stagger";
 
-export function CTA() {
+type CTAProps = {
+  variant?: CtaVariant;
+};
+
+export function CTA({ variant = "platform" }: CTAProps) {
   const prefersReducedMotion = useReducedMotion();
+  const { wordmark, cta, subtitleLines } = CTA_VARIANTS[variant];
+  const [wordmarkPrimary, wordmarkSecondary] = wordmark.split(" ");
 
   return (
     <section
@@ -59,21 +65,29 @@ export function CTA() {
             variants={prefersReducedMotion ? {} : fadeUp}
             className="text-[20px] font-normal tracking-[-0.4px] text-white md:text-lg md:tracking-normal md:text-white/85"
           >
-            {VIDEO_CTA.subtitle}
+            {subtitleLines.map((line, i) => (
+              <span key={line} className={i > 0 ? "block" : undefined}>
+                {line}
+              </span>
+            ))}
           </motion.p>
 
           <motion.h2
             variants={prefersReducedMotion ? {} : fadeUp}
-            className="mt-2 text-[32px] font-medium uppercase leading-[1.05] tracking-[0.04em] text-white md:text-[clamp(56px,10vw,140px)] md:leading-none"
+            className="mt-2 font-superground text-[32px] font-normal lowercase leading-none tracking-normal text-white md:text-[64px]"
           >
-            {VIDEO_CTA.wordmark}
+            <span className="md:hidden">
+              <span className="block">{wordmarkPrimary}</span>
+              <span className="block">{wordmarkSecondary}</span>
+            </span>
+            <span className="hidden md:inline">{wordmark}</span>
           </motion.h2>
 
           <motion.div
             variants={prefersReducedMotion ? {} : fadeUp}
             className="mt-8 py-2"
           >
-            <PillButtonCta showShadow>{VIDEO_CTA.cta}</PillButtonCta>
+            <PillButtonCta showShadow>{cta}</PillButtonCta>
           </motion.div>
 
           <motion.nav

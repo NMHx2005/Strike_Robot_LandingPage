@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
+import useEmblaCarousel from "embla-carousel-react";
 import { motion, useReducedMotion } from "framer-motion";
 import { AGENTIC_LAYER_SECTION, AGENTIC_PARTS } from "@/lib/constants";
 import { fadeUp, fadeUpScale } from "@/components/animations/fadeUp";
@@ -24,6 +25,13 @@ const RIGHT_BRACKET_D =
 
 export function AgenticLayer() {
   const prefersReducedMotion = useReducedMotion();
+
+  // Mobile-only carousel: disabled at ≥640px so sm+ keeps the plain grid.
+  const [emblaRef] = useEmblaCarousel({
+    align: "center",
+    containScroll: "trimSnaps",
+    breakpoints: { "(min-width: 640px)": { active: false } },
+  });
 
   // Header band height drives the bottom line + side brackets so they always
   // sit at the band's real bottom edge — the headline can wrap to multiple
@@ -159,72 +167,76 @@ export function AgenticLayer() {
             </motion.div>
           </div>
 
-          {/* Parts grid — gentle A→B→C→D reveal (slower stagger) */}
-          <motion.div
-            className="grid grid-cols-1 gap-4 py-12 sm:grid-cols-2 md:pl-[60px] md:pr-[60px] lg:grid-cols-4 lg:gap-6"
-            variants={prefersReducedMotion ? {} : staggerContainerSlow}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-100px" }}
+          {/* Parts. Mobile (<sm): Embla horizontal carousel (drag/swipe).
+              sm+: Embla disabled via breakpoint → original responsive grid. */}
+          <div
+            ref={emblaRef}
+            className="overflow-hidden py-12 sm:overflow-visible"
           >
-            {AGENTIC_PARTS.map((part) => (
-              <motion.article
-                key={part.id}
-                variants={prefersReducedMotion ? {} : fadeUpScale}
-                className="flex h-full flex-col overflow-hidden rounded-2xl bg-white shadow-[0_2px_16px_rgba(0,0,0,0.06)]"
-              >
-                {/* Media visual — Figma 308×150 (≈2.05:1) */}
-                <div className="relative aspect-[308/150] w-full">
-                  {part.media.endsWith(".gif") ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={part.media}
-                      alt=""
-                      className="absolute inset-0 h-full w-full object-cover"
-                    />
-                  ) : (
-                    <Image
-                      src={part.media}
-                      alt=""
-                      fill
-                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                      className="object-cover"
-                    />
-                  )}
-                </div>
+            <motion.div
+              className="flex gap-4 sm:grid sm:grid-cols-2 md:pl-[60px] md:pr-[60px] lg:grid-cols-4 lg:gap-6"
+              variants={prefersReducedMotion ? {} : staggerContainerSlow}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, margin: "-100px" }}
+            >
+              {AGENTIC_PARTS.map((part) => (
+                <motion.article
+                  key={part.id}
+                  variants={prefersReducedMotion ? {} : fadeUpScale}
+                  className="flex h-full min-w-0 flex-[0_0_82%] flex-col overflow-hidden rounded-2xl bg-white shadow-[0_2px_16px_rgba(0,0,0,0.06)] sm:flex-none"
+                >
+                  {/* Media visual — Figma 308×150 (≈2.05:1) */}
+                  <div className="relative aspect-[308/150] w-full">
+                    {part.media.endsWith(".gif") ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={part.media}
+                        alt=""
+                        className="absolute inset-0 h-full w-full object-cover"
+                      />
+                    ) : (
+                      <Image
+                        src={part.media}
+                        alt=""
+                        fill
+                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                        className="object-cover"
+                      />
+                    )}
+                  </div>
 
-                {/* Text — padding 20/16/20/24, centered (Figma) */}
-                <div className="flex flex-1 flex-col items-center px-5 pb-6 pt-4 text-center">
-                  <h3 className="text-[22px] font-medium leading-[1.2] tracking-[-0.22px] text-black">
-                    {part.title}
-                  </h3>
-                  <p className="mt-2 text-[14px] leading-[22px] text-[#3e424d]">
-                    {part.description}
-                  </p>
-                </div>
-              </motion.article>
-            ))}
-          </motion.div>
+                  {/* Text — padding 20/16/20/24, centered (Figma) */}
+                  <div className="flex flex-1 flex-col items-center px-5 pb-6 pt-4 text-center">
+                    <h3 className="text-[22px] font-medium leading-[1.2] tracking-[-0.22px] text-black">
+                      {part.title}
+                    </h3>
+                    <p className="mt-2 text-[14px] leading-[22px] text-[#3e424d]">
+                      {part.description}
+                    </p>
+                  </div>
+                </motion.article>
+              ))}
+            </motion.div>
+          </div>
         </div>
       </div>
 
-      {/* Bottom watermark band — wide "SR AGENTIC" repeating text from /end_one_layer.png */}
+      {/* Bottom watermark band — diagonal stripe pattern */}
       <motion.div
         aria-hidden
-        className="pointer-events-none relative mt-8 w-full overflow-hidden"
+        className="pointer-events-none relative mt-8 h-16 w-full overflow-hidden md:h-[72px] lg:h-[110px]"
         initial={prefersReducedMotion ? undefined : { opacity: 0 }}
         whileInView={{ opacity: 1 }}
         viewport={{ once: true, margin: "-40px" }}
         transition={{ duration: 0.8, ease: EASE }}
-      >
-        <Image
-          src="/end_one_layer.png"
-          alt=""
-          width={1728}
-          height={110}
-          className="h-auto w-full select-none"
-        />
-      </motion.div>
+        style={{
+          backgroundImage: "url(/end_one_layer.png)",
+          backgroundRepeat: "no-repeat",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        }}
+      />
     </section>
   );
 }

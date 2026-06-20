@@ -109,8 +109,7 @@ export const COMMUNITY = {
 
 export const VIDEO_CTA = {
   background: "/Vid.png",
-  subtitle: "Build physical AI with",
-  wordmark: "SR PLATFORM",
+  wordmark: "sr platform",
   cta: "Create with SR Platform",
   rotatingBadge: "STRIKE ROBOT • STRIKE ROBOT • STRIKE ROBOT • STRIKE ROBOT • ",
   sidebarLinks: [
@@ -122,6 +121,24 @@ export const VIDEO_CTA = {
     { label: "Privacy Policy", href: "#" },
     { label: "Security", href: "#" },
   ],
+};
+
+export type CtaVariant = "platform" | "agentic";
+
+export const CTA_VARIANTS: Record<
+  CtaVariant,
+  { wordmark: string; cta: string; subtitleLines: string[] }
+> = {
+  platform: {
+    wordmark: "sr platform",
+    cta: "Create with SR Platform",
+    subtitleLines: ["Build physical AI with"],
+  },
+  agentic: {
+    wordmark: "sr agentic",
+    cta: "Build with SR Agentic",
+    subtitleLines: ["Give your robots", "real-world judgment with"],
+  },
 };
 
 export const FOOTER = {
@@ -278,22 +295,5 @@ export const AGENTIC_OEMS = {
         "Action allow-lists, a safety governor, sandboxed execution, and an immutable audit log bound what a robot can physically do in the field.",
       icon: "/agentic/oems/security.png",
     },
-  ],
-};
-
-export const AGENTIC_CTA = {
-  background: "/Vid.png",
-  subtitle: "Give your robots real-world judgment with",
-  wordmark: "sr agentic",
-  cta: "Build with SR Agentic",
-  rotatingBadge: "STRIKE ROBOT • STRIKE ROBOT • STRIKE ROBOT • STRIKE ROBOT • ",
-  sidebarLinks: [
-    { label: "About", href: "#" },
-    { label: "Search & Insights", href: "#" },
-    { label: "Strike Robot Labs", href: "#" },
-    { label: "About", href: "#" },
-    { label: "Term of Service", href: "#" },
-    { label: "Privacy Policy", href: "#" },
-    { label: "Security", href: "#" },
   ],
 };
