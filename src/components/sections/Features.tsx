@@ -32,7 +32,6 @@ const ICON_SRC: Record<string, string> = {
   "spatial-layout": "/icons/features/spatial-layout.png",
   "stimulation": "/icons/features/stimulation.png",
   "realtime-edit": "/icons/features/realtime-edit.png",
-  "export-pipeline": "/icons/features/export-pipeline.png",
 };
 
 const ACTIVE_GRADIENT =
@@ -72,6 +71,7 @@ function FeatureDescription({
 
 type FeatureItemProps = {
   feature: (typeof FEATURES)[number];
+  index: number;
   isActive: boolean;
   showTopBorder: boolean;
   onSelect: () => void;
@@ -81,6 +81,7 @@ type FeatureItemProps = {
 
 function FeatureItem({
   feature,
+  index,
   isActive,
   showTopBorder,
   onSelect,
@@ -100,10 +101,23 @@ function FeatureItem({
         "group relative w-full cursor-pointer text-left outline-none focus-visible:ring-2 focus-visible:ring-black/15",
         isActive
           ? "max-md:flex max-md:flex-col max-md:gap-2 max-md:rounded-2xl max-md:border max-md:border-white/60 max-md:border-l-2 max-md:px-6 max-md:pb-6 max-md:pt-5 max-md:shadow-[inset_0_-1px_0_0_rgba(0,0,0,0.15)]"
-          : "max-md:border-t max-md:border-black/10 max-md:px-6 max-md:py-3",
+          : cn(
+              "max-md:px-6 max-md:py-3",
+              index > 0 && "max-md:border-t max-md:border-black/10"
+            ),
         "md:rounded-xl md:px-6 md:py-3"
       )}
     >
+      <motion.span
+        aria-hidden
+        className="pointer-events-none absolute left-0 right-0 top-0 h-px bg-black/10 md:hidden"
+        initial={false}
+        animate={{ opacity: !isActive && index > 0 ? 1 : 0 }}
+        transition={
+          prefersReducedMotion ? { duration: 0 } : { duration: 0.2, ease: EASE }
+        }
+      />
+
       <motion.span
         aria-hidden
         className="pointer-events-none absolute left-0 right-0 top-0 hidden h-px origin-center bg-black/10 md:block"
@@ -133,7 +147,7 @@ function FeatureItem({
           aria-hidden
           className={cn(
             "relative block h-8 w-8 shrink-0 md:h-12 md:w-12",
-            isActive ? "opacity-100" : "opacity-60 md:opacity-[0.45]"
+            isActive ? "opacity-100" : "opacity-75 md:opacity-80"
           )}
         >
           {iconSrc && (
@@ -142,7 +156,12 @@ function FeatureItem({
               alt=""
               width={96}
               height={96}
-              className="h-full w-full object-contain select-none max-md:mix-blend-normal md:mix-blend-multiply"
+              className={cn(
+                "h-full w-full object-contain select-none transition-[filter,opacity] duration-300 max-md:mix-blend-normal md:mix-blend-multiply",
+                isActive
+                  ? "brightness-[0.82] contrast-150 saturate-150"
+                  : "brightness-[0.95] contrast-110 saturate-110"
+              )}
               draggable={false}
               priority
             />
@@ -202,7 +221,7 @@ function FeatureItem({
         <div
           className={cn(
             "max-md:border-t max-md:border-black/10 max-md:pb-4 max-md:pt-3",
-            "md:pb-1 md:pl-[72px] md:pr-1 md:pt-3"
+            "md:pb-1 md:pl-[72px] md:pr-1"
           )}
         >
           <FeatureDescription
@@ -234,7 +253,10 @@ export function Features() {
   const activeFeature = FEATURES.find((f) => f.id === activeId) ?? FEATURES[0];
 
   const wrapperRef = useRef<HTMLDivElement>(null);
+  const innerRef = useRef<HTMLDivElement>(null);
+  const ctaRef = useRef<HTMLDivElement>(null);
   const itemRefs = useRef<Map<string, HTMLButtonElement>>(new Map());
+  const [lineHeight, setLineHeight] = useState<number | null>(null);
 
   const activeIdRef = useRef(activeId);
   activeIdRef.current = activeId;
@@ -260,6 +282,17 @@ export function Features() {
     );
   }, []);
 
+  const updateLineHeight = useCallback(() => {
+    const innerEl = innerRef.current;
+    const ctaEl = ctaRef.current;
+    if (!innerEl || !ctaEl) return;
+
+    const innerRect = innerEl.getBoundingClientRect();
+    const ctaRect = ctaEl.getBoundingClientRect();
+    const next = ctaRect.bottom - innerRect.top;
+    setLineHeight((prev) => (prev === next ? prev : next));
+  }, []);
+
   // Update khi active item đổi.
   useEffect(() => {
     const raf = requestAnimationFrame(() => updateIndicator(activeId));
@@ -279,6 +312,7 @@ export function Features() {
       rafId = requestAnimationFrame(() => {
         rafId = null;
         updateIndicator(activeIdRef.current);
+        updateLineHeight();
       });
     });
     ro.observe(wrapperEl);
@@ -286,7 +320,12 @@ export function Features() {
       if (rafId !== null) cancelAnimationFrame(rafId);
       ro.disconnect();
     };
-  }, [updateIndicator]);
+  }, [updateIndicator, updateLineHeight]);
+
+  useEffect(() => {
+    const raf = requestAnimationFrame(updateLineHeight);
+    return () => cancelAnimationFrame(raf);
+  }, [activeId, updateLineHeight]);
 
   const setItemRef = useCallback(
     (id: string) => (el: HTMLButtonElement | null) => {
@@ -362,25 +401,30 @@ export function Features() {
         {/* Inner content — locked at max 1268px, centered. Contains the text,
             features grid, and the vertical line + indicator so the line stays
             50px from the content's left edge regardless of viewport width. */}
-        <div className="relative mx-auto w-full max-w-[1268px]">
+        <div ref={innerRef} className="relative mx-auto w-full max-w-[1268px]">
           {/* Single continuous vertical line — sits 50px left of content text */}
           <motion.div
             aria-hidden
-            className="pointer-events-none absolute top-0 bottom-0 hidden w-px bg-black/15 md:block"
-            style={{ left: LINE_LEFT, transformOrigin: "50% 0%" }}
+            className="pointer-events-none absolute top-0 hidden w-px bg-black/15 md:block"
+            style={{
+              left: LINE_LEFT,
+              height: lineHeight ?? "100%",
+              transformOrigin: "50% 0%",
+            }}
             initial={prefersReducedMotion ? undefined : { scaleY: 0 }}
             whileInView={{ scaleY: 1 }}
             viewport={{ once: true, margin: "-60px" }}
             transition={{ duration: 0.7, ease: EASE, delay: 0.2 }}
           />
 
-          {/* Animated black indicator on the vertical line */}
-          <motion.div
+          {/* Animated indicator sits to the right of the vertical line. */}
+          <motion.svg
             aria-hidden
-            className="pointer-events-none absolute hidden rounded-full bg-black md:block"
+            className="pointer-events-none absolute hidden md:block"
+            viewBox="0 0 3 40"
+            fill="none"
             style={{
-              left: LINE_LEFT,
-              x: "-50%",
+              left: LINE_LEFT + 1,
               width: INDICATOR_WIDTH,
               height: INDICATOR_HEIGHT,
               willChange: "top",
@@ -398,7 +442,12 @@ export function Features() {
                     opacity: { duration: 0.35, ease: EASE, delay: indicator.ready ? 0.15 : 0 },
                   }
             }
-          />
+          >
+            <path
+              d="M0 0.428569C0 0.191876 0.191878 0 0.428571 0C1.84873 0 3 1.15127 3 2.57143V37.4286C3 38.8487 1.84873 40 0.428571 40C0.191878 40 0 39.8081 0 39.5714V0.428569Z"
+              fill="#4D4D4D"
+            />
+          </motion.svg>
 
           {/* Header band content */}
           <div className="relative max-md:border-y max-md:border-black/15 max-md:px-5 max-md:pb-6 max-md:pt-12 md:min-h-[206px] md:pl-[60px] md:pr-[60px]">
@@ -444,7 +493,7 @@ export function Features() {
         </div>
 
         {/* Features content — Figma 23:2855: p-24 mobile */}
-        <div className="flex flex-col items-start gap-12 max-md:mt-2.5 max-md:px-3 max-md:py-6 md:py-[64px] lg:flex-row lg:gap-12 md:pl-[60px] md:pr-[60px]">
+        <div className="flex flex-col items-start gap-12 max-md:mt-2.5 max-md:px-3 max-md:pb-12 max-md:pt-6 md:py-[64px] lg:flex-row lg:gap-12 md:pl-[60px] md:pr-[60px]">
           <motion.div
             className="w-full shrink-0 lg:w-[462px]"
             initial={prefersReducedMotion ? undefined : { opacity: 0, y: 20 }}
@@ -462,6 +511,7 @@ export function Features() {
                   <FeatureItem
                     key={feature.id}
                     feature={feature}
+                    index={index}
                     isActive={isActive}
                     showTopBorder={showTopBorder}
                     onSelect={() => setActiveId(feature.id)}
@@ -472,8 +522,8 @@ export function Features() {
               })}
             </div>
 
-            <div className="flex justify-center pt-4 md:pt-6">
-              <PillButtonCta className="max-md:w-[276px]">{FEATURES_SECTION.cta}</PillButtonCta>
+            <div ref={ctaRef} className="flex justify-center pt-4 md:justify-start md:pt-6">
+              <PillButtonCta className="w-[276px]">{FEATURES_SECTION.cta}</PillButtonCta>
             </div>
           </motion.div>
 

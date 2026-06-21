@@ -49,7 +49,7 @@ export function AgenticOEMs() {
   return (
     <section
       id="oems"
-      className="relative px-3 pb-24 pt-16 md:px-[48px] cv-auto"
+      className="relative px-3 py-[90px] md:px-[48px] cv-auto"
       aria-label="Built for robotics teams and OEMs"
     >
       <motion.div
@@ -63,7 +63,7 @@ export function AgenticOEMs() {
       />
 
       <motion.div
-        className="relative mx-auto grid w-full max-w-[1268px] grid-cols-1 gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,420px)] lg:gap-16"
+        className="relative mx-auto grid w-full max-w-[1268px] grid-cols-1 gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,544px)] lg:gap-16"
         variants={prefersReducedMotion ? {} : staggerContainer}
         initial="hidden"
         whileInView="visible"
@@ -73,19 +73,19 @@ export function AgenticOEMs() {
           variants={prefersReducedMotion ? {} : fadeUp}
           className="order-1 flex flex-col items-center text-center lg:order-2 lg:items-start lg:text-left"
         >
-          <span className="text-[11px] font-medium uppercase tracking-[0.22em] text-black/45">
+          <span className="text-[14px] font-normal uppercase leading-[18px] tracking-normal text-[#8FA6B0] lg:text-base lg:leading-[22px]">
             {AGENTIC_OEMS.tag}
           </span>
 
-          <h2 className="mt-4 text-[clamp(34px,3.6vw,52px)] font-normal leading-[1.08] tracking-[-0.02em] text-black">
+          <h2 className="mt-8 max-w-[544px] text-[34px] font-normal leading-[1.08] tracking-[-0.02em] text-black lg:mt-9 lg:text-[64px] lg:leading-[70px]">
             {AGENTIC_OEMS.headlinePart1}
             {AGENTIC_OEMS.headlinePart2}{" "}
-            <span className="font-superground font-normal tracking-[-0.01em] text-[#2a3e3e]">
+            <span className="font-superground text-[29px] font-normal leading-[1.08] tracking-[-0.02em] text-black lg:text-[54px] lg:leading-[70px]">
               {AGENTIC_OEMS.headlineAccent}
             </span>
           </h2>
 
-          <p className="mt-5 max-w-[420px] text-[14.5px] leading-[1.55] text-[#3e424d]/75">
+          <p className="mt-4 max-w-[444px] text-[14px] leading-6 text-[#3E424D]/70 lg:text-base lg:leading-[22px]">
             {AGENTIC_OEMS.description}
           </p>
         </motion.div>
@@ -100,7 +100,7 @@ export function AgenticOEMs() {
               variants={prefersReducedMotion ? {} : fadeUpScale}
               className={cn(
                 "flex flex-col items-center gap-4 py-7 text-center",
-                "lg:flex-row lg:items-start lg:gap-4 lg:py-0 lg:text-left",
+                "lg:flex-row lg:items-start lg:gap-8 lg:py-0 lg:text-left",
                 i > 0 && "border-t border-black/10 lg:mt-7 lg:border-t-0"
               )}
             >

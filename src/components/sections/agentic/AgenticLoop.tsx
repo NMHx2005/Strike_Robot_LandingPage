@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { AGENTIC_LOOP } from "@/lib/constants";
 import { fadeUp, fadeUpScale } from "@/components/animations/fadeUp";
@@ -8,23 +7,9 @@ import {
   staggerContainer,
   staggerContainerSlow,
 } from "@/components/animations/stagger";
-import { useVanillaTilt } from "@/hooks/useVanillaTilt";
 import { cn } from "@/lib/utils";
 
 type Side = "edge" | "cloud";
-
-/** True at the lg breakpoint (≥1024px). Drives desktop-only hover tilt. */
-function useIsDesktop() {
-  const [isDesktop, setIsDesktop] = useState(false);
-  useEffect(() => {
-    const mq = window.matchMedia("(min-width: 1024px)");
-    const update = () => setIsDesktop(mq.matches);
-    update();
-    mq.addEventListener("change", update);
-    return () => mq.removeEventListener("change", update);
-  }, []);
-  return isDesktop;
-}
 
 const PANEL_BG_GIF = "/SR%20Agentic%20Assets/Effect%20Card%20Final.gif";
 
@@ -56,6 +41,11 @@ const CLOUD_NODES: NodeLayout[] = [
   { left: "18.42%", top: "46.33%" },
   { left: "37.48%", top: "71.03%" },
 ];
+
+const LEFT_BRACKET_D =
+  "M0.391113 0.311523L9.77805 12.0984C11.4699 14.2228 12.3911 16.8582 12.3911 19.574V153.049C12.3911 155.765 11.4699 158.4 9.77804 160.525L0.391113 172.312";
+const RIGHT_BRACKET_D =
+  "M12.5 0.311523L3.11307 12.0984C1.42121 14.2228 0.5 16.8582 0.5 19.574V153.049C0.5 155.765 1.42121 158.4 3.11307 160.525L12.5 172.312";
 
 function PanelHeader({
   label,
@@ -128,28 +118,16 @@ function LoopPanel({
   side: Side;
 }) {
   const positions = side === "edge" ? EDGE_NODES : CLOUD_NODES;
-  // Hover-tilt only makes sense on desktop. Disabling vanilla-tilt below lg
-  // stops it from overwriting the static mobile tilt with a flat transform.
-  const isDesktop = useIsDesktop();
-  const tiltRef = useVanillaTilt<HTMLDivElement>(undefined, isDesktop);
-
-  // Mobile has no hover, so the card rests at a fixed inward tilt instead.
-  // Desktop keeps the hover-driven vanilla-tilt, so this static transform +
-  // its perspective are gated to max-lg only and never touch the desktop look.
   const restTilt =
     side === "edge"
-      ? "max-lg:[transform:rotateX(3deg)_rotateY(-8deg)]"
-      : "max-lg:[transform:rotateX(3deg)_rotateY(8deg)]";
+      ? "[transform:rotateX(2deg)_rotateY(-7deg)_rotateZ(-1.25deg)]"
+      : "[transform:rotateX(2deg)_rotateY(7deg)_rotateZ(1.25deg)]";
 
   return (
-    <div className="w-full max-lg:[perspective:1400px]">
+    <div className="[perspective:1400px]">
       <div
-        ref={tiltRef}
         className={cn(
-          // Mobile: fixed-height portrait so the % chip positions have room to
-          // spread (auto-height chips wrap to 2 lines and would overlap on a
-          // square card). Desktop keeps the exact 452×454 Figma aspect.
-          "relative isolate box-border min-h-[480px] w-full overflow-hidden rounded-3xl border border-white/60 border-l-2 will-change-transform [transform-style:preserve-3d] lg:min-h-0 lg:aspect-[452/454]",
+          "relative isolate box-border aspect-[452/454] w-full overflow-hidden rounded-3xl border border-white/60 border-l-2 will-change-transform [transform-style:preserve-3d]",
           restTilt
         )}
       >
@@ -162,7 +140,7 @@ function LoopPanel({
         />
         <div
           aria-hidden
-          className="pointer-events-none absolute inset-0 backdrop-blur-[4px]"
+          className="pointer-events-none absolute inset-0 backdrop-blur-[20px]"
           style={{ background: PANEL_OVERLAYS[side] }}
         />
 
@@ -193,8 +171,6 @@ const FLOW_TRANSITION = {
   ease: "easeInOut" as const,
   repeat: Infinity,
 };
-
-const LABEL_STYLE = { fontFamily: "ui-serif, Georgia, serif" } as const;
 
 /**
  * The two Figma comet arrows crossing between the EDGE and CLOUD panels.
@@ -231,7 +207,28 @@ function CrossArrows() {
               fill="url(#loopArrowTopGrad)"
             />
           </g>
+          <text
+            fill="url(#loopArrowTopLabelGrad)"
+            fontFamily="var(--font-golos-text), sans-serif"
+            fontSize="16"
+            fontWeight="600"
+            letterSpacing="0"
+            dominantBaseline="middle"
+            opacity="0.95"
+          >
+            <textPath
+              href="#loopArrowTopLabelPath"
+              startOffset="47%"
+              textAnchor="middle"
+            >
+              new event
+            </textPath>
+          </text>
           <defs>
+            <path
+              id="loopArrowTopLabelPath"
+              d="M66 -7C98 -9 122 -5 149 2C181 10 209 11 238 6"
+            />
             <filter
               id="loopArrowTopShadow"
               x="0"
@@ -279,6 +276,17 @@ function CrossArrows() {
               <stop offset="0.215195" stopColor="#8CAFA5" />
               <stop offset="1" stopColor="white" />
             </linearGradient>
+            <linearGradient
+              id="loopArrowTopLabelGrad"
+              x1="64"
+              y1="19"
+              x2="193"
+              y2="33"
+              gradientUnits="userSpaceOnUse"
+            >
+              <stop stopColor="#7AA297" />
+              <stop offset="1" stopColor="#FFFFFF" />
+            </linearGradient>
           </defs>
         </motion.svg>
       </div>
@@ -307,7 +315,28 @@ function CrossArrows() {
               fill="url(#loopArrowBottomGrad)"
             />
           </g>
+          <text
+            fill="url(#loopArrowBottomLabelGrad)"
+            fontFamily="var(--font-golos-text), sans-serif"
+            fontSize="16"
+            fontWeight="600"
+            letterSpacing="0"
+            dominantBaseline="middle"
+            opacity="0.95"
+          >
+            <textPath
+              href="#loopArrowBottomLabelPath"
+              startOffset="52%"
+              textAnchor="middle"
+            >
+              subgoals
+            </textPath>
+          </text>
           <defs>
+            <path
+              id="loopArrowBottomLabelPath"
+              d="M44 0C86 -10 123 -9 158 1C196 12 232 15 270 10"
+            />
             <filter
               id="loopArrowBottomShadow"
               x="0"
@@ -355,23 +384,20 @@ function CrossArrows() {
               <stop offset="0.793241" stopColor="#EEF3F2" />
               <stop offset="0.960824" stopColor="white" stopOpacity="0" />
             </linearGradient>
+            <linearGradient
+              id="loopArrowBottomLabelGrad"
+              x1="91"
+              y1="21"
+              x2="222"
+              y2="39"
+              gradientUnits="userSpaceOnUse"
+            >
+              <stop stopColor="#7AA297" />
+              <stop offset="1" stopColor="#FFFFFF" />
+            </linearGradient>
           </defs>
         </motion.svg>
       </div>
-
-      {/* Flow labels */}
-      <span
-        className="absolute -translate-x-1/2 -translate-y-full text-[13px] italic text-white/70"
-        style={{ left: "41%", top: "30%", ...LABEL_STYLE }}
-      >
-        new event
-      </span>
-      <span
-        className="absolute -translate-x-1/2 -translate-y-full text-[13px] italic text-white/70"
-        style={{ left: "54%", top: "72%", ...LABEL_STYLE }}
-      >
-        subgoals
-      </span>
     </>
   );
 }
@@ -388,7 +414,7 @@ export function AgenticLoop() {
       {/* Top horizontal rule — spans the page frame (48px gutters) */}
       <motion.div
         aria-hidden
-        className="pointer-events-none absolute left-3 right-3 top-0 h-px bg-black/15 md:left-[48px] md:right-[48px]"
+        className="pointer-events-none absolute left-0 right-0 top-0 h-px bg-black/15 md:left-[48px] md:right-[48px]"
         initial={prefersReducedMotion ? undefined : { scaleX: 0 }}
         whileInView={{ scaleX: 1 }}
         viewport={{ once: true, margin: "-60px" }}
@@ -406,7 +432,7 @@ export function AgenticLoop() {
         {/* Left vertical rule — 10px inside the content box (matches AgenticLayer) */}
         <motion.div
           aria-hidden
-          className="pointer-events-none absolute top-0 bottom-0 hidden w-px bg-black/15 md:block"
+          className="pointer-events-none absolute bottom-0 top-[-64px] hidden w-px bg-black/15 md:block"
           initial={prefersReducedMotion ? undefined : { scaleY: 0 }}
           whileInView={{ scaleY: 1 }}
           viewport={{ once: true, margin: "-60px" }}
@@ -414,59 +440,81 @@ export function AgenticLoop() {
           style={{ left: 10, transformOrigin: "50% 0%" }}
         />
 
-        <motion.h2
-          variants={prefersReducedMotion ? {} : fadeUp}
-          className="text-center text-[clamp(32px,3.8vw,52px)] font-normal leading-[1.15] tracking-[-0.02em] text-black"
-        >
-          <span className="block">{AGENTIC_LOOP.headlineLine1}</span>
-          <span className="block">{AGENTIC_LOOP.headlineLine2}</span>
-        </motion.h2>
-
-        <motion.p
-          variants={prefersReducedMotion ? {} : fadeUp}
-          className="mx-auto mt-5 max-w-[760px] text-center text-base leading-6 text-[#3e424d]/75"
-        >
-          {AGENTIC_LOOP.description}
-        </motion.p>
-
-        <motion.div
-          className="relative isolate mx-auto mt-14 grid w-full max-w-[920px] grid-cols-1 gap-6 overflow-visible py-2 lg:grid-cols-2 lg:gap-4"
-          variants={prefersReducedMotion ? {} : staggerContainerSlow}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: "-80px" }}
-        >
-          <motion.div
-            variants={prefersReducedMotion ? {} : fadeUpScale}
-            className="w-full"
+        <div className="relative max-md:px-5">
+          <svg
+            aria-hidden
+            viewBox="0 0 13 173"
+            fill="none"
+            className="pointer-events-none absolute top-1/2 hidden h-[172px] w-3 -translate-y-1/2 max-md:left-[-12px] max-md:block"
+            preserveAspectRatio="none"
           >
-            <LoopPanel
-              label={AGENTIC_LOOP.edge.label}
-              subtitle={AGENTIC_LOOP.edge.subtitle}
-              timing={AGENTIC_LOOP.edge.timing}
-              nodes={AGENTIC_LOOP.edge.nodes}
-              side="edge"
-            />
-          </motion.div>
-
-          <motion.div
-            variants={prefersReducedMotion ? {} : fadeUpScale}
-            className="w-full"
+            <path d={LEFT_BRACKET_D} stroke="black" strokeOpacity="0.15" />
+          </svg>
+          <svg
+            aria-hidden
+            viewBox="0 0 13 173"
+            fill="none"
+            className="pointer-events-none absolute top-1/2 hidden h-[172px] w-3 -translate-y-1/2 max-md:right-[-12px] max-md:block"
+            preserveAspectRatio="none"
           >
-            <LoopPanel
-              label={AGENTIC_LOOP.cloud.label}
-              subtitle={AGENTIC_LOOP.cloud.subtitle}
-              timing={AGENTIC_LOOP.cloud.timing}
-              nodes={AGENTIC_LOOP.cloud.nodes}
-              side="cloud"
-            />
-          </motion.div>
+            <path d={RIGHT_BRACKET_D} stroke="black" strokeOpacity="0.15" />
+          </svg>
 
-          {/* Cross-panel curved arrows — only on lg+ where panels sit side-by-side */}
-          <div className="pointer-events-none absolute inset-0 hidden lg:block">
-            <CrossArrows />
-          </div>
-        </motion.div>
+          <motion.h2
+            variants={prefersReducedMotion ? {} : fadeUp}
+            className="text-center text-[clamp(32px,3.8vw,52px)] font-normal leading-[1.15] tracking-[-0.02em] text-black"
+          >
+            <span className="block">{AGENTIC_LOOP.headlineLine1}</span>
+            <span className="block">{AGENTIC_LOOP.headlineLine2}</span>
+          </motion.h2>
+
+          <motion.p
+            variants={prefersReducedMotion ? {} : fadeUp}
+            className="mx-auto mt-5 max-w-[760px] text-center text-base leading-6 text-[#3e424d]/75"
+          >
+            {AGENTIC_LOOP.description}
+          </motion.p>
+        </div>
+
+        <div className="scrollbar-none -mx-3 overflow-x-auto px-3 [-webkit-overflow-scrolling:touch] md:mx-auto md:overflow-visible md:px-0">
+          <motion.div
+            className="relative isolate mx-auto mt-14 grid w-[820px] grid-cols-[repeat(2,402px)] gap-4 overflow-visible py-2 md:w-full md:max-w-[920px] md:grid-cols-[repeat(2,452px)]"
+            variants={prefersReducedMotion ? {} : staggerContainerSlow}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-80px" }}
+          >
+            <motion.div
+              variants={prefersReducedMotion ? {} : fadeUpScale}
+              className="w-full"
+            >
+              <LoopPanel
+                label={AGENTIC_LOOP.edge.label}
+                subtitle={AGENTIC_LOOP.edge.subtitle}
+                timing={AGENTIC_LOOP.edge.timing}
+                nodes={AGENTIC_LOOP.edge.nodes}
+                side="edge"
+              />
+            </motion.div>
+
+            <motion.div
+              variants={prefersReducedMotion ? {} : fadeUpScale}
+              className="w-full"
+            >
+              <LoopPanel
+                label={AGENTIC_LOOP.cloud.label}
+                subtitle={AGENTIC_LOOP.cloud.subtitle}
+                timing={AGENTIC_LOOP.cloud.timing}
+                nodes={AGENTIC_LOOP.cloud.nodes}
+                side="cloud"
+              />
+            </motion.div>
+
+            <div className="pointer-events-none absolute inset-0">
+              <CrossArrows />
+            </div>
+          </motion.div>
+        </div>
       </motion.div>
     </section>
   );

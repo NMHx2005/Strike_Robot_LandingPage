@@ -24,13 +24,15 @@ export default function AgenticPage() {
         <div className="relative z-10 -mt-[100vh]">
           <Navbar />
           <AgenticHero />
-          <MainSection transparent>
+          <MainSection>
             <AgenticLayer />
             <AgenticLoop />
-            <AgenticAwareness />
-            <AgenticOEMs />
-            <CTA variant="agentic" />
-            <Footer />
+            <div className="relative bg-[linear-gradient(180deg,#FFFFFF_0%,#F7F7F7_48%,#FFFFFF_100%)]">
+              <AgenticAwareness />
+              <AgenticOEMs />
+              <CTA variant="agentic" />
+              <Footer />
+            </div>
           </MainSection>
         </div>
       </div>

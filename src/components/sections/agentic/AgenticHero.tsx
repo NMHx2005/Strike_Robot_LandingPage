@@ -7,7 +7,6 @@ import {
   useScroll,
   useTransform,
 } from "framer-motion";
-import { Sparkles } from "lucide-react";
 import { AGENTIC_HERO, VIDEOS } from "@/lib/constants";
 import { PillButton } from "@/components/ui/PillButton";
 import { AutoplayVideo } from "@/components/ui/AutoplayVideo";
@@ -15,6 +14,24 @@ import { ScrollVideoReveal } from "@/components/ui/ScrollVideoReveal";
 import { fadeUp } from "@/components/animations/fadeUp";
 import { staggerContainer } from "@/components/animations/stagger";
 import { REVEAL_OFFSET } from "@/components/animations/scrollVideoReveal";
+
+function BadgeSparkIcon() {
+  return (
+    <svg
+      width="10"
+      height="10"
+      viewBox="0 0 10 10"
+      fill="none"
+      aria-hidden="true"
+      className="shrink-0"
+    >
+      <path
+        d="M10 5.00278L7.8387 6.09401C6.32897 6.95966 5.73014 8.5065 5.00055 10C4.86979 10 4.01165 8.03645 3.82815 7.74308C2.91287 6.2807 1.4416 5.81287 0 5.05723C1.03395 4.45827 2.27997 4.09934 3.13812 3.22814C4.01494 2.33804 4.4105 1.07456 5.00055 0C5.51148 0.936771 5.80705 1.99244 6.4861 2.83254C7.37172 3.92821 8.75508 4.43716 10 5.00278Z"
+        fill="#69419D"
+      />
+    </svg>
+  );
+}
 
 export function AgenticHero() {
   const prefersReducedMotion = useReducedMotion();
@@ -60,21 +77,25 @@ export function AgenticHero() {
           <motion.span
             variants={prefersReducedMotion ? {} : fadeUp}
             aria-hidden
-            className="order-2 mt-4 block h-[6px] w-[44px] rounded-[2px] bg-[#020202] lg:order-none"
+            className="order-2 mt-4 block h-1 w-6 rounded-[2px] bg-[#020202] lg:order-none"
           />
 
           <motion.div
             variants={prefersReducedMotion ? {} : fadeUp}
             className="order-6 mt-6 flex w-full flex-col items-center gap-2.5 lg:order-none lg:mt-10 lg:w-auto lg:flex-row lg:flex-wrap lg:items-center lg:gap-3"
           >
-            <PillButton size="lg" showArrow className="w-[240px] pl-6 pr-5 lg:w-auto">
+            <PillButton
+              size="lg"
+              showArrow
+              className="hero-mobile-pill w-auto gap-2 px-6 py-4 lg:w-auto lg:pr-5"
+            >
               {AGENTIC_HERO.ctaPrimary}
             </PillButton>
             <PillButton
               variant="outline"
               size="lg"
               showArrow={false}
-              className="w-[240px] lg:w-auto"
+              className="hero-mobile-pill w-auto gap-2 px-6 py-4 lg:w-auto"
             >
               {AGENTIC_HERO.ctaSecondary}
             </PillButton>
@@ -100,13 +121,13 @@ export function AgenticHero() {
 
           <motion.span
             variants={prefersReducedMotion ? {} : fadeUp}
-            className="order-3 mt-6 inline-flex items-center gap-2 rounded-full border border-black/10 bg-white/60 px-3 py-1.5 text-sm text-black/75 backdrop-blur-sm lg:order-none"
+            className="order-3 mt-6 inline-flex items-center gap-2.5 rounded-lg px-2 py-1 text-sm font-normal text-[#69419D] backdrop-blur-sm lg:order-none"
+            style={{
+              background: "rgba(255,255,255,0.2)",
+              border: "1.5px solid #FFFFFF66",
+            }}
           >
-            <Sparkles
-              className="size-4 text-[#5a7c7c]"
-              strokeWidth={1.8}
-              aria-hidden
-            />
+            <BadgeSparkIcon />
             {AGENTIC_HERO.badge}
           </motion.span>
         </div>
@@ -121,6 +142,7 @@ export function AgenticHero() {
             src={VIDEOS.hero}
             ariaLabel="SR Agentic robotics task demonstration"
             loadOnScroll
+            mobileTapFullscreen
           />
         </div>
 

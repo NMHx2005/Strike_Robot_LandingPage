@@ -101,7 +101,6 @@ function MobileScrollHeader({
 
   const paddingTop = useTransform(progress, [0, 1], [12, 12]);
   const paddingBottom = useTransform(progress, [0, 1], [0, 12]);
-  const innerPy = useTransform(progress, [0, 1], [0, 12]);
   const innerPx = useTransform(progress, [0, 1], [0, 12]);
   const borderRadius = useTransform(progress, [0, 1], [0, 12]);
   const innerRadius = useTransform(progress, [0, 1], [0, 10.6]);
@@ -137,10 +136,8 @@ function MobileScrollHeader({
           }}
         />
         <motion.div
-          className="relative flex items-center justify-between"
+          className="relative flex h-14 items-center justify-between"
           style={{
-            paddingTop: innerPy,
-            paddingBottom: innerPy,
             paddingLeft: innerPx,
             paddingRight: innerPx,
           }}
@@ -229,6 +226,10 @@ export function Navbar() {
   return (
     <>
       <header className="pointer-events-none fixed left-0 right-0 top-0 z-[1000]">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-x-0 top-0 h-[env(safe-area-inset-top)] bg-[#E5E5E5] md:hidden"
+        />
         {/* Desktop */}
         <div className="pointer-events-auto relative mx-auto hidden h-32 w-full items-center justify-between gap-6 px-[48px] md:flex">
           <Link
@@ -347,19 +348,35 @@ export function Navbar() {
             transition={{ duration: prefersReducedMotion ? 0 : 0.2 }}
           >
             {/* Watermark — logo chạy ngang chân menu */}
-            <div className="pointer-events-none absolute bottom-0 left-0 w-[min(525px,120vw)] select-none opacity-[0.2]">
-              <Image
-                src="/images/Logo.png"
-                alt=""
-                width={525}
-                height={200}
-                aria-hidden="true"
-                className="h-auto w-full"
-              />
-            </div>
+            <motion.div
+              aria-hidden
+              className="pointer-events-none absolute bottom-0 left-0 flex w-[240vw] select-none opacity-50"
+              animate={
+                prefersReducedMotion
+                  ? undefined
+                  : { x: ["0%", "-50%"] }
+              }
+              transition={
+                prefersReducedMotion
+                  ? undefined
+                  : { duration: 18, ease: "linear", repeat: Infinity }
+              }
+            >
+              {[0, 1].map((i) => (
+                <Image
+                  key={i}
+                  src="/images/Logo.png"
+                  alt=""
+                  width={525}
+                  height={200}
+                  aria-hidden="true"
+                  className="h-auto w-[min(525px,120vw)] shrink-0"
+                />
+              ))}
+            </motion.div>
 
             <GlassPill>
-              <div className="flex items-center justify-between px-3 py-3">
+              <div className="flex h-14 items-center justify-between px-3">
                 <MobileLogo onClick={() => setMobileOpen(false)} />
                 <MobileMenuButton
                   onClick={() => setMobileOpen(false)}

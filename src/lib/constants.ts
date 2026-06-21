@@ -76,14 +76,6 @@ export const FEATURES = [
     icon: "PencilLine",
     videoSrc: "/Video/Comp%201.mp4",
   },
-  {
-    id: "export-pipeline",
-    title: "Export to Training Pipeline",
-    description:
-      "Package simulation outputs as training-ready datasets in standard formats. SR Platform integrates directly with major robot learning frameworks including ROS2, IsaacGym, and MuJoCo.",
-    icon: "Download",
-    videoSrc: "/Video/Comp%202.mp4",
-  },
 ];
 
 export const SCROLLING_TEXT = {
@@ -244,21 +236,21 @@ export const AGENTIC_AWARENESS = {
       title: "Autonomous security patrol",
       description:
         "Routine patrols of warehouses, substations, and construction sites. The robot maps only persistent infrastructure, flags anomalies, and adapts to what's changed since the last sweep.",
-      videoSrc: "/Video/Comp%201.mp4",
+      imageSrc: "/agentic/awareness/security-patrol.png",
     },
     {
       id: "factory-inspection",
       title: "Factory floor inspection",
       description:
         "Walk production lines with task-conditioned attention on equipment, conveyors, and operators. Detect deviations from baseline and surface only what needs a human decision.",
-      videoSrc: "/Video/Comp%202.mp4",
+      imageSrc: "/agentic/awareness/factory-inspection.png",
     },
     {
       id: "search-rescue",
       title: "Search and rescue",
       description:
         "Indoor search-and-rescue across unfamiliar buildings — schema templates focus on victims, exits, and hazards instead of trying to map the entire structure to centimeter accuracy.",
-      videoSrc: "/Video/Comp%203.mp4",
+      imageSrc: "/agentic/awareness/search-rescue.png",
     },
   ],
 };

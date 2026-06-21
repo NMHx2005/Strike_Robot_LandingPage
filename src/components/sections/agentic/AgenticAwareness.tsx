@@ -1,10 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { AGENTIC_AWARENESS } from "@/lib/constants";
-import { AutoplayVideo } from "@/components/ui/AutoplayVideo";
 import { fadeUp, fadeUpScale } from "@/components/animations/fadeUp";
 import { staggerContainer } from "@/components/animations/stagger";
 import { cn } from "@/lib/utils";
@@ -25,15 +25,15 @@ function SlideCounter({
   return (
     <div
       className={cn(
-        "inline-flex h-[26px] w-[66px] shrink-0 items-center gap-2.5 self-start overflow-hidden rounded-xl px-3 py-1 backdrop-blur-[10px]",
+        "inline-flex h-[26px] w-[66px] shrink-0 items-center gap-2.5 self-start overflow-hidden rounded-xl px-3 py-1 backdrop-blur-[10px] md:h-[43px] md:w-20 md:px-[13px] md:py-0 md:backdrop-blur-[20px]",
         className
       )}
       style={{ background: "rgba(0,0,0,0.3)" }}
     >
-      <span className="inline-flex h-4 items-center font-superground text-[18px] leading-none text-white">
+      <span className="inline-flex h-4 items-center font-superground text-[18px] leading-none text-white md:h-auto md:text-[28px]">
         {index + 1}
       </span>
-      <span className="inline-flex h-4 items-center gap-0.5 text-[16px] leading-none text-white/60">
+      <span className="inline-flex h-4 items-center gap-0.5 text-[16px] leading-none text-white/60 md:h-auto md:text-xl">
         <span>/</span>
         <span>{total}</span>
       </span>
@@ -55,29 +55,25 @@ function SlideInfoCard({
   const surfaceStyle =
     variant === "desktop"
       ? {
-          background: "rgba(10,12,16,0.55)",
-          backdropFilter: "blur(14px) saturate(120%)",
-          WebkitBackdropFilter: "blur(14px) saturate(120%)",
-          boxShadow:
-            "0 24px 60px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.06)",
+          background: "rgba(0,0,0,0.4)",
+          backdropFilter: "blur(15px)",
+          WebkitBackdropFilter: "blur(15px)",
         }
       : {
           background: "rgba(0,0,0,0.6)",
           backdropFilter: "blur(7.5px) saturate(120%)",
           WebkitBackdropFilter: "blur(7.5px) saturate(120%)",
-          boxShadow:
-            "0 24px 60px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.06)",
         };
 
   return (
     <div
-      className={cn("rounded-[20px] border border-white/10 p-5 md:rounded-2xl md:p-7", className)}
+      className={cn("rounded-[20px] p-5 md:rounded-xl md:p-6", className)}
       style={surfaceStyle}
     >
-      <h3 className="text-[20px] font-medium leading-normal tracking-[-0.4px] text-white md:text-[clamp(24px,2.4vw,36px)] md:leading-[1.05] md:tracking-[-0.01em]">
+      <h3 className="text-[20px] font-medium leading-normal tracking-[-0.4px] text-white md:text-[32px] md:leading-[38px] md:tracking-normal">
         {title}
       </h3>
-      <p className="mt-2.5 text-xs leading-5 text-white/70 md:mt-4 md:text-sm md:leading-[1.55] md:text-white/80 lg:text-[15px]">
+      <p className="mt-2.5 text-xs leading-5 text-white/70 md:mt-[17px] md:text-base md:leading-[22px] md:text-white/70">
         {description}
       </p>
     </div>
@@ -117,7 +113,7 @@ function DesktopPagination({
   onGoTo: (next: number) => void;
 }) {
   return (
-    <div className="flex w-full max-w-[416px] items-center gap-1.5 pl-1">
+    <div className="flex w-[216px] items-center gap-1.5">
       {SLIDES.map((s, i) => (
         <button
           key={s.id}
@@ -127,8 +123,8 @@ function DesktopPagination({
           className={cn(
             "h-1 cursor-pointer rounded-full transition-all duration-500 ease-out",
             i === index
-              ? "flex-[3] bg-white"
-              : "flex-1 bg-white/30 hover:bg-white/50"
+              ? "w-[124px] bg-white"
+              : "w-10 bg-white/30 hover:bg-white/45"
           )}
         />
       ))}
@@ -173,21 +169,21 @@ export function AgenticAwareness() {
         <div className="flex w-full flex-col items-center px-3 text-center md:items-start md:px-0 md:text-left">
           <motion.span
             variants={prefersReducedMotion ? {} : fadeUp}
-            className="block text-[14px] font-normal uppercase tracking-[0.22em] text-[#8fa6b0] md:text-[11px] md:font-medium md:text-black/45"
+            className="block text-[14px] font-normal uppercase leading-[18px] tracking-normal text-[#8FA6B0] md:text-base md:leading-[22px]"
           >
             {AGENTIC_AWARENESS.tag}
           </motion.span>
 
           <motion.h2
             variants={prefersReducedMotion ? {} : fadeUp}
-            className="mt-3 max-w-[820px] text-[32px] font-medium leading-9 tracking-[-0.64px] text-black md:mt-4 md:text-[clamp(32px,4vw,56px)] md:font-normal md:leading-[1.1] md:tracking-[-0.02em]"
+            className="mt-3 max-w-[914px] text-[32px] font-medium leading-9 tracking-[-0.64px] text-[#3E424D] md:mt-[31px] md:text-[64px] md:font-normal md:leading-[70px] md:tracking-normal"
           >
             {AGENTIC_AWARENESS.headline}
           </motion.h2>
 
           <motion.p
             variants={prefersReducedMotion ? {} : fadeUp}
-            className="mt-3 max-w-[760px] text-[14px] leading-6 text-[#3e424d]/70 md:mt-5 md:text-base md:text-[#3e424d]/75"
+            className="mt-3 max-w-[637px] text-[14px] leading-6 text-[#3E424D]/80 md:mt-[42px] md:text-base md:leading-[22px] md:text-[#3E424D]"
           >
             {AGENTIC_AWARENESS.description}
           </motion.p>
@@ -209,10 +205,12 @@ export function AgenticAwareness() {
                   transition={{ duration: 0.45, ease: EASE }}
                   className="absolute inset-0"
                 >
-                  <AutoplayVideo
-                    src={slide.videoSrc}
-                    ariaLabel={slide.title}
-                    loadOnScroll
+                  <Image
+                    src={slide.imageSrc}
+                    alt={slide.title}
+                    fill
+                    sizes="406px"
+                    className="object-cover"
                   />
                 </motion.div>
               </AnimatePresence>
@@ -236,8 +234,8 @@ export function AgenticAwareness() {
           </div>
 
           {/* Desktop carousel */}
-          <div className="relative hidden w-full overflow-hidden rounded-3xl border border-black/10 bg-black/5 shadow-[0_24px_70px_rgba(0,0,0,0.12)] md:block">
-            <div className="relative aspect-[1268/640] w-full">
+          <div className="relative hidden w-full max-w-[1200px] overflow-hidden rounded-[20px] bg-white md:block">
+            <div className="relative aspect-[2/1] w-full">
               <AnimatePresence mode="wait">
                 <motion.div
                   key={slide.id}
@@ -247,45 +245,50 @@ export function AgenticAwareness() {
                   transition={{ duration: 0.45, ease: EASE }}
                   className="absolute inset-0"
                 >
-                  <AutoplayVideo
-                    src={slide.videoSrc}
-                    ariaLabel={slide.title}
-                    loadOnScroll
+                  <Image
+                    src={slide.imageSrc}
+                    alt={slide.title}
+                    fill
+                    sizes="1200px"
+                    className="object-cover"
+                    priority={index === 0}
                   />
                 </motion.div>
               </AnimatePresence>
 
-              <div className="absolute left-6 top-6 hidden items-center gap-2 rounded-full bg-black/40 px-3 py-1 text-xs text-white/85 backdrop-blur-sm md:flex">
-                <span className="size-1.5 rounded-full bg-white" />
-                {index + 1} / {SLIDES.length}
-              </div>
+              <SlideCounter
+                index={index}
+                total={SLIDES.length}
+                className="absolute left-6 top-6 hidden md:flex"
+              />
 
-              <div className="absolute bottom-6 left-6 right-6 flex items-end justify-between gap-6 md:bottom-8 md:left-8 md:right-8">
-                <div className="flex max-w-[560px] flex-col gap-[72px]">
+              <div className="absolute bottom-6 left-6 right-7 flex items-end justify-between gap-6">
+                <div className="flex w-[416px] flex-col gap-[68px]">
                   <SlideInfoCard
                     variant="desktop"
                     title={slide.title}
                     description={slide.description}
+                    className="h-[228px] w-[416px]"
                   />
                   <DesktopPagination index={index} onGoTo={goTo} />
                 </div>
 
-                <div className="flex shrink-0 items-center gap-3">
+                <div className="flex shrink-0 items-center gap-3.5">
                   <button
                     type="button"
                     aria-label="Previous slide"
                     onClick={() => goTo(index - 1)}
-                    className="flex size-11 cursor-pointer items-center justify-center rounded-full border border-white/30 bg-white/10 text-white backdrop-blur-sm transition-colors hover:bg-white/20"
+                    className="flex size-16 cursor-pointer items-center justify-center rounded-full bg-black/10 text-white backdrop-blur-[20px] transition-colors hover:bg-black/20"
                   >
-                    <ChevronLeft className="size-5" strokeWidth={2.75} />
+                    <ChevronLeft className="size-7" strokeWidth={2.25} />
                   </button>
                   <button
                     type="button"
                     aria-label="Next slide"
                     onClick={() => goTo(index + 1)}
-                    className="flex size-11 cursor-pointer items-center justify-center rounded-full border border-white/30 bg-white/10 text-white backdrop-blur-sm transition-colors hover:bg-white/20"
+                    className="flex size-16 cursor-pointer items-center justify-center rounded-full bg-black/30 text-white backdrop-blur-[20px] transition-colors hover:bg-black/40"
                   >
-                    <ChevronRight className="size-5" strokeWidth={2.75} />
+                    <ChevronRight className="size-7" strokeWidth={2.25} />
                   </button>
                 </div>
               </div>

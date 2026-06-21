@@ -7,6 +7,7 @@ import {
   useScroll,
   useTransform,
 } from "framer-motion";
+import Image from "next/image";
 import { HERO, VIDEOS } from "@/lib/constants";
 import { PillButton } from "@/components/ui/PillButton";
 import { AutoplayVideo } from "@/components/ui/AutoplayVideo";
@@ -17,31 +18,35 @@ import { REVEAL_OFFSET } from "@/components/animations/scrollVideoReveal";
 
 function PlatformIcon() {
   return (
-    <span className="relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full">
-      <span
-        aria-hidden
-        className="absolute inset-0 rounded-full"
-        style={{
-          background:
-            "radial-gradient(circle at 40% 35%, rgba(255,255,255,0.35) 0%, rgba(120,140,160,0.2) 100%)",
-        }}
-      />
-      <svg
-        width="20"
-        height="22"
-        viewBox="0 0 20 22"
-        fill="none"
+    <span className="relative flex size-10 shrink-0 items-center justify-center">
+      <Image
+        src="/create-with-sr-icon.svg"
+        alt=""
         aria-hidden="true"
-        className="relative"
-      >
-        <path
-          d="M10 1L18 6V16L10 21L2 16V6L10 1Z"
-          stroke="rgba(180,200,220,0.9)"
-          strokeWidth="1.2"
-          fill="rgba(100,130,150,0.25)"
-        />
-      </svg>
+        width={40}
+        height={40}
+        className="size-10 select-none"
+        draggable={false}
+      />
     </span>
+  );
+}
+
+function BadgeSparkIcon({ color }: { color: string }) {
+  return (
+    <svg
+      width="10"
+      height="10"
+      viewBox="0 0 10 10"
+      fill="none"
+      aria-hidden="true"
+      className="shrink-0"
+    >
+      <path
+        d="M10 5.00278L7.8387 6.09401C6.32897 6.95966 5.73014 8.5065 5.00055 10C4.86979 10 4.01165 8.03645 3.82815 7.74308C2.91287 6.2807 1.4416 5.81287 0 5.05723C1.03395 4.45827 2.27997 4.09934 3.13812 3.22814C4.01494 2.33804 4.4105 1.07456 5.00055 0C5.51148 0.936771 5.80705 1.99244 6.4861 2.83254C7.37172 3.92821 8.75508 4.43716 10 5.00278Z"
+        fill={color}
+      />
+    </svg>
   );
 }
 
@@ -79,16 +84,14 @@ export function Hero() {
           {[HERO.badge1, HERO.badge2].map((badge) => (
             <span
               key={badge.label}
-              className="flex h-[25px] items-center gap-2.5 rounded-lg px-2 text-sm font-normal"
+              className="flex items-center gap-2.5 rounded-lg px-2 py-1 text-sm font-normal"
               style={{
                 background: "rgba(255,255,255,0.2)",
-                border: "1.5px solid rgba(255,255,255,0.4)",
+                border: "1.5px solid #FFFFFF66",
                 color: badge.color,
               }}
             >
-              <svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true">
-                <circle cx="5" cy="5" r="5" fill={badge.color} />
-              </svg>
+              <BadgeSparkIcon color={badge.color} />
               {badge.label}
             </span>
           ))}
@@ -117,11 +120,15 @@ export function Hero() {
             size="lg"
             icon={<PlatformIcon />}
             showArrow={false}
-            className="w-[262px] md:w-auto pl-4 pr-6 tracking-[-0.02em]"
+            className="hero-mobile-pill w-auto gap-2 px-6 py-4 tracking-[-0.02em] md:w-auto md:gap-1 md:pl-4 md:pr-6"
           >
             {HERO.ctaPrimary}
           </PillButton>
-          <PillButton variant="outline" size="lg" className="w-[225px] md:w-auto">
+          <PillButton
+            variant="outline"
+            size="lg"
+            className="hero-mobile-pill w-auto gap-2 px-6 py-4 md:w-auto md:gap-1 md:pl-4 md:pr-6"
+          >
             {HERO.ctaSecondary}
           </PillButton>
         </motion.div>
@@ -136,6 +143,7 @@ export function Hero() {
             src={VIDEOS.hero}
             ariaLabel="SR Platform simulation environment with robotic arms"
             loadOnScroll
+            mobileTapFullscreen
           />
         </div>
       </ScrollVideoReveal>
