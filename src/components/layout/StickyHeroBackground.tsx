@@ -8,7 +8,7 @@ export function StickyHeroBackground() {
   return (
     <div
       aria-hidden
-      className="pointer-events-none sticky top-0 -z-10 h-screen w-full"
+      className="pointer-events-none sticky top-0 -z-10 h-[100dvh] w-full"
     >
       <picture className="absolute inset-0 block size-full">
         <source media="(min-width: 768px)" srcSet={HERO_BACKGROUND} />

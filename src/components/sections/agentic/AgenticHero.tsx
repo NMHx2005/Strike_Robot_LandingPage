@@ -55,7 +55,7 @@ export function AgenticHero() {
     >
       {/* Title block — vertically centered in viewport below navbar */}
       <motion.div
-        className="flex w-full flex-col items-center max-lg:justify-center min-h-[calc(100vh-72px)] md:min-h-[calc(100vh-128px)] pt-12 md:pt-28 lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:gap-16"
+        className="flex w-full flex-col items-center max-lg:justify-center min-h-[calc(100dvh-72px)] md:min-h-[calc(100dvh-128px)] pt-12 md:pt-28 lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:gap-16"
         variants={prefersReducedMotion ? {} : staggerContainer}
         initial="hidden"
         animate="visible"

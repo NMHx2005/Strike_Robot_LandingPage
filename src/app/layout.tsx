@@ -61,7 +61,7 @@ export default function RootLayout({
       lang="en"
       className={`${golosText.variable} ${jetbrainsMono.variable} ${superGround.variable}`}
     >
-      <body className="bg-transparent text-text font-body antialiased min-h-screen">
+      <body className="bg-transparent text-text font-body antialiased min-h-[100dvh]">
         <SmoothScroll>{children}</SmoothScroll>
       </body>
     </html>

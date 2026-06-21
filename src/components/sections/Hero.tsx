@@ -74,7 +74,7 @@ export function Hero() {
     <section className="relative z-10 flex flex-col items-center px-3 md:px-[48px]">
       {/* Title block — vertically centered in viewport below navbar */}
       <motion.div
-        className="mx-auto flex w-full max-w-[1200px] flex-col items-center justify-center min-h-[calc(100vh-72px)] md:min-h-[calc(100vh-128px)] pt-20 md:pt-32"
+        className="mx-auto flex w-full max-w-[1200px] flex-col items-center justify-center min-h-[calc(100dvh-72px)] md:min-h-[calc(100dvh-128px)] pt-20 md:pt-32"
         variants={prefersReducedMotion ? {} : staggerContainer}
         initial="hidden"
         animate="visible"

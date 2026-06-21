@@ -21,6 +21,11 @@ type AutoplayVideoProps = {
   mobileTapFullscreen?: boolean;
 };
 
+type LockableScreenOrientation = ScreenOrientation & {
+  lock?: (orientation: "landscape") => Promise<void>;
+  unlock?: () => void;
+};
+
 function formatVideoTime(seconds: number) {
   if (!Number.isFinite(seconds)) return "0:00";
   const minutes = Math.floor(seconds / 60);
@@ -175,10 +180,14 @@ export function AutoplayVideo({
     if (!isPlayerOpen) return;
 
     const previousOverflow = document.body.style.overflow;
+    const previousHtmlOverflow = document.documentElement.style.overflow;
     document.body.style.overflow = "hidden";
+    document.documentElement.style.overflow = "hidden";
 
     const video = modalVideoRef.current;
+    const orientation = screen.orientation as LockableScreenOrientation | undefined;
     void video?.play().catch(() => {});
+    void orientation?.lock?.("landscape").catch(() => {});
 
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") setIsPlayerOpen(false);
@@ -187,8 +196,10 @@ export function AutoplayVideo({
     window.addEventListener("keydown", onKeyDown);
     return () => {
       document.body.style.overflow = previousOverflow;
+      document.documentElement.style.overflow = previousHtmlOverflow;
       window.removeEventListener("keydown", onKeyDown);
       video?.pause();
+      orientation?.unlock?.();
       if (document.fullscreenElement) {
         void document.exitFullscreen().catch(() => {});
       }
@@ -231,6 +242,8 @@ export function AutoplayVideo({
   }, [isPlayerOpen]);
 
   const openMobilePlayer = () => {
+    setModalCurrentTime(0);
+    setIsModalPlaying(true);
     setIsPlayerOpen(true);
     void document.documentElement.requestFullscreen?.().catch(() => {});
   };
@@ -323,7 +336,7 @@ export function AutoplayVideo({
               role="dialog"
               aria-modal="true"
               aria-label={ariaLabel}
-              className="fixed inset-0 z-[1000] flex items-center justify-center bg-black"
+              className="mobile-video-modal"
             >
               <div className="mobile-landscape-shell">
                 <video
@@ -337,27 +350,6 @@ export function AutoplayVideo({
                   aria-label={ariaLabel}
                   onClick={toggleModalPlay}
                 />
-                {!isModalPlaying && (
-                  <button
-                    type="button"
-                    aria-label="Play video"
-                    className="absolute left-1/2 top-1/2 z-10 flex size-24 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-white/25 text-white backdrop-blur-sm transition-transform active:scale-95"
-                    onClick={toggleModalPlay}
-                  >
-                    <svg
-                      aria-hidden
-                      viewBox="0 0 48 48"
-                      fill="none"
-                      className="size-14 translate-x-0.5"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M31.2864 22.304C32.5397 23.0873 32.5397 24.9127 31.2864 25.696L21.06 32.0875C19.7279 32.9201 18 31.9624 18 30.3915L18 17.6085C18 16.0376 19.7279 15.0799 21.06 15.9125L31.2864 22.304Z"
-                        fill="currentColor"
-                      />
-                    </svg>
-                  </button>
-                )}
                 <button
                   type="button"
                   aria-label="Close video"

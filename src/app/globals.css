@@ -33,6 +33,7 @@
   }
 
   html {
+    background-color: #E5E5E5;
     scroll-padding-top: 7rem;
   }
 
@@ -42,6 +43,7 @@
     font-family: var(--font-golos-text), sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    overscroll-behavior-y: none;
   }
 
   ::selection {
@@ -156,10 +158,24 @@
     animation: agenticWatermarkMarquee 28s linear infinite;
   }
 
+  .mobile-video-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: flex;
+    width: 100vw;
+    height: 100dvh;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    background: #000000;
+  }
+
   .mobile-landscape-shell {
     position: relative;
-    height: 100%;
-    width: 100%;
+    height: 100dvh;
+    width: 100vw;
+    overflow: hidden;
     background: #000000;
   }
 
@@ -206,6 +222,18 @@
     border: 0;
     border-radius: 999px;
     background: #ffffff;
+  }
+
+  @media (max-width: 767px) and (orientation: portrait) {
+    .mobile-landscape-shell {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 100dvh;
+      height: 100vw;
+      transform: translate(-50%, -50%) rotate(90deg);
+      transform-origin: center;
+    }
   }
 
   @keyframes agenticWatermarkMarquee {

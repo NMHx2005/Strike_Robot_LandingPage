@@ -14,7 +14,7 @@ export default function LandingPage() {
       <Navbar />
       <div className="relative">
         <StickyHeroBackground />
-        <div className="relative z-10 -mt-[100vh]">
+        <div className="relative z-10 -mt-[100dvh]">
           <Hero />
           <Features />
         </div>
