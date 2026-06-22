@@ -1,4 +1,4 @@
-import type { Metadata, Viewport } from "next";
+import type { Metadata } from "next";
 import { Golos_Text, JetBrains_Mono } from "next/font/google";
 import localFont from "next/font/local";
 import "./globals.css";
@@ -49,11 +49,6 @@ export const metadata: Metadata = {
     title: SITE_NAME,
     description: SITE_DESCRIPTION,
   },
-};
-
-export const viewport: Viewport = {
-  themeColor: "#E5E5E5",
-  viewportFit: "cover",
 };
 
 export default function RootLayout({
