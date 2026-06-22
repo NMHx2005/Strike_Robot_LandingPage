@@ -69,6 +69,10 @@ function CommunityCard({
   const holdingRef = useRef(false);
   const movedRef = useRef(false);
   const pointerStartRef = useRef({ x: 0, y: 0 });
+  const mobileDescription =
+    title === "Community Creations"
+      ? "See simulation environments, training datasets, and robot tasks generated with SR Platform..."
+      : "Step-by-step guides to generating environments, assets, and training datasets...";
 
   useEffect(() => {
     const mq = window.matchMedia("(min-width: 768px)");
@@ -84,18 +88,18 @@ function CommunityCard({
     hideTimerRef.current = null;
   };
 
-  const clearHoldTimer = () => {
-    if (!holdTimerRef.current) return;
-    clearTimeout(holdTimerRef.current);
-    holdTimerRef.current = null;
-  };
-
   const scheduleHide = (delayMs: number) => {
     clearHideTimer();
     hideTimerRef.current = setTimeout(() => {
       setMobileRevealed(false);
       hideTimerRef.current = null;
     }, delayMs);
+  };
+
+  const clearHoldTimer = () => {
+    if (!holdTimerRef.current) return;
+    clearTimeout(holdTimerRef.current);
+    holdTimerRef.current = null;
   };
 
   const revealForMobile = () => {
@@ -221,8 +225,7 @@ function CommunityCard({
             src={videoSrc}
             objectPosition={objectPosition}
             ariaLabel={`${title} preview`}
-            playMode={isMobile ? "press" : "auto"}
-            isPressing={mobileRevealed}
+            playMode="auto"
           />
           {/* Default dark gradient — fades out on hover (desktop only) */}
           <div
@@ -259,7 +262,10 @@ function CommunityCard({
             )}
             aria-hidden
           >
-            {description}
+            <span className="min-[430px]:hidden md:hidden">
+              {mobileDescription}
+            </span>
+            <span className="max-[429px]:hidden">{description}</span>
           </p>
         </div>
 
