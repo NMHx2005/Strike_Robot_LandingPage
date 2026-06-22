@@ -349,7 +349,7 @@ export function Navbar() {
       <header className="pointer-events-none fixed left-0 right-0 top-0 z-[1000]">
         <div
           aria-hidden
-          className="pointer-events-none absolute inset-x-0 top-0 h-[env(safe-area-inset-top)] bg-[#E5E5E5] md:hidden"
+          className="pointer-events-none absolute inset-x-0 top-0 h-[env(safe-area-inset-top)] bg-transparent md:hidden"
         />
         {/* Desktop */}
         <div className="pointer-events-auto relative mx-auto hidden w-full items-center justify-between gap-6 p-6 md:flex">
