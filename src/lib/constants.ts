@@ -172,14 +172,14 @@ export const AGENTIC_PARTS = [
     title: "Task-Conditioned Scene Graph",
     description:
       "Builds a Task-Conditioned Scene Graph (TC-SG) — picking or synthesizing the right spatial ontology before it maps. The map is a function of the task, not a fixed universal schema.",
-    media: "/SR%20Agentic%20Assets/S1.webp",
+    media: "/SR%20Agentic%20Assets/S1.gif",
   },
   {
     id: "open-vocab",
     title: "Open-vocabulary perception",
     description:
       "Detects and grounds objects it was never explicitly trained on, fusing detection, segmentation, and captioning into the live scene understanding.",
-    media: "/SR%20Agentic%20Assets/S2.webp",
+    media: "/SR%20Agentic%20Assets/S2.gif",
   },
   {
     id: "realtime",
