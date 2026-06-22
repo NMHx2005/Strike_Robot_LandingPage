@@ -19,6 +19,26 @@ const LEFT_BRACKET_D =
 const RIGHT_BRACKET_D =
   "M12.5 0.311523L3.11307 12.0984C1.42121 14.2228 0.5 16.8582 0.5 19.574V153.049C0.5 155.765 1.42121 158.4 3.11307 160.525L12.5 172.312";
 
+const WATERMARK_ITEMS = Array.from({ length: 8 }, (_, i) => i);
+const WATERMARK_WORDS = ["one", "intelligence", "layer"];
+
+function WatermarkStar() {
+  return (
+    <svg
+      aria-hidden
+      viewBox="0 0 10 10"
+      fill="none"
+      className="mx-5 size-8 shrink-0 md:mx-7 md:size-[54px]"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M10 5.00278L7.8387 6.09401C6.32897 6.95966 5.73014 8.5065 5.00055 10C4.86979 10 4.01165 8.03645 3.82815 7.74308C2.91287 6.2807 1.4416 5.81287 0 5.05723C1.03395 4.45827 2.27997 4.09934 3.13812 3.22814C4.01494 2.33804 4.4105 1.07456 5.00055 0C5.51148 0.936771 5.80705 1.99244 6.4861 2.83254C7.37172 3.92821 8.75508 4.43716 10 5.00278Z"
+        fill="currentColor"
+      />
+    </svg>
+  );
+}
+
 export function AgenticLayer() {
   const prefersReducedMotion = useReducedMotion();
 
@@ -32,14 +52,14 @@ export function AgenticLayer() {
   return (
     <section
       id="intelligence-layer"
-      className="relative bg-transparent pt-[80px] md:pt-[110px]"
+      className="relative !bg-transparent pt-[80px] md:pt-[110px]"
       aria-label="Intelligence layer breakdown"
     >
-      <div className="relative">
+      <div className="relative bg-transparent">
         {/* Inner content — locked at max 1268px, centered (matches Features.tsx
             on the homepage). Contains the text, parts grid, and the vertical
             line so it stays 50px from the content's left edge at any width. */}
-        <div className="relative mx-auto w-full max-w-[1268px] px-6 md:px-0">
+        <div className="relative mx-auto w-full max-w-[1268px] bg-transparent px-6 md:px-0">
           {/* Single continuous vertical line — 50px left of content text */}
           <motion.div
             aria-hidden
@@ -169,7 +189,7 @@ export function AgenticLayer() {
         </div>
       </div>
 
-      {/* Bottom watermark band — diagonal stripe pattern */}
+      {/* Bottom watermark band */}
       <motion.div
         aria-hidden
         className="pointer-events-none relative mt-8 h-16 w-full overflow-hidden md:h-[72px] lg:h-[110px]"
@@ -178,15 +198,18 @@ export function AgenticLayer() {
         viewport={{ once: true, margin: "-40px" }}
         transition={{ duration: 0.8, ease: EASE }}
       >
-        <div
-          className="agentic-watermark-marquee absolute inset-y-0 left-0 w-[200%]"
-          style={{
-            backgroundImage: "url(/end_one_layer.png)",
-            backgroundRepeat: "repeat-x",
-            backgroundSize: "auto 100%",
-            backgroundPosition: "0% center",
-          }}
-        />
+        <div className="agentic-watermark-marquee flex h-full w-max items-center whitespace-nowrap font-superground text-[48px] font-normal leading-none tracking-normal text-black/5 md:text-[72px]">
+          {WATERMARK_ITEMS.map((item) => (
+            <span key={item} className="flex items-center">
+              {WATERMARK_WORDS.map((word) => (
+                <span key={`${item}-${word}`} className="flex items-center">
+                  <span>{word}</span>
+                  <WatermarkStar />
+                </span>
+              ))}
+            </span>
+          ))}
+        </div>
       </motion.div>
     </section>
   );

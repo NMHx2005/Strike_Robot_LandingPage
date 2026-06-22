@@ -2,7 +2,6 @@
 
 import { useState, useRef, useEffect, useCallback } from "react";
 import { motion, useReducedMotion } from "framer-motion";
-import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { FEATURES, FEATURES_SECTION } from "@/lib/constants";
 import { PillButtonCta } from "@/components/ui/PillButton";
@@ -28,10 +27,10 @@ const INDICATOR_WIDTH = 3;
 const ITEM_ICON_CENTER_FROM_TOP = 36;
 
 const ICON_SRC: Record<string, string> = {
-  "asset-creation": "/icons/features/asset-creation.png",
-  "spatial-layout": "/icons/features/spatial-layout.png",
-  "stimulation": "/icons/features/stimulation.png",
-  "realtime-edit": "/icons/features/realtime-edit.png",
+  "asset-creation": "/icons/features/asset-creation.svg",
+  "spatial-layout": "/icons/features/spatial-layout.svg",
+  "stimulation": "/icons/features/stimulation.svg",
+  "realtime-edit": "/icons/features/realtime-edit.svg",
 };
 
 const ACTIVE_GRADIENT =
@@ -146,24 +145,17 @@ function FeatureItem({
         <span
           aria-hidden
           className={cn(
-            "relative block h-8 w-8 shrink-0 md:h-12 md:w-12",
-            isActive ? "opacity-100" : "opacity-75 md:opacity-80"
+            "relative block h-8 w-8 shrink-0 transition-opacity duration-300 md:h-12 md:w-12",
+            isActive ? "opacity-100" : "opacity-60"
           )}
         >
           {iconSrc && (
-            <Image
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
               src={iconSrc}
               alt=""
-              width={96}
-              height={96}
-              className={cn(
-                "h-full w-full object-contain select-none transition-[filter,opacity] duration-300 max-md:mix-blend-normal md:mix-blend-multiply",
-                isActive
-                  ? "brightness-[0.82] contrast-150 saturate-150"
-                  : "brightness-[0.95] contrast-110 saturate-110"
-              )}
+              className="h-full w-full select-none object-contain"
               draggable={false}
-              priority
             />
           )}
         </span>
@@ -232,7 +224,7 @@ function FeatureItem({
         </div>
         {isActive && videoSrc && (
           <div className="relative max-md:pt-3 md:mt-3 lg:hidden">
-            <div className="relative h-[178px] w-full max-w-[334px] overflow-hidden rounded-xl border border-black/60 bg-black/5">
+            <div className="relative aspect-[5/3] w-full max-w-[334px] overflow-hidden rounded-xl border border-black/60 bg-black/5">
               <AutoplayVideo
                 src={videoSrc}
                 objectPosition="top center"
@@ -450,7 +442,7 @@ export function Features() {
           </motion.svg>
 
           {/* Header band content */}
-          <div className="relative max-md:border-y max-md:border-black/15 max-md:px-5 max-md:pb-6 max-md:pt-12 md:min-h-[206px] md:pl-[60px] md:pr-[60px]">
+          <div className="relative max-md:px-5 max-md:pb-6 max-md:pt-12 md:min-h-[206px] md:pl-[60px] md:pr-[60px]">
           {/* Mobile brackets — centered on header band, flush to screen edges */}
           <svg
             aria-hidden
@@ -529,7 +521,7 @@ export function Features() {
 
           {/* Desktop-only right column — switch video theo activeId
               (key remount để clean reset state mỗi lần đổi feature). */}
-          <div className="relative hidden h-[511px] w-full shrink-0 overflow-hidden rounded-2xl border border-[#d9d9d9] bg-black/5 lg:block lg:flex-1">
+          <div className="relative hidden h-[480px] w-[800px] shrink-0 overflow-hidden rounded-2xl border border-[#d9d9d9] bg-black/5 lg:block">
             <AutoplayVideo
               key={activeFeature.id}
               src={activeFeature.videoSrc}

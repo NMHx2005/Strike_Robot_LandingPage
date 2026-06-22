@@ -118,17 +118,22 @@ function LoopPanel({
   side: Side;
 }) {
   const positions = side === "edge" ? EDGE_NODES : CLOUD_NODES;
-  const restTilt =
+  const mobileTilt =
     side === "edge"
-      ? "[transform:rotateX(2deg)_rotateY(-7deg)_rotateZ(-1.25deg)]"
-      : "[transform:rotateX(2deg)_rotateY(7deg)_rotateZ(1.25deg)]";
+      ? "max-md:[transform:rotateX(2deg)_rotateY(-7deg)_rotateZ(-1.25deg)]"
+      : "max-md:[transform:rotateX(2deg)_rotateY(7deg)_rotateZ(1.25deg)]";
+  const desktopHoverTilt =
+    side === "edge"
+      ? "md:hover:[transform:rotateX(2deg)_rotateY(-7deg)_rotateZ(-1.25deg)]"
+      : "md:hover:[transform:rotateX(2deg)_rotateY(7deg)_rotateZ(1.25deg)]";
 
   return (
     <div className="[perspective:1400px]">
       <div
         className={cn(
-          "relative isolate box-border aspect-[452/454] w-full overflow-hidden rounded-3xl border border-white/60 border-l-2 will-change-transform [transform-style:preserve-3d]",
-          restTilt
+          "relative isolate box-border aspect-[452/454] w-full overflow-hidden rounded-3xl border border-white/60 border-l-2 transition-transform duration-500 ease-[cubic-bezier(0.25,0.1,0.25,1)] will-change-transform [transform-style:preserve-3d] md:[transform:none]",
+          mobileTilt,
+          desktopHoverTilt
         )}
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}

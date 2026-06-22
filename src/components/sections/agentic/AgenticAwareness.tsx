@@ -12,6 +12,17 @@ import { cn } from "@/lib/utils";
 const SLIDES = AGENTIC_AWARENESS.slides;
 
 const EASE = [0.25, 0.1, 0.25, 1] as const;
+const slideVariants = {
+  enter: (direction: number) => ({
+    x: direction > 0 ? "100%" : "-100%",
+  }),
+  center: {
+    x: "0%",
+  },
+  exit: (direction: number) => ({
+    x: direction > 0 ? "-100%" : "100%",
+  }),
+};
 
 function SlideCounter({
   index,
@@ -135,11 +146,17 @@ function DesktopPagination({
 export function AgenticAwareness() {
   const prefersReducedMotion = useReducedMotion();
   const [index, setIndex] = useState(0);
+  const [direction, setDirection] = useState(1);
   const slide = SLIDES[index];
 
   const goTo = (next: number) => {
     const total = SLIDES.length;
     const wrapped = ((next % total) + total) % total;
+    if (wrapped === index) return;
+
+    const forwardDistance = (wrapped - index + total) % total;
+    const backwardDistance = (index - wrapped + total) % total;
+    setDirection(forwardDistance <= backwardDistance ? 1 : -1);
     setIndex(wrapped);
   };
 
@@ -176,14 +193,14 @@ export function AgenticAwareness() {
 
           <motion.h2
             variants={prefersReducedMotion ? {} : fadeUp}
-            className="mt-3 max-w-[914px] text-[32px] font-medium leading-9 tracking-[-0.64px] text-[#3E424D] md:mt-[31px] md:text-[64px] md:font-normal md:leading-[70px] md:tracking-normal"
+            className="mt-3 w-full max-w-[914px] text-[32px] font-medium leading-9 tracking-[-0.64px] text-[#3E424D] md:mt-[31px] md:text-[64px] md:font-normal md:leading-[70px] md:tracking-normal"
           >
             {AGENTIC_AWARENESS.headline}
           </motion.h2>
 
           <motion.p
             variants={prefersReducedMotion ? {} : fadeUp}
-            className="mt-3 max-w-[637px] text-[14px] leading-6 text-[#3E424D]/80 md:mt-[42px] md:text-base md:leading-[22px] md:text-[#3E424D]"
+            className="mt-3 w-full max-w-[914px] text-[14px] leading-6 text-[#3E424D]/80 md:mt-[42px] md:text-base md:leading-[22px] md:text-[#3E424D]"
           >
             {AGENTIC_AWARENESS.description}
           </motion.p>
@@ -196,13 +213,15 @@ export function AgenticAwareness() {
           {/* Mobile carousel card */}
           <div className="relative w-full max-w-[406px] overflow-hidden rounded-[20px] md:hidden">
             <div className="relative aspect-[406/512] w-full bg-white">
-              <AnimatePresence mode="wait">
+              <AnimatePresence initial={false} custom={direction}>
                 <motion.div
                   key={slide.id}
-                  initial={prefersReducedMotion ? undefined : { opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={prefersReducedMotion ? undefined : { opacity: 0 }}
-                  transition={{ duration: 0.45, ease: EASE }}
+                  custom={direction}
+                  variants={prefersReducedMotion ? undefined : slideVariants}
+                  initial={prefersReducedMotion ? undefined : "enter"}
+                  animate="center"
+                  exit={prefersReducedMotion ? undefined : "exit"}
+                  transition={{ duration: 0.55, ease: EASE }}
                   className="absolute inset-0"
                 >
                   <Image
@@ -234,15 +253,17 @@ export function AgenticAwareness() {
           </div>
 
           {/* Desktop carousel */}
-          <div className="relative hidden w-full max-w-[1200px] overflow-hidden rounded-[20px] bg-white md:block">
+          <div className="relative hidden w-full overflow-hidden rounded-[20px] bg-white md:block">
             <div className="relative aspect-[2/1] w-full">
-              <AnimatePresence mode="wait">
+              <AnimatePresence initial={false} custom={direction}>
                 <motion.div
                   key={slide.id}
-                  initial={prefersReducedMotion ? undefined : { opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={prefersReducedMotion ? undefined : { opacity: 0 }}
-                  transition={{ duration: 0.45, ease: EASE }}
+                  custom={direction}
+                  variants={prefersReducedMotion ? undefined : slideVariants}
+                  initial={prefersReducedMotion ? undefined : "enter"}
+                  animate="center"
+                  exit={prefersReducedMotion ? undefined : "exit"}
+                  transition={{ duration: 0.55, ease: EASE }}
                   className="absolute inset-0"
                 >
                   <Image

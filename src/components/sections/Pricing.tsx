@@ -5,7 +5,6 @@ import { motion, useReducedMotion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import { COMMUNITY, VIDEOS } from "@/lib/constants";
 import { AutoplayVideo } from "@/components/ui/AutoplayVideo";
-import { useVanillaTilt } from "@/hooks/useVanillaTilt";
 import { fadeUp } from "@/components/animations/fadeUp";
 import { staggerContainer } from "@/components/animations/stagger";
 import { cn } from "@/lib/utils";
@@ -48,6 +47,7 @@ type CommunityCardProps = {
   videoSrc: string;
   objectPosition?: string;
   hoverLabel: string;
+  tiltSide: "left" | "right";
 };
 
 function CommunityCard({
@@ -57,6 +57,7 @@ function CommunityCard({
   videoSrc,
   objectPosition = "center",
   hoverLabel,
+  tiltSide,
 }: CommunityCardProps) {
   const prefersReducedMotion = useReducedMotion();
   const [mobileRevealed, setMobileRevealed] = useState(false);
@@ -76,8 +77,6 @@ function CommunityCard({
     mq.addEventListener("change", onChange);
     return () => mq.removeEventListener("change", onChange);
   }, []);
-
-  const tiltRef = useVanillaTilt<HTMLElement>(undefined, isDesktop);
 
   const clearHideTimer = () => {
     if (!hideTimerRef.current) return;
@@ -183,14 +182,16 @@ function CommunityCard({
       )}
     >
       <article
-        ref={tiltRef}
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
         onPointerLeave={handlePointerUp}
         onPointerCancel={handlePointerUp}
         className={cn(
-          "group relative h-full w-full rounded-[14px] p-2.5 will-change-transform transition-colors duration-300 ease-[cubic-bezier(0.25,0.1,0.25,1)] max-md:h-[193px] max-md:overflow-visible md:overflow-hidden md:rounded-[20px] md:p-4 md:hover:bg-white",
+          "group relative h-full w-full rounded-[14px] p-2.5 will-change-transform transition-[background-color,transform] duration-300 ease-[cubic-bezier(0.25,0.1,0.25,1)] max-md:h-[193px] max-md:overflow-visible md:overflow-hidden md:rounded-[20px] md:p-4 md:hover:bg-white",
+          tiltSide === "left"
+            ? "md:hover:[transform:rotateX(2deg)_rotateY(-5deg)_rotateZ(-1deg)]"
+            : "md:hover:[transform:rotateX(2deg)_rotateY(5deg)_rotateZ(1deg)]",
           mobileRevealed && "max-md:bg-white"
         )}
       >
@@ -233,9 +234,9 @@ function CommunityCard({
         </div>
 
         {/* Text content layer (above the masked media). */}
-        <div className="relative flex h-full min-h-[173px] flex-col p-3.5 md:min-h-[264px] md:p-6">
+        <div className="relative flex h-full min-h-[173px] flex-col p-3.5 max-md:pb-[35px] md:min-h-[264px] md:p-6">
           <div className="flex flex-1 flex-col gap-2.5 md:gap-0">
-            <span className="inline-flex w-fit shrink-0 items-center rounded-[5px] border border-white/10 bg-black/20 px-1.5 py-0.5 text-xs font-normal leading-normal text-white/80 md:rounded-lg md:border-[1.5px] md:bg-black/75 md:px-2 md:py-1 md:text-sm md:backdrop-blur-sm">
+            <span className="inline-flex w-fit shrink-0 items-center gap-2.5 rounded-lg border-[1.5px] border-white/10 bg-black/20 px-2 py-1 text-center text-sm font-normal leading-none tracking-normal text-[#CDCDCD] backdrop-blur-[10px]">
               {tag}
             </span>
 
@@ -245,7 +246,7 @@ function CommunityCard({
               <div className="absolute bottom-0 size-1.5 rounded-full bg-white/30" />
             </div>
 
-            <h3 className="max-w-[120px] shrink-0 text-xl font-medium leading-normal tracking-[-0.2px] text-white max-md:whitespace-pre-line md:mt-4 md:min-h-[76px] md:max-w-[182px] md:text-[32px] md:leading-[1.15] md:tracking-[-0.01em]">
+            <h3 className="max-w-[120px] shrink-0 text-xl font-medium leading-normal tracking-[-0.2px] text-white max-md:-mt-[15px] max-md:whitespace-pre-line md:mt-4 md:min-h-[76px] md:max-w-[182px] md:text-[32px] md:leading-[1.15] md:tracking-[-0.01em]">
               {title}
             </h3>
           </div>
@@ -325,6 +326,7 @@ export function Pricing() {
           videoSrc={VIDEOS.communityExplore}
           objectPosition="65% center"
           hoverLabel={COMMUNITY.explore.hoverLabel}
+          tiltSide="left"
         />
         <CommunityCard
           tag={COMMUNITY.tutorials.tag}
@@ -333,6 +335,7 @@ export function Pricing() {
           videoSrc={VIDEOS.communityTutorials}
           objectPosition="65% center"
           hoverLabel={COMMUNITY.tutorials.hoverLabel}
+          tiltSide="right"
         />
       </motion.div>
     </section>

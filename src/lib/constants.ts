@@ -16,7 +16,7 @@ export const NAV_CTA = "Create with SR Platform";
 export const VIDEOS = {
   hero: "/Video/Comp%202.mp4",
   featureEditor: "/Video/Comp%201.mp4",
-  communityExplore: "/Video/Comp%203.mp4",
+  communityExplore: "/Video/Community%20Creation.mp4",
   communityTutorials: "/Video/Comp%203.mp4",
 } as const;
 
@@ -41,7 +41,6 @@ export const FEATURES_SECTION = {
   cta: "Create with SR Platform",
 };
 
-// TODO: replace videoSrc per feature với asset đúng (hiện đang cycle qua 3 video có sẵn).
 export const FEATURES = [
   {
     id: "asset-creation",
@@ -50,7 +49,7 @@ export const FEATURES = [
       "Generate custom 3D geometry from text, or photograph any real-world object to reconstruct it as a production-grade mesh with physically-based materials. Every asset is indexed into a shared library that improves every future scene.",
     boldPhrase: "custom 3D geometry",
     icon: "Box",
-    videoSrc: "/Video/Comp%201.mp4",
+    videoSrc: "/Video/SR%20Platform%20feature/Asset%20Creation_30fps.mp4",
   },
   {
     id: "spatial-layout",
@@ -58,7 +57,8 @@ export const FEATURES = [
     description:
       "Compose full simulation environments from natural language descriptions. SR Platform arranges objects, surfaces, and lighting with physics constraints baked in — ready for robot navigation tasks.",
     icon: "LayoutGrid",
-    videoSrc: "/Video/Comp%202.mp4",
+    videoSrc:
+      "/Video/SR%20Platform%20feature/Spatial%20Layout%20Generation1_30fps.mp4",
   },
   {
     id: "stimulation",
@@ -66,7 +66,8 @@ export const FEATURES = [
     description:
       "Run thousands of robot policy rollouts inside generated environments. Every simulation is instrumented with sensor outputs, collision data, and task success metrics exported automatically.",
     icon: "Car",
-    videoSrc: "/Video/Comp%203.mp4",
+    videoSrc:
+      "/Video/SR%20Platform%20feature/Simulations%20%26%20Rollout_30fps.mp4",
   },
   {
     id: "realtime-edit",
@@ -74,7 +75,7 @@ export const FEATURES = [
     description:
       "Modify scenes on the fly — swap assets, adjust physics parameters, and regenerate lighting without leaving the platform. Changes propagate across all active simulation instances instantly.",
     icon: "PencilLine",
-    videoSrc: "/Video/Comp%201.mp4",
+    videoSrc: "/Video/SR%20Platform%20feature/Edit%20In%20Realtime_30fps.mp4",
   },
 ];
 

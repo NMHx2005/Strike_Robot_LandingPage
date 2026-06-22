@@ -99,9 +99,11 @@ export function AgenticOEMs() {
               key={bullet.title}
               variants={prefersReducedMotion ? {} : fadeUpScale}
               className={cn(
-                "flex flex-col items-center gap-4 py-7 text-center",
-                "lg:flex-row lg:items-start lg:gap-8 lg:py-0 lg:text-left",
-                i > 0 && "border-t border-black/10 lg:mt-7 lg:border-t-0"
+                "flex flex-col items-center gap-4 py-6 text-center",
+                "lg:flex-row lg:items-start lg:gap-8 lg:py-6 lg:text-left",
+                i < AGENTIC_OEMS.bullets.length - 1
+                  ? "border-b border-black/15"
+                  : ""
               )}
             >
               <OEMBullet

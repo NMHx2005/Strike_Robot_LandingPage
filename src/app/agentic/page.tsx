@@ -24,7 +24,7 @@ export default function AgenticPage() {
         <div className="relative z-10 -mt-[100dvh]">
           <Navbar />
           <AgenticHero />
-          <MainSection>
+          <MainSection transparent>
             <AgenticLayer />
             <AgenticLoop />
             <div className="relative bg-[linear-gradient(180deg,#FFFFFF_0%,#F7F7F7_48%,#FFFFFF_100%)]">

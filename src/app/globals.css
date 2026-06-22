@@ -155,7 +155,7 @@
   }
 
   .agentic-watermark-marquee {
-    animation: agenticWatermarkMarquee 28s linear infinite;
+    animation: agenticWatermarkMarquee 32s linear infinite;
   }
 
   @keyframes agenticWatermarkMarquee {
@@ -163,7 +163,7 @@
       transform: translateX(0%);
     }
     to {
-      transform: translateX(-50%);
+      transform: translateX(-25%);
     }
   }
 }
