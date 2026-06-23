@@ -352,7 +352,14 @@ export function AboutMission() {
               aria-expanded={expanded}
               className="mt-5 mb-2 flex cursor-pointer items-center gap-1.5 rounded-md text-[16px] font-semibold text-black"
             >
-              {expanded ? ABOUT_MISSION.readLess : ABOUT_MISSION.readMore}
+              {expanded ? (
+                <>
+                  <span className="md:hidden">Hide</span>
+                  <span className="hidden md:inline">{ABOUT_MISSION.readLess}</span>
+                </>
+              ) : (
+                ABOUT_MISSION.readMore
+              )}
               <ChevronDown
                 className={`size-[18px] transition-transform duration-300 ${
                   expanded ? "rotate-180" : ""

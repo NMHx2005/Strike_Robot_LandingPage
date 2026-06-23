@@ -148,10 +148,10 @@ export function AboutHero() {
 
             <span
               aria-hidden
-              className="mt-6 hidden h-1.5 w-11 rounded-[2px] bg-[#020202] md:block"
+              className="mt-[72px] hidden h-1.5 w-11 rounded-[2px] bg-[#020202] md:block"
             />
 
-            {followButton("mt-7 hidden h-11 md:flex")}
+            {followButton("mt-[84px] hidden h-11 md:flex")}
           </motion.div>
 
           {/* Description */}

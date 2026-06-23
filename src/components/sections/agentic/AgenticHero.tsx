@@ -77,12 +77,12 @@ export function AgenticHero() {
           <motion.span
             variants={prefersReducedMotion ? {} : fadeUp}
             aria-hidden
-            className="order-2 mt-4 block h-1 w-6 rounded-[2px] bg-[#020202] lg:order-none"
+            className="order-2 mt-4 block h-1 w-6 rounded-[2px] bg-[#020202] lg:order-none lg:mt-[48px] lg:h-1.5 lg:w-11"
           />
 
           <motion.div
             variants={prefersReducedMotion ? {} : fadeUp}
-            className="order-6 mt-6 flex w-full flex-col items-center gap-2.5 lg:order-none lg:mt-10 lg:w-auto lg:flex-row lg:flex-wrap lg:items-center lg:gap-3"
+            className="order-6 mt-6 flex w-full flex-col items-center gap-2.5 lg:order-none lg:mt-[120px] lg:w-auto lg:flex-row lg:flex-wrap lg:items-center lg:gap-3"
           >
             <PillButton
               size="lg"
