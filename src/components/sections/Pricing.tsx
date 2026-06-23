@@ -72,7 +72,7 @@ function CommunityCard({
   const mobileDescription =
     title === "Community Creations"
       ? "See simulation environments, training datasets, and robot tasks generated with SR Platform..."
-      : "Step-by-step guides to generating environments, assets, and training datasets...";
+      : "Discover the innovators, researchers, and visionary founders pushing the boundaries of AI and robotics";
 
   useEffect(() => {
     const mq = window.matchMedia("(min-width: 768px)");
@@ -249,7 +249,7 @@ function CommunityCard({
               <div className="absolute bottom-0 size-1.5 rounded-full bg-white/30" />
             </div>
 
-            <h3 className="max-w-[120px] shrink-0 text-xl font-medium leading-normal tracking-[-0.2px] text-white max-md:-mt-[15px] max-md:whitespace-pre-line md:mt-4 md:min-h-[76px] md:max-w-[182px] md:text-[32px] md:leading-[1.15] md:tracking-[-0.01em]">
+            <h3 className="max-w-[120px] shrink-0 whitespace-pre-line text-xl font-medium leading-normal tracking-[-0.2px] text-white max-md:-mt-[15px] md:mt-4 md:min-h-[76px] md:max-w-[182px] md:text-[32px] md:leading-[1.15] md:tracking-[-0.01em]">
               {title}
             </h3>
           </div>
@@ -335,12 +335,12 @@ export function Pricing() {
           tiltSide="left"
         />
         <CommunityCard
-          tag={COMMUNITY.tutorials.tag}
-          title={COMMUNITY.tutorials.title}
-          description={COMMUNITY.tutorials.description}
-          videoSrc={VIDEOS.communityTutorials}
+          tag={COMMUNITY.blog.tag}
+          title={COMMUNITY.blog.title}
+          description={COMMUNITY.blog.description}
+          videoSrc={VIDEOS.communityBlog}
           objectPosition="65% center"
-          hoverLabel={COMMUNITY.tutorials.hoverLabel}
+          hoverLabel={COMMUNITY.blog.hoverLabel}
           tiltSide="right"
         />
       </motion.div>

@@ -2,7 +2,13 @@
 
 import Image from "next/image";
 import { useState } from "react";
-import { motion, useReducedMotion } from "framer-motion";
+import {
+  motion,
+  useReducedMotion,
+  useTransform,
+  useSpring,
+  useMotionValue,
+} from "framer-motion";
 import { ChevronDown } from "lucide-react";
 import { ABOUT_MISSION } from "@/lib/constants";
 import { fadeUp } from "@/components/animations/fadeUp";
@@ -60,11 +66,23 @@ export function AboutMission() {
   const [expanded, setExpanded] = useState(false);
   const cardClip = `url(#${expanded ? "about-card-expanded" : "about-card-collapsed"})`;
 
+  // Reaching-hands hover push-away (% of each hand's own size). The diagonal
+  // fly-in is a scroll-triggered reveal (whileInView) handled on the wrappers
+  // below; this only adds the outward nudge when the section is hovered.
+  const hover = useMotionValue(0);
+  const hoverSpring = useSpring(hover, { stiffness: 140, damping: 20 });
+  const leftHoverX = useTransform(hoverSpring, [0, 1], ["0%", "-5%"]);
+  const leftHoverY = useTransform(hoverSpring, [0, 1], ["0%", "3%"]);
+  const rightHoverX = useTransform(hoverSpring, [0, 1], ["0%", "5%"]);
+  const rightHoverY = useTransform(hoverSpring, [0, 1], ["0%", "3%"]);
+
   return (
     <section
       id="mission"
       aria-label="Our mission"
-      className="relative isolate overflow-hidden bg-gradient-to-b from-[#f5f5f5] to-[#fafafa] px-3 py-20 md:px-12 md:pb-[250px] md:pt-[150px] cv-auto"
+      onMouseEnter={() => hover.set(1)}
+      onMouseLeave={() => hover.set(0)}
+      className="relative isolate overflow-hidden bg-gradient-to-b from-[#f5f5f5] to-[#fafafa] px-6 pt-[72px] pb-[270px] md:px-12 md:pb-[250px] md:pt-[150px] cv-auto"
     >
       {/* Card silhouette clip paths (scoped notch for both card states) */}
       <svg aria-hidden width="0" height="0" className="pointer-events-none absolute">
@@ -78,33 +96,98 @@ export function AboutMission() {
         </defs>
       </svg>
 
-      {/* Reaching hands — desktop only, behind content */}
+      {/* Mobile reaching hands — compact pair (desktop keeps the large hands below) */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 bottom-[70px] z-[1] flex items-end justify-between md:hidden"
+      >
+        <Image
+          src="/about/Left.png"
+          alt=""
+          width={218}
+          height={200}
+          draggable={false}
+          className="h-auto w-[218px] -translate-x-4 select-none object-contain"
+        />
+        <Image
+          src="/about/Right.png"
+          alt=""
+          width={198}
+          height={200}
+          draggable={false}
+          className="h-auto w-[198px] translate-x-4 select-none object-contain"
+        />
+      </div>
+
+      {/* Reaching hands — desktop only, behind content, peeking from the bottom corners */}
       <div
         aria-hidden
         className="pointer-events-none absolute inset-x-0 bottom-0 z-[1] hidden items-end justify-between md:flex"
       >
-        <Image
-          src={ABOUT_MISSION.handLeft}
-          alt=""
-          width={1452}
-          height={954}
-          draggable={false}
-          className="h-auto w-[min(620px,40vw)] translate-y-[20%] translate-x-[-24%] select-none object-contain"
-        />
-        <Image
-          src={ABOUT_MISSION.handRight}
-          alt=""
-          width={1024}
-          height={671}
-          draggable={false}
-          className="h-auto w-[min(980px,70vw)] translate-y-[40%] translate-x-[24%] select-none object-contain"
-        />
+        <motion.div
+          className="w-[min(620px,40vw)]"
+          initial={
+            prefersReducedMotion
+              ? { x: "-54%", y: "30%" }
+              : { x: "-46%", y: "34%", opacity: 0 }
+          }
+          whileInView={
+            prefersReducedMotion ? undefined : { x: "-24%", y: "20%", opacity: 1 }
+          }
+          viewport={{ once: true, margin: "-10% 0px -10% 0px" }}
+          transition={{ duration: 0.9, ease: EASE }}
+        >
+          <motion.div
+            style={
+              prefersReducedMotion ? undefined : { x: leftHoverX, y: leftHoverY }
+            }
+          >
+            <Image
+              src={ABOUT_MISSION.handLeft}
+              alt=""
+              width={1452}
+              height={954}
+              draggable={false}
+              className="h-auto w-full select-none object-contain"
+            />
+          </motion.div>
+        </motion.div>
+        <motion.div
+          className="w-[min(980px,70vw)]"
+          initial={
+            prefersReducedMotion
+              ? { x: "24%", y: "40%" }
+              : { x: "48%", y: "56%", opacity: 0 }
+          }
+          whileInView={
+            prefersReducedMotion ? undefined : { x: "24%", y: "40%", opacity: 1 }
+          }
+          viewport={{ once: true, margin: "-10% 0px -10% 0px" }}
+          transition={{ duration: 0.9, ease: EASE }}
+        >
+          <motion.div
+            style={
+              prefersReducedMotion
+                ? undefined
+                : { x: rightHoverX, y: rightHoverY }
+            }
+          >
+            <Image
+              src={ABOUT_MISSION.handRight}
+              alt=""
+              width={1024}
+              height={671}
+              draggable={false}
+              className="h-auto w-full select-none object-contain"
+            />
+          </motion.div>
+        </motion.div>
       </div>
 
       {/* Watermark — repeated word scrolling right→left, same band as home/agentic */}
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-x-0 bottom-[0%] z-0 overflow-hidden md:py-[24px] py-[10px]"
+        className="pointer-events-none absolute inset-x-0 bottom-[0%] z-0 overflow-hidden mb-[24px] md:mb-[24px] md:py-[24px] py-[10px] "
       >
         <div className="agentic-watermark-marquee flex w-max items-center whitespace-nowrap font-superground text-[clamp(40px,8vw,72px)] lowercase leading-none text-black/[0.06]">
           {WATERMARK_ITEMS.map((item) => (
@@ -123,7 +206,7 @@ export function AboutMission() {
         {/* Vertical line — spans the full band, top edge to bottom rule */}
         <motion.div
           aria-hidden
-          className="pointer-events-none absolute bottom-0 top-[-150px] left-[-70px] hidden w-px bg-black/15 md:block"
+          className="pointer-events-none absolute bottom-[-120px] top-[-150px] left-[-70px] hidden w-px bg-black/15 md:block"
           style={{ transformOrigin: "50% 0%" }}
           initial={prefersReducedMotion ? undefined : { scaleY: 0 }}
           whileInView={{ scaleY: 1 }}
@@ -133,7 +216,7 @@ export function AboutMission() {
         {/* Bottom rule — full-bleed, meets the side brackets */}
         <motion.div
           aria-hidden
-          className="pointer-events-none absolute bottom-0 left-[calc(0px-max(0px,(100vw-1416px)/2))] right-[calc(0px-max(0px,(100vw-1416px)/2))] hidden h-px bg-black/15 md:block"
+          className="pointer-events-none absolute bottom-[-120px] left-[calc(0px-max(0px,(100vw-1416px)/2))] right-[calc(0px-max(0px,(100vw-1416px)/2))] hidden h-px bg-black/15 md:block"
           initial={prefersReducedMotion ? undefined : { scaleX: 0 }}
           whileInView={{ scaleX: 1 }}
           viewport={{ once: true, margin: "-60px" }}
@@ -161,19 +244,51 @@ export function AboutMission() {
         </svg>
 
         <motion.div
-          className="relative z-[2] flex w-full flex-col gap-12 md:min-h-[480px] md:flex-row md:items-start md:justify-between md:gap-16 md:py-14 "
+          className="relative z-[2] flex w-full flex-col gap-[34px] md:h-[562px] md:flex-row md:items-start md:justify-between md:gap-16 md:py-14 "
           variants={prefersReducedMotion ? {} : staggerContainer}
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, margin: "-100px" }}
         >
-          {/* Headline column */}
-          <motion.h2
+          {/* Headline column — decorative edge brackets on mobile only */}
+          <motion.div
             variants={prefersReducedMotion ? {} : fadeUp}
-            className="max-w-[620px] text-[34px] font-normal leading-[1.25] tracking-[-0.6px] text-black md:text-[54px] md:leading-[70px] md:tracking-[-1.08px]"
+            className="relative w-full md:w-auto md:max-w-[620px]"
           >
-            {ABOUT_MISSION.headline}
-          </motion.h2>
+            <svg
+              aria-hidden
+              width="13"
+              height="173"
+              viewBox="0 0 13 173"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              className="pointer-events-none absolute -left-6 top-1/2 -translate-y-1/2 md:hidden"
+            >
+              <path
+                d="M-0.286194 0.311523L9.10074 12.0984C10.7926 14.2228 11.7138 16.8582 11.7138 19.574V153.049C11.7138 155.765 10.7926 158.4 9.10074 160.525L-0.286194 172.312"
+                stroke="black"
+                strokeOpacity="0.15"
+              />
+            </svg>
+            <svg
+              aria-hidden
+              width="13"
+              height="173"
+              viewBox="0 0 13 173"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              className="pointer-events-none absolute -right-6 top-1/2 -translate-y-1/2 md:hidden"
+            >
+              <path
+                d="M12.5 0.311523L3.11307 12.0984C1.42121 14.2228 0.5 16.8582 0.5 19.574V153.049C0.5 155.765 1.42121 158.4 3.11307 160.525L12.5 172.312"
+                stroke="black"
+                strokeOpacity="0.15"
+              />
+            </svg>
+            <h2 className="max-w-[620px] text-[32px] font-normal leading-[1.25] tracking-[-0.6px] text-black md:text-[54px] md:leading-[70px] md:tracking-[-1.08px]">
+              {ABOUT_MISSION.headline}
+            </h2>
+          </motion.div>
 
           {/* Content card column */}
           <motion.div
@@ -198,7 +313,7 @@ export function AboutMission() {
               <div
                 className={`space-y-4 overflow-hidden transition-all duration-300 ease-out ${
                   expanded
-                    ? "card-scroll -mr-8 max-h-[460px] overflow-y-auto pr-8"
+                    ? "card-scroll -mr-8 max-h-[326px] overflow-y-auto pr-8"
                     : "max-h-[210px]"
                 }`}
               >

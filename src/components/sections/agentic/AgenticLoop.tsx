@@ -483,7 +483,7 @@ export function AgenticLoop() {
 
         <div className="scrollbar-none -mx-3 overflow-x-auto px-3 [-webkit-overflow-scrolling:touch] md:mx-auto md:overflow-visible md:px-0">
           <motion.div
-            className="relative isolate mx-auto mt-14 grid w-[820px] grid-cols-[repeat(2,402px)] gap-4 overflow-visible py-2 md:w-full md:max-w-[920px] md:grid-cols-[repeat(2,452px)]"
+            className="relative isolate mx-auto mt-14 grid w-[calc(160vw+1rem)] grid-cols-[repeat(2,80vw)] gap-4 overflow-visible py-2 md:w-full md:max-w-[920px] md:grid-cols-[repeat(2,452px)]"
             variants={prefersReducedMotion ? {} : staggerContainerSlow}
             initial="hidden"
             whileInView="visible"

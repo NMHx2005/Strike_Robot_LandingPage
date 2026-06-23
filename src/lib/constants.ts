@@ -15,7 +15,7 @@ export const VIDEOS = {
   hero: "/Video/Comp%202.mp4",
   featureEditor: "/Video/Comp%201.mp4",
   communityExplore: "/Video/Community%20Creation.mp4",
-  communityTutorials: "/Video/Comp%203.mp4",
+  communityBlog: "/Video/Blog-Articles.mp4",
 } as const;
 
 export const HERO_BACKGROUND = "/Background.png";
@@ -89,12 +89,12 @@ export const COMMUNITY = {
       "See what teams and researchers are building — simulation environments, training datasets, and robot tasks generated with SR Platform.",
     hoverLabel: "Explore Showcase",
   },
-  tutorials: {
-    tag: "#Learn",
-    title: "Tutorials",
+  blog: {
+    tag: "#News",
+    title: "Blog/\nArticles",
     description:
-      "Step-by-step guides to generating your first environment, building custom assets, and exporting training datasets for your robot stack.",
-    hoverLabel: "Watch Tutorial",
+      "Discover the innovators, researchers, and visionary founders pushing the boundaries of artificial intelligence and robotics",
+    hoverLabel: "Explore More",
   },
 };
 
@@ -365,12 +365,11 @@ export const ABOUT_PARTNERS: {
   description:
     "We work with leading infrastructure, compute, and ecosystem partners to bring deployable robot intelligence to the field.",
   logos: [
-    { name: "Virtuals Protocol", src: "/about/partner-virtuals.png" },
-    { name: "Base", src: "/about/partner-base.png" },
-    { name: "Reppo", src: "/about/partner-reppo.png", invert: true },
-    { name: "Reppo", src: "/about/partner-reppo.png", invert: true },
-    { name: "Virtuals Protocol", src: "/about/partner-virtuals.png" },
-    { name: "Base", src: "/about/partner-base.png" },
-    { name: "Reppo", src: "/about/partner-reppo.png", invert: true },
+    { name: "Virtuals Protocol", src: "/about/Logo Partners/Virtuals Protocol.png" },
+    { name: "Base", src: "/about/Logo Partners/Base.png" },
+    { name: "Reppo", src: "/about/Logo Partners/Reppo.png" },
+    { name: "Eastworlds", src: "/about/Logo Partners/Eastworlds.png" },
+    { name: "Venice", src: "/about/Logo Partners/Venice.png" },
+    { name: "Orboh", src: "/about/Logo Partners/Orboh.png" },
   ],
 };

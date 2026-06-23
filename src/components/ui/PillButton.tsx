@@ -4,12 +4,20 @@ import { useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { AnimatedButtonLabel } from "@/components/ui/AnimatedButtonLabel";
+import { StarBorderLayer } from "@/components/ui/StarBorder";
 
 const darkGradient =
   "linear-gradient(131deg, rgb(51, 51, 51) 0.79%, rgb(13, 13, 13) 35.22%, rgb(38, 38, 38) 99.16%)";
 
 const tapEase = [0.25, 0.1, 0.25, 1] as const;
+
+// Star-border speed: loops continuously, faster while hovered.
+const STAR_SPEED = "5s";
+const STAR_SPEED_HOVER = "2s";
+
+// Inner cover sits above the glow and hides it everywhere except this thin rim,
+// so the shine reads as a border highlight instead of a halo filling the pill.
+const STAR_RIM = 3; // px of glow visible inside the border
 
 type PillButtonProps = {
   variant?: "dark" | "outline";
@@ -27,31 +35,27 @@ const sizeClasses = {
   lg: "h-[52px] pl-4 pr-6 text-base gap-1",
 };
 
-function ButtonLabel({
-  children,
-  active,
-  weightRange,
-}: {
-  children: React.ReactNode;
-  active: boolean;
-  weightRange?: [number, number];
-}) {
-  if (typeof children === "string") {
-    return (
-      <AnimatedButtonLabel active={active} weightRange={weightRange}>
-        {children}
-      </AnimatedButtonLabel>
-    );
-  }
-  return <span>{children}</span>;
-}
-
 function useTapMotion(prefersReducedMotion: boolean | null) {
   if (prefersReducedMotion) return {};
   return {
     whileTap: { scale: 0.97 },
     transition: { duration: 0.2, ease: tapEase },
   };
+}
+
+// Outline (white) pill: subtle gradient border that follows the pill radius.
+const outlineBorderBg =
+  "linear-gradient(#fff,#fff) padding-box, linear-gradient(206.97deg, rgba(13,13,13,0.1) 13.96%, rgba(204,204,204,0.1) 50.79%, rgba(13,13,13,0.1) 83.14%) border-box";
+
+/** Covers the pill interior so the star glow only shows as a thin rim at the border. */
+function StarRimCover({ background }: { background: string }) {
+  return (
+    <span
+      aria-hidden
+      className="absolute z-[1] rounded-[inherit]"
+      style={{ inset: STAR_RIM, background }}
+    />
+  );
 }
 
 export function PillButton({
@@ -66,6 +70,7 @@ export function PillButton({
   const prefersReducedMotion = useReducedMotion();
   const motionProps = useTapMotion(prefersReducedMotion);
   const [hovered, setHovered] = useState(false);
+  const starSpeed = hovered ? STAR_SPEED_HOVER : STAR_SPEED;
 
   if (variant === "outline") {
     return (
@@ -80,19 +85,20 @@ export function PillButton({
           className
         )}
         style={{
-          border: "1.4px solid #0d0d0d",
+          border: "1.4px solid transparent",
+          background: outlineBorderBg,
           boxShadow:
             "inset 0 2px 4px rgba(0,0,0,0.05), inset 0 -2px 4px rgba(255,255,255,0.2)",
         }}
         {...motionProps}
       >
-        <span
-          aria-hidden
-          className="absolute inset-0 z-0 bg-white pointer-events-none rounded-[inherit]"
-        />
-        <span className="relative z-[2]">
-          <ButtonLabel active={hovered} weightRange={[400, 700]}>{children}</ButtonLabel>
-        </span>
+        {!prefersReducedMotion && (
+          <>
+            <StarBorderLayer color="rgba(13,13,13,0.5)" speed={starSpeed} />
+            <StarRimCover background="#fff" />
+          </>
+        )}
+        <span className="relative z-[2]">{children}</span>
         {showArrow && (
           <ArrowRight
             className="relative z-[2] w-[18px] h-[18px] shrink-0 opacity-80"
@@ -122,10 +128,14 @@ export function PillButton({
       }}
       {...motionProps}
     >
+      {!prefersReducedMotion && (
+        <>
+          <StarBorderLayer color="rgba(255,255,255,0.95)" speed={starSpeed} />
+          <StarRimCover background={darkGradient} />
+        </>
+      )}
       {icon && <span className="relative z-[2] shrink-0">{icon}</span>}
-      <span className="relative z-[2] text-[#e0e0e0]">
-        <ButtonLabel active={hovered}>{children}</ButtonLabel>
-      </span>
+      <span className="relative z-[2] text-[#e0e0e0]">{children}</span>
       {showArrow && (
         <ArrowRight
           className="relative z-[2] w-[18px] h-[18px] shrink-0 text-white/80"
@@ -148,6 +158,7 @@ export function PillButtonCta({
   const prefersReducedMotion = useReducedMotion();
   const motionProps = useTapMotion(prefersReducedMotion);
   const [hovered, setHovered] = useState(false);
+  const starSpeed = hovered ? STAR_SPEED_HOVER : STAR_SPEED;
 
   return (
     <motion.button
@@ -167,9 +178,13 @@ export function PillButtonCta({
       }}
       {...motionProps}
     >
-      <span className="relative z-[2]">
-        <ButtonLabel active={hovered}>{children}</ButtonLabel>
-      </span>
+      {!prefersReducedMotion && (
+        <>
+          <StarBorderLayer color="rgba(255,255,255,0.95)" speed={starSpeed} />
+          <StarRimCover background={darkGradient} />
+        </>
+      )}
+      <span className="relative z-[2]">{children}</span>
       <ArrowRight
         className="relative z-[2] w-[18px] h-[18px] shrink-0 text-white/80"
         strokeWidth={2}

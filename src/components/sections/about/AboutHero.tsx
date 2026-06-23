@@ -1,13 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Image from "next/image";
 import { motion, useReducedMotion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import { ABOUT_HERO } from "@/lib/constants";
 import { fadeUp } from "@/components/animations/fadeUp";
 import { staggerContainer } from "@/components/animations/stagger";
-import { AnimatedButtonLabel } from "@/components/ui/AnimatedButtonLabel";
+import { StarBorderLayer } from "@/components/ui/StarBorder";
+import { cn } from "@/lib/utils";
+import { HeroSpotlightHands } from "./HeroSpotlightHands";
 
 const darkGradient =
   "linear-gradient(131deg, rgb(51, 51, 51) 0.79%, rgb(13, 13, 13) 35.22%, rgb(38, 38, 38) 99.16%)";
@@ -44,45 +46,100 @@ const SOCIAL_ICONS: Record<string, React.ReactNode> = {
 export function AboutHero() {
   const prefersReducedMotion = useReducedMotion();
   const [followHovered, setFollowHovered] = useState(false);
+  const spotlightRef = useRef<HTMLDivElement>(null);
 
   const followTap = prefersReducedMotion
     ? {}
     : { whileTap: { scale: 0.97 }, transition: { duration: 0.2, ease: tapEase } };
 
+  // Rendered twice: inside the title column on desktop, after the description on
+  // mobile (Figma order). `extraClassName` controls visibility / height / order.
+  const followButton = (extraClassName: string) => (
+    <motion.a
+      href={ABOUT_HERO.followHref}
+      onMouseEnter={() => setFollowHovered(true)}
+      onMouseLeave={() => setFollowHovered(false)}
+      className={cn(
+        "relative cursor-pointer select-none items-center justify-center gap-1.5 overflow-hidden rounded-3xl px-[50px] text-sm font-medium text-[#e0e0e0]",
+        extraClassName
+      )}
+      style={{
+        background: darkGradient,
+        border: "2px solid #0d0d0d",
+        boxShadow:
+          "inset 0 2px 4px rgba(0,0,0,0.2), inset 0 -2px 4px rgba(255,255,255,0.2)",
+      }}
+      {...followTap}
+    >
+      {!prefersReducedMotion && (
+        <>
+          <StarBorderLayer
+            color="rgba(255,255,255,0.95)"
+            speed={followHovered ? "2s" : "5s"}
+          />
+          <span
+            aria-hidden
+            className="absolute z-[1] rounded-[inherit]"
+            style={{ inset: 3, background: darkGradient }}
+          />
+        </>
+      )}
+      <span className="relative z-[2] flex items-center gap-2">
+        {ABOUT_HERO.followLabel}
+        <span className="flex size-4 items-center justify-center">{XIcon}</span>
+      </span>
+      <ArrowRight
+        className="relative z-[2] h-[18px] w-[18px] shrink-0 text-white/80"
+        strokeWidth={2}
+      />
+    </motion.a>
+  );
+
+  // Drive the spotlight reveal from the section so the cursor is tracked even when
+  // it hovers the content layer (events bubble up to the section).
+  const handlePointerMove = (e: React.PointerEvent<HTMLElement>) => {
+    const zone = spotlightRef.current;
+    if (!zone) return;
+    const rect = zone.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const inside = x >= 0 && x <= rect.width && y >= 0 && y <= rect.height;
+    zone.style.setProperty("--mx", `${x}px`);
+    zone.style.setProperty("--my", `${y}px`);
+    zone.style.setProperty("--reveal", inside ? "1" : "0");
+  };
+
+  const handlePointerLeave = () => {
+    spotlightRef.current?.style.setProperty("--reveal", "0");
+  };
+
   return (
     <section
       className="relative overflow-hidden px-3 md:px-12 cv-auto"
       aria-label="About StrikeRobot"
+      onPointerMove={prefersReducedMotion ? undefined : handlePointerMove}
+      onPointerLeave={prefersReducedMotion ? undefined : handlePointerLeave}
     >
-      {/* Robot hands — centered behind the columns on desktop */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-x-0 bottom-0 z-0 hidden items-end justify-center md:flex"
-      >
-        <Image
-          src={ABOUT_HERO.image}
-          alt=""
-          width={760}
-          height={836}
-          priority
-          className="h-auto w-[clamp(260px,36vw,540px)] select-none object-contain"
-          draggable={false}
-        />
-      </div>
+      {/* Robot hands spotlight reveal — centered behind the columns on desktop */}
+      <HeroSpotlightHands
+        ref={spotlightRef}
+        baseImage={ABOUT_HERO.image}
+        effectImage="/about/hero-effect.jpg"
+      />
 
       <motion.div
-        className="relative z-10 mx-auto flex w-full flex-col pb-12 pt-28 md:min-h-[100dvh] md:pb-16 md:pt-36"
+        className="relative z-10 mx-auto flex w-full flex-col pb-12 pt-28 md:min-h-[1117px] md:pb-16 md:pt-36"
         variants={prefersReducedMotion ? {} : staggerContainer}
         initial="hidden"
         animate="visible"
       >
-        <div className="flex flex-1 flex-col gap-12 md:flex-row md:items-start md:justify-between md:gap-8">
-          {/* Title block */}
+        <div className="flex flex-1 flex-col items-center gap-8 md:flex-row md:items-start md:justify-between">
+          {/* Title (+ desktop button) */}
           <motion.div
             variants={prefersReducedMotion ? {} : fadeUp}
-            className="flex flex-col items-start"
+            className="order-1 flex flex-col items-center md:items-start"
           >
-            <h1 className="bg-gradient-to-r from-black to-[#314344] bg-clip-text text-[clamp(56px,9vw,96px)] font-normal leading-[1.02] tracking-[-0.02em] text-transparent">
+            <h1 className="bg-gradient-to-r from-black to-[#314344] bg-clip-text text-center text-[clamp(56px,9vw,96px)] font-normal leading-[1.02] tracking-[-0.02em] text-transparent md:text-left">
               <span className="block">{ABOUT_HERO.titlePrefix}</span>
               <span className="block text-[clamp(52px,8.4vw,88px)]">
                 {ABOUT_HERO.titleAccent}
@@ -91,36 +148,30 @@ export function AboutHero() {
 
             <span
               aria-hidden
-              className="mt-6 block h-1.5 w-11 rounded-[2px] bg-[#020202]"
+              className="mt-6 hidden h-1.5 w-11 rounded-[2px] bg-[#020202] md:block"
             />
 
-            <motion.a
-              href={ABOUT_HERO.followHref}
-              onMouseEnter={() => setFollowHovered(true)}
-              onMouseLeave={() => setFollowHovered(false)}
-              className="mt-7 flex w-auto cursor-pointer select-none items-center justify-center gap-2 rounded-3xl px-[50px] py-[17px] text-[16px] font-medium tracking-[-0.32px] text-white"
-              style={{
-                background: darkGradient,
-                border: "2px solid #0d0d0d",
-                boxShadow:
-                  "inset 0 2px 4px rgba(0,0,0,0.2), inset 0 -2px 4px rgba(255,255,255,0.2)",
-              }}
-              {...followTap}
-            >
-              <span className="flex items-center gap-2">
-                <AnimatedButtonLabel active={followHovered}>
-                  {ABOUT_HERO.followLabel}
-                </AnimatedButtonLabel>
-                <span className="flex size-4 items-center justify-center">
-                  {XIcon}
-                </span>
-              </span>
-              <ArrowRight className="size-[18px] shrink-0 text-white/80" strokeWidth={2} />
-            </motion.a>
+            {followButton("mt-7 hidden h-11 md:flex")}
           </motion.div>
 
+          {/* Description */}
+          <motion.div
+            variants={prefersReducedMotion ? {} : fadeUp}
+            className="order-2 flex flex-col items-center text-center md:max-w-[420px] md:items-start md:pt-2 md:text-left"
+          >
+            <p className="text-[20px] leading-[30px] tracking-[-0.4px] text-black md:text-[32px] md:leading-[48px] md:tracking-[-0.64px]">
+              {ABOUT_HERO.description}
+            </p>
+          </motion.div>
+
+          {/* Mobile follow button — after the description per Figma */}
+          {followButton("order-3 flex h-[52px] md:hidden")}
+
           {/* Mobile hands image */}
-          <div aria-hidden className="flex justify-center md:hidden">
+          <div
+            aria-hidden
+            className="order-4 flex justify-center md:hidden"
+          >
             <Image
               src={ABOUT_HERO.image}
               alt=""
@@ -130,23 +181,6 @@ export function AboutHero() {
               draggable={false}
             />
           </div>
-
-          {/* Description block */}
-          <motion.div
-            variants={prefersReducedMotion ? {} : fadeUp}
-            className="flex flex-col md:max-w-[420px] md:pt-2"
-          >
-            {/* <span
-              aria-hidden
-              className="mb-5 hidden items-center gap-2 text-black/30 md:flex"
-            >
-              <span className="h-px w-16 bg-current" />
-              <ArrowUpRight className="size-4" strokeWidth={2} />
-            </span> */}
-            <p className="text-[20px] leading-[30px] tracking-[-0.4px] text-black md:text-[32px] md:leading-[48px] md:tracking-[-0.64px]">
-              {ABOUT_HERO.description}
-            </p>
-          </motion.div>
         </div>
 
         {/* Social links */}

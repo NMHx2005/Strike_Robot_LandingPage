@@ -201,6 +201,84 @@
   }
 }
 
+/* Star-border shine for CTA pills — traveling glow (reactbits StarBorder) */
+.border-gradient-bottom,
+.border-gradient-top {
+  position: absolute;
+  width: 300%;
+  height: 50%;
+  opacity: 0.7;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
+  animation-iteration-count: infinite;
+  animation-timing-function: linear;
+  animation-direction: alternate;
+}
+.border-gradient-bottom {
+  bottom: -12px;
+  right: -250%;
+  animation-name: star-movement-bottom;
+}
+.border-gradient-top {
+  top: -12px;
+  left: -250%;
+  animation-name: star-movement-top;
+}
+@keyframes star-movement-bottom {
+  0% {
+    transform: translate(0%, 0%);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-100%, 0%);
+    opacity: 0;
+  }
+}
+@keyframes star-movement-top {
+  0% {
+    transform: translate(0%, 0%);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(100%, 0%);
+    opacity: 0;
+  }
+}
+
+/* Desktop nav dropdown item hover */
+.nav-dropdown-item:hover {
+  background: linear-gradient(
+    90deg,
+    rgba(197, 209, 208, 0.2) 0%,
+    rgba(97, 107, 101, 0.2) 100%
+  );
+}
+
+/* Mobile partner-logo marquee (two opposite-direction rows) */
+.marquee-track-left {
+  animation: marquee-left 30s linear infinite;
+}
+.marquee-track-right {
+  animation: marquee-right 30s linear infinite;
+}
+@keyframes marquee-left {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+@keyframes marquee-right {
+  from {
+    transform: translateX(-50%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

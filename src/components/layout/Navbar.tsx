@@ -8,6 +8,7 @@ import { ChevronDown, X, ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { NAV_CTA, NAV_LINKS, SITE_NAME } from "@/lib/constants";
 import { PillButtonCta } from "@/components/ui/PillButton";
+import { StarBorderLayer } from "@/components/ui/StarBorder";
 import { GlassPill, METALLIC_BORDER_BG, PILL_BAR_BG, PILL_BAR_SHADOW, GPU_LAYER } from "@/components/ui/GlassPill";
 import { MenuIcon } from "@/components/ui/MenuIcon";
 
@@ -262,7 +263,6 @@ function MobileScrollHeader({
 }
 
 export function Navbar() {
-  const [activeItem, setActiveItem] = useState("Home");
   const [mobileOpen, setMobileOpen] = useState(false);
   const [desktopProductOpen, setDesktopProductOpen] = useState(false);
   const [mobileProductOpen, setMobileProductOpen] = useState(false);
@@ -333,13 +333,11 @@ export function Navbar() {
   };
 
   const handleItemClick = (label: string, href: string) => {
-    setActiveItem(label);
     setDesktopProductOpen(false);
     navigateTo(href);
   };
 
   const handleMobileItemClick = (label: string, href: string) => {
-    setActiveItem(label);
     setMobileOpen(false);
     setTimeout(() => navigateTo(href), 220);
   };
@@ -379,9 +377,9 @@ export function Navbar() {
             >
               <nav className="flex items-center gap-[6px]" aria-label="Main navigation">
                 {NAV_LINKS.filter((item) => item.label !== "Home").map((item) => {
-                  const isActive = activeItem === item.label;
                   const isProduct = item.label === "Product";
-                  const isHighlighted = isActive;
+                  // Black pill only while a dropdown tab is open; otherwise default.
+                  const isHighlighted = isProduct && desktopProductOpen;
                   return (
                     <button
                       key={item.label}
@@ -393,7 +391,6 @@ export function Navbar() {
                       onFocus={isProduct ? openProductDropdown : undefined}
                       onClick={() => {
                         if (isProduct) {
-                          setActiveItem(item.label);
                           openProductDropdown();
                           return;
                         }
@@ -401,25 +398,25 @@ export function Navbar() {
                       }}
                       aria-expanded={isProduct ? desktopProductOpen : undefined}
                       className={cn(
-                        "relative flex cursor-pointer select-none items-center gap-2 overflow-hidden rounded-full px-4 py-2 font-sans text-sm font-medium leading-none tracking-normal transition-[color,padding] duration-200",
+                        "relative flex cursor-pointer select-none items-center gap-2 overflow-hidden rounded-full px-4 py-2 font-sans text-sm font-medium leading-none tracking-normal transition-[color,background-color,padding] duration-200",
                         isHighlighted
                           ? "px-4 font-semibold text-white"
-                          : "text-[#4d4d4d] hover:text-black"
+                          : "text-[#4d4d4d] hover:bg-[#0000000d] hover:text-black"
                       )}
                     >
-                      {isHighlighted && (
-                        <motion.span
-                          layoutId="desktop-nav-active-pill"
-                          className="absolute inset-0 rounded-full bg-black"
-                          transition={{
-                            type: "spring",
-                            stiffness: 430,
-                            damping: 36,
-                            mass: 0.8,
-                          }}
-                          aria-hidden="true"
-                        />
-                      )}
+                      <AnimatePresence>
+                        {isHighlighted && (
+                          <motion.span
+                            key="active-pill"
+                            className="absolute inset-0 rounded-full bg-black"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            transition={{ duration: 0.3, ease: "easeOut" }}
+                            aria-hidden="true"
+                          />
+                        )}
+                      </AnimatePresence>
                       <span className="relative z-10">{item.label}</span>
                       {item.hasDropdown && (
                         <NavChevronIcon active={isHighlighted} />
@@ -456,11 +453,8 @@ export function Navbar() {
                     <Link
                       key={product.label}
                       href={product.href}
-                      onClick={() => {
-                        setActiveItem("Product");
-                        setDesktopProductOpen(false);
-                      }}
-                      className="group flex items-center gap-4 rounded-[18px] px-2 py-4 transition-colors duration-200 hover:bg-white/55"
+                      onClick={() => setDesktopProductOpen(false)}
+                      className="nav-dropdown-item group flex items-center gap-4 rounded-[18px] px-2 py-4 transition-colors duration-200"
                     >
                       <ProductCubeIcon className="size-12 shrink-0 opacity-60" />
                       <span className="min-w-0 flex-1">
@@ -560,7 +554,6 @@ export function Navbar() {
                         type="button"
                         onClick={() => {
                           if (isProduct) {
-                            setActiveItem(item.label);
                             setMobileProductOpen((open) => !open);
                             return;
                           }
@@ -589,7 +582,7 @@ export function Navbar() {
                           {mobileProductOpen && (
                             <motion.div
                               key="mobile-product-links"
-                              className="mx-3 mb-2 overflow-hidden rounded-[24px] border border-white/10 bg-white/[0.05]"
+                              className="overflow-hidden"
                               initial={{ height: 0, opacity: 0 }}
                               animate={{ height: "auto", opacity: 1 }}
                               exit={{ height: 0, opacity: 0 }}
@@ -597,29 +590,16 @@ export function Navbar() {
                                 duration: prefersReducedMotion ? 0 : 0.22,
                               }}
                             >
-                              <div className="flex flex-col p-4">
-                                {PRODUCT_LINKS.map((product) => (
-                                  <Link
-                                    key={product.label}
-                                    href={product.href}
-                                    onClick={() => {
-                                      setActiveItem("Product");
-                                      setMobileOpen(false);
-                                    }}
-                                    className="flex items-center gap-4 rounded-[18px] px-2 py-4 text-white transition-colors active:bg-white/10"
-                                  >
-                                    <ProductCubeIcon className="size-12 shrink-0 opacity-60" />
-                                    <span className="min-w-0 flex-1">
-                                      <span className="mb-2.5 block font-sans text-[18px] font-semibold leading-none tracking-normal">
-                                        {product.label}
-                                      </span>
-                                      <span className="block font-sans text-sm font-normal leading-[18px] tracking-normal text-white/55">
-                                        {product.description}
-                                      </span>
-                                    </span>
-                                  </Link>
-                                ))}
-                              </div>
+                              {PRODUCT_LINKS.map((product) => (
+                                <Link
+                                  key={product.label}
+                                  href={product.href}
+                                  onClick={() => setMobileOpen(false)}
+                                  className="flex w-full items-center border-t border-white/10 py-5 pl-10 pr-3 text-[18px] tracking-[-0.2px] text-white/90 active:bg-white/10"
+                                >
+                                  {product.label}
+                                </Link>
+                              ))}
                             </motion.div>
                           )}
                         </AnimatePresence>
@@ -641,10 +621,30 @@ export function Navbar() {
                       "inset 0 2px 4px 0 rgba(0,0,0,0.2), inset 0 -2px 4px 0 rgba(255,255,255,0.2)",
                   }}
                 >
-                  <span className="whitespace-nowrap text-base font-medium tracking-[-0.32px] text-white">
+                  {!prefersReducedMotion && (
+                    <>
+                      <StarBorderLayer
+                        color="rgba(255,255,255,0.95)"
+                        speed="5s"
+                      />
+                      <span
+                        aria-hidden
+                        className="absolute z-[1] rounded-[inherit]"
+                        style={{
+                          inset: 3,
+                          background:
+                            "linear-gradient(136deg, #333 0.79%, #0d0d0d 35.22%, #262626 99.16%)",
+                        }}
+                      />
+                    </>
+                  )}
+                  <span className="relative z-[2] whitespace-nowrap text-base font-medium tracking-[-0.32px] text-white">
                     {NAV_CTA}
                   </span>
-                  <ArrowRight className="size-[18px] text-white" strokeWidth={2} />
+                  <ArrowRight
+                    className="relative z-[2] size-[18px] text-white"
+                    strokeWidth={2}
+                  />
                 </button>
               </div>
             </div>

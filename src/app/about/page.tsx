@@ -18,20 +18,22 @@ export default function AboutPage() {
   return (
     <>
       <Navbar />
-      {/* Hero overlays a sticky top background (same as home/agentic); the two
-          sections below keep their own backgrounds via MainSection transparent. */}
+      {/* One page-level sticky hero background (same as agentic): it stays pinned
+          at the top behind everything. Sections with their own bg cover it
+          (e.g. AboutMission's gradient); transparent sections like AboutPartners
+          reveal it as you scroll. */}
       <div className="relative">
         <StickyHeroBackground />
         <div className="relative z-10 -mt-[100dvh]">
           <AboutHero />
+          <MainSection transparent>
+            <AboutMission />
+            <AboutPartners />
+            <CTA variant="about" />
+            <Footer />
+          </MainSection>
         </div>
       </div>
-      <MainSection transparent>
-        <AboutMission />
-        <AboutPartners />
-        <CTA variant="about" />
-        <Footer />
-      </MainSection>
     </>
   );
 }

@@ -210,9 +210,23 @@ export function AgenticAwareness() {
           variants={prefersReducedMotion ? {} : fadeUpScale}
           className="flex w-full flex-col items-center gap-2.5 md:mt-12"
         >
-          {/* Mobile carousel card */}
+          {/* Mobile carousel card — swipe horizontally to change slides */}
           <div className="relative w-full max-w-[406px] overflow-hidden rounded-[20px] md:hidden">
-            <div className="relative aspect-[406/512] w-full bg-white">
+            <motion.div
+              className="relative aspect-[406/512] w-full touch-pan-y select-none bg-white"
+              drag="x"
+              dragConstraints={{ left: 0, right: 0 }}
+              dragElastic={0.18}
+              dragMomentum={false}
+              onDragEnd={(_, info) => {
+                const swipe = 50;
+                if (info.offset.x < -swipe || info.velocity.x < -400) {
+                  goTo(index + 1);
+                } else if (info.offset.x > swipe || info.velocity.x > 400) {
+                  goTo(index - 1);
+                }
+              }}
+            >
               <AnimatePresence initial={false} custom={direction}>
                 <motion.div
                   key={slide.id}
@@ -245,7 +259,7 @@ export function AgenticAwareness() {
                   />
                 </div>
               </div>
-            </div>
+            </motion.div>
           </div>
 
           <div className="flex justify-center md:hidden">
