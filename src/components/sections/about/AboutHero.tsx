@@ -125,7 +125,7 @@ export function AboutHero() {
         ref={spotlightRef}
         baseImage="/about/layer-1.png"
         effectImage="/about/layer-2.png"
-        effectImage2="/about/layer-3.png"
+        effectImage2="/about/layer-3-glow.png"
       />
 
       <motion.div
@@ -134,7 +134,7 @@ export function AboutHero() {
         initial="hidden"
         animate="visible"
       >
-        <div className="flex flex-1 flex-col items-center gap-8 md:flex-row md:items-start md:justify-between">
+        <div className="flex flex-1 flex-col items-center gap-8 md:flex-row md:items-center md:justify-between">
           {/* Title (+ desktop button) */}
           <motion.div
             variants={prefersReducedMotion ? {} : fadeUp}
@@ -158,9 +158,21 @@ export function AboutHero() {
           {/* Description */}
           <motion.div
             variants={prefersReducedMotion ? {} : fadeUp}
-            className="order-2 flex flex-col items-center text-center md:max-w-[420px] md:items-start md:pt-2 md:text-left"
+            className="order-2 flex flex-col items-center text-center md:flex-row md:items-start md:gap-[26px] md:pt-2 md:text-left"
           >
-            <p className="text-[20px] leading-[30px] tracking-[-0.4px] text-black md:text-[32px] md:leading-[48px] md:tracking-[-0.64px]">
+            {/* Decorative left marker — desktop only; mt nudges the line onto the first text row */}
+            <svg
+              aria-hidden
+              width="103"
+              height="17"
+              viewBox="0 0 103 17"
+              fill="none"
+              className="hidden shrink-0 md:mt-[15px] md:block"
+            >
+              <path d="M0 8.26514H96" stroke="black" strokeOpacity="0.2" />
+              <path d="M92 16.2651L102 0.265137" stroke="black" strokeOpacity="0.2" />
+            </svg>
+            <p className="text-[20px] leading-[30px] tracking-[-0.4px] text-black md:max-w-[420px] md:text-[32px] md:leading-[48px] md:tracking-[-0.64px]">
               {ABOUT_HERO.description}
             </p>
           </motion.div>

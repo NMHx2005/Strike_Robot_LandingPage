@@ -74,7 +74,6 @@ export const HeroSpotlightHands = forwardRef<HTMLDivElement, Props>(
             {
               opacity: "var(--reveal)",
               transition: "opacity 0.4s ease",
-              mixBlendMode: "screen",
               WebkitMaskImage: mask,
               maskImage: mask,
             } as React.CSSProperties
