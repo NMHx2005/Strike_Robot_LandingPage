@@ -434,7 +434,7 @@ export function Navbar() {
             {desktopProductOpen && (
               <motion.div
                 key="desktop-product-dropdown"
-                className="absolute left-1/2 top-[58px] z-20 w-max max-w-[min(400px,calc(100vw-96px))] -translate-x-1/2 overflow-hidden rounded-[24px] border-[1.4px] p-4"
+                className="absolute left-1/2 top-[58px] z-20 w-max max-w-[min(400px,calc(100vw-96px))] overflow-hidden rounded-[24px] border-[1.4px] p-4"
                 style={{
                   background:
                     "linear-gradient(90.64deg, #FFFFFF 4.23%, rgba(255,255,255,0.8) 56%, rgba(223,227,230,0.8) 99.91%)",
@@ -444,9 +444,9 @@ export function Navbar() {
                   backdropFilter: "blur(30px)",
                   WebkitBackdropFilter: "blur(30px)",
                 }}
-                initial={{ opacity: 0, y: -8, scale: 0.98 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: -8, scale: 0.98 }}
+                initial={{ opacity: 0, y: -8, scale: 0.98, x: "-50%" }}
+                animate={{ opacity: 1, y: 0, scale: 1, x: "-50%" }}
+                exit={{ opacity: 0, y: -8, scale: 0.98, x: "-50%" }}
                 transition={{ duration: prefersReducedMotion ? 0 : 0.18 }}
                 onMouseEnter={openProductDropdown}
                 onMouseLeave={closeProductDropdown}

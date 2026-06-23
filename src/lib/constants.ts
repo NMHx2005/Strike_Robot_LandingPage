@@ -4,9 +4,7 @@ export const SITE_DESCRIPTION =
   "SR Platform generates physics-valid simulation environments, production-grade 3D assets, and training-ready datasets — from a single natural language description.";
 
 export const NAV_LINKS = [
-  { label: "Home", href: "#" },
   { label: "About", href: "#features" },
-  { label: "Case Studies", href: "#community", hasDropdown: true },
   { label: "Product", href: "#features", hasDropdown: true },
   { label: "Simulation", href: "#cta" },
 ];
@@ -116,7 +114,7 @@ export const VIDEO_CTA = {
   ],
 };
 
-export type CtaVariant = "platform" | "agentic";
+export type CtaVariant = "platform" | "agentic" | "about";
 
 export const CTA_VARIANTS: Record<
   CtaVariant,
@@ -131,6 +129,11 @@ export const CTA_VARIANTS: Record<
     wordmark: "sr agentic",
     cta: "Build with SR Agentic",
     subtitleLines: ["Give your robots", "real-world judgment with"],
+  },
+  about: {
+    wordmark: "physical ai",
+    cta: "Create with SR Platform",
+    subtitleLines: ["Let's build the future of"],
   },
 };
 
@@ -288,5 +291,86 @@ export const AGENTIC_OEMS = {
         "Action allow-lists, a safety governor, sandboxed execution, and an immutable audit log bound what a robot can physically do in the field.",
       icon: "/agentic/oems/security.png",
     },
+  ],
+};
+
+// ---------------- ABOUT PAGE (/about) ----------------
+
+export const ABOUT_HERO = {
+  titlePrefix: "About",
+  titleAccent: "StrikeRobot",
+  followLabel: "Follow us on",
+  followHref: "#",
+  description:
+    "StrikeRobot builds the intelligence and infrastructure layer for the next generation of physical AI — giving robots the spatial understanding to act in the real world, and giving the teams that build them the tools to get there faster.",
+  image: "/about/hero-hands.png",
+  socials: [
+    { label: "X", href: "#" },
+    { label: "Instagram", href: "#" },
+    { label: "Facebook", href: "#" },
+    { label: "Discord", href: "#" },
+  ],
+};
+
+type MissionRun = { text: string; bold?: boolean };
+
+export const ABOUT_MISSION: {
+  headline: string;
+  watermark: string;
+  readMore: string;
+  readLess: string;
+  paragraphs: MissionRun[][];
+  handLeft: string;
+  handRight: string;
+} = {
+  headline:
+    "We build physical AI infrastructure — from the data that trains robots to the intelligence that runs on them.",
+  watermark: "sr agentic",
+  readMore: "Read Full",
+  readLess: "Hide content",
+  paragraphs: [
+    [
+      {
+        text: "Robotics has a hard truth at its center: intelligent machines need enormous volumes of high-quality spatial data to learn, and a robust layer of real-time reasoning to act once they're deployed. Both have been bottlenecks for the entire industry. StrikeRobot exists to remove them.",
+      },
+    ],
+    [
+      { text: "Our two products attack the problem from both ends. " },
+      { text: "SR Platform", bold: true },
+      {
+        text: " is a 3D spatial creation platform that turns a natural-language description into physics-valid simulation environments and training-ready datasets — compressing what used to take a team months into a single day. ",
+      },
+      { text: "SR Agentic", bold: true },
+      {
+        text: " is an ephemeral intelligence layer that builds task-shaped spatial understanding on the fly, so robots act appropriately in the real world and adapt the instant it changes.",
+      },
+    ],
+    [
+      {
+        text: "We're a team of engineers and researchers working closely with humanoid labs, hardware OEMs, and infrastructure partners to put deployable robot intelligence into the field — built on open foundations and an onchain economic layer that lets robots participate as autonomous economic actors.",
+      },
+    ],
+  ],
+  handLeft: "/about/hand-left.png",
+  handRight: "/about/hand-right.png",
+};
+
+export const ABOUT_PARTNERS: {
+  headline: string;
+  description: string;
+  // `invert` recolors a white-on-transparent logo to black so it reads on the white card.
+  logos: { name: string; src: string; invert?: boolean }[];
+} = {
+  headline: "Our trusted partnership",
+  description:
+    "We work with leading infrastructure, compute, and ecosystem partners to bring deployable robot intelligence to the field.",
+  logos: [
+    { name: "Virtuals Protocol", src: "/about/partner-virtuals.png" },
+    { name: "Base", src: "/about/partner-base.png" },
+    { name: "Reppo", src: "/about/partner-reppo.png", invert: true },
+    { name: "Reppo", src: "/about/partner-reppo.png", invert: true },
+    { name: "Virtuals Protocol", src: "/about/partner-virtuals.png" },
+    { name: "Base", src: "/about/partner-base.png" },
+    { name: "Reppo", src: "/about/partner-reppo.png", invert: true },
   ],
 };

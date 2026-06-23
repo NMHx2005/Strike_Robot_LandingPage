@@ -101,6 +101,25 @@
     display: none;
   }
 
+  /* Card scrollbar — black 30% thumb (Figma), overrides the global purple one */
+  .card-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: #0000004d transparent;
+  }
+
+  .card-scroll::-webkit-scrollbar {
+    width: 5px;
+  }
+
+  .card-scroll::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .card-scroll::-webkit-scrollbar-thumb {
+    background: #0000004d;
+    border-radius: 8px;
+  }
+
   /* White card surface — stands out against #E5E5E5 background */
   .surface-card {
     background: #FFFFFF;
