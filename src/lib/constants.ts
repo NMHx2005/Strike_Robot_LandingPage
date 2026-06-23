@@ -241,6 +241,7 @@ export const AGENTIC_AWARENESS = {
       description:
         "Routine patrols of warehouses, substations, and construction sites. The robot maps only persistent infrastructure, flags anomalies, and adapts to what's changed since the last sweep.",
       imageSrc: "/agentic/awareness/security-patrol.png",
+      mobileImageSrc: "/agentic/awareness/anh-1.png",
     },
     {
       id: "factory-inspection",
@@ -248,6 +249,7 @@ export const AGENTIC_AWARENESS = {
       description:
         "Walk production lines with task-conditioned attention on equipment, conveyors, and operators. Detect deviations from baseline and surface only what needs a human decision.",
       imageSrc: "/agentic/awareness/factory-inspection.png",
+      mobileImageSrc: "/agentic/awareness/anh-2.png",
     },
     {
       id: "search-rescue",
@@ -255,6 +257,7 @@ export const AGENTIC_AWARENESS = {
       description:
         "Indoor search-and-rescue across unfamiliar buildings — schema templates focus on victims, exits, and hazards instead of trying to map the entire structure to centimeter accuracy.",
       imageSrc: "/agentic/awareness/search-rescue.png",
+      mobileImageSrc: "/agentic/awareness/anh-3.png",
     },
   ],
 };
@@ -352,7 +355,7 @@ export const ABOUT_MISSION: {
     ],
   ],
   handLeft: "/about/hand-left.png",
-  handRight: "/about/hand-right.png",
+  handRight: "/about/hero-right.png",
 };
 
 export const ABOUT_PARTNERS: {

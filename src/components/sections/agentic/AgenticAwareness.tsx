@@ -239,7 +239,7 @@ export function AgenticAwareness() {
                   className="absolute inset-0"
                 >
                   <Image
-                    src={slide.imageSrc}
+                    src={slide.mobileImageSrc}
                     alt={slide.title}
                     fill
                     sizes="406px"

@@ -6,8 +6,10 @@ import Image from "next/image";
 type Props = {
   /** Image 1 — base robot hands (bottom layer) */
   baseImage: string;
-  /** Image 2 — effect art revealed under the cursor (top layer). Falls back to a placeholder glow. */
+  /** Image 2 — effect art revealed under the cursor (middle reveal layer). Falls back to a placeholder glow. */
   effectImage?: string;
+  /** Image 3 — second effect art revealed under the cursor, stacked on top of image 2. */
+  effectImage2?: string;
   /** Reveal circle radius in px (250 => 500px circle) */
   radius?: number;
   /** Solid core fraction (0..1) before the feather fades out — lower = softer/more feather */
@@ -23,7 +25,14 @@ type Props = {
  */
 export const HeroSpotlightHands = forwardRef<HTMLDivElement, Props>(
   function HeroSpotlightHands(
-    { baseImage, effectImage, radius = 250, feather = 0.25, glow = false },
+    {
+      baseImage,
+      effectImage,
+      effectImage2,
+      radius = 250,
+      feather = 0.25,
+      glow = false,
+    },
     ref,
   ) {
     const solid = Math.round(feather * 100);
@@ -36,11 +45,11 @@ export const HeroSpotlightHands = forwardRef<HTMLDivElement, Props>(
         className="pointer-events-none absolute bottom-0 left-1/2 z-0 hidden -translate-x-1/2 md:block"
         style={
           {
-            width: 1280,
-            height: 1000,
+            width: 1200,
+            height: 800,
             opacity: 1,
-            "--mx": "640px",
-            "--my": "500px",
+            "--mx": "600px",
+            "--my": "400px",
             "--reveal": "0",
           } as React.CSSProperties
         }
@@ -65,6 +74,7 @@ export const HeroSpotlightHands = forwardRef<HTMLDivElement, Props>(
             {
               opacity: "var(--reveal)",
               transition: "opacity 0.4s ease",
+              mixBlendMode: "screen",
               WebkitMaskImage: mask,
               maskImage: mask,
             } as React.CSSProperties
@@ -92,6 +102,33 @@ export const HeroSpotlightHands = forwardRef<HTMLDivElement, Props>(
             )}
           </div>
         </div>
+
+        {/* Image 3 — second effect, stacked on top of image 2, same cursor reveal */}
+        {effectImage2 && (
+          <div
+            className="absolute inset-0"
+            style={
+              {
+                opacity: "var(--reveal)",
+                transition: "opacity 0.4s ease",
+                mixBlendMode: "screen",
+                WebkitMaskImage: mask,
+                maskImage: mask,
+              } as React.CSSProperties
+            }
+          >
+            <div className="absolute inset-x-0 bottom-0 flex items-end justify-center">
+              <Image
+                src={effectImage2}
+                alt=""
+                width={740}
+                height={740}
+                draggable={false}
+                className="h-[clamp(360px,53vw,760px)] w-auto select-none object-contain"
+              />
+            </div>
+          </div>
+        )}
 
         {/* "Viền sáng" — optional glowing ring around the reveal circle */}
         {glow && (

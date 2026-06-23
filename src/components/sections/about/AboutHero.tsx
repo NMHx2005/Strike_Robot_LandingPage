@@ -123,12 +123,13 @@ export function AboutHero() {
       {/* Robot hands spotlight reveal — centered behind the columns on desktop */}
       <HeroSpotlightHands
         ref={spotlightRef}
-        baseImage={ABOUT_HERO.image}
-        effectImage="/about/hero-effect.jpg"
+        baseImage="/about/layer-1.png"
+        effectImage="/about/layer-2.png"
+        effectImage2="/about/layer-3.png"
       />
 
       <motion.div
-        className="relative z-10 mx-auto flex w-full flex-col pt-28 md:min-h-[1117px] md:pb-16 md:pt-36"
+        className="relative z-10 mx-auto flex w-full flex-col pt-28 md:min-h-[1080px] md:pb-16 md:pt-36"
         variants={prefersReducedMotion ? {} : staggerContainer}
         initial="hidden"
         animate="visible"
