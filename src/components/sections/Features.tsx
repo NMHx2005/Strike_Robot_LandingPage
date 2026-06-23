@@ -285,10 +285,19 @@ export function Features() {
     setLineHeight((prev) => (prev === next ? prev : next));
   }, []);
 
-  // Update khi active item đổi.
+  // Update khi active item đổi. Re-measure mỗi frame trong suốt animation
+  // expand/collapse (~0.45s): vị trí item active dịch chuyển khi item cũ co lại,
+  // nên đo 1 lần lúc bắt đầu sẽ chốt nhầm vị trí (rõ nhất ở item cuối). Bám theo
+  // tới khi layout ổn định để thanh chỉ báo dừng đúng hàng icon trên cùng.
   useEffect(() => {
-    const raf = requestAnimationFrame(() => updateIndicator(activeId));
-    return () => cancelAnimationFrame(raf);
+    const start = performance.now();
+    let rafId = requestAnimationFrame(function tick() {
+      updateIndicator(activeId);
+      if (performance.now() - start < 520) {
+        rafId = requestAnimationFrame(tick);
+      }
+    });
+    return () => cancelAnimationFrame(rafId);
   }, [activeId, updateIndicator]);
 
   // Single ResizeObserver, RAF-throttled — bao phủ cả window resize

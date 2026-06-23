@@ -46,10 +46,10 @@ export const HeroSpotlightHands = forwardRef<HTMLDivElement, Props>(
         style={
           {
             width: 1200,
-            height: 950,
+            height: 1045,
             opacity: 1,
             "--mx": "600px",
-            "--my": "475px",
+            "--my": "522px",
             "--reveal": "0",
           } as React.CSSProperties
         }
@@ -63,7 +63,7 @@ export const HeroSpotlightHands = forwardRef<HTMLDivElement, Props>(
             height={836}
             priority
             draggable={false}
-            className="h-[clamp(420px,60vw,850px)] w-auto select-none object-contain"
+            className="h-[clamp(462px,66vw,935px)] w-auto select-none object-contain"
           />
         </div>
 
@@ -87,7 +87,7 @@ export const HeroSpotlightHands = forwardRef<HTMLDivElement, Props>(
                 width={740}
                 height={740}
                 draggable={false}
-                className="h-[clamp(420px,60vw,850px)] w-auto select-none object-contain"
+                className="h-[clamp(462px,66vw,935px)] w-auto select-none object-contain"
               />
             </div>
           </div>
@@ -113,7 +113,7 @@ export const HeroSpotlightHands = forwardRef<HTMLDivElement, Props>(
                 width={740}
                 height={740}
                 draggable={false}
-                className="h-[clamp(420px,60vw,850px)] w-auto select-none object-contain"
+                className="h-[clamp(462px,66vw,935px)] w-auto select-none object-contain"
               />
             ) : (
               // Placeholder until image 2 (the real effect art) is ready
