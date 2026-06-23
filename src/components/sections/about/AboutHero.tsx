@@ -128,7 +128,7 @@ export function AboutHero() {
       />
 
       <motion.div
-        className="relative z-10 mx-auto flex w-full flex-col pb-12 pt-28 md:min-h-[1117px] md:pb-16 md:pt-36"
+        className="relative z-10 mx-auto flex w-full flex-col pt-28 md:min-h-[1117px] md:pb-16 md:pt-36"
         variants={prefersReducedMotion ? {} : staggerContainer}
         initial="hidden"
         animate="visible"
@@ -186,7 +186,7 @@ export function AboutHero() {
         {/* Social links */}
         <motion.div
           variants={prefersReducedMotion ? {} : fadeUp}
-          className="mt-12 flex items-center gap-3 opacity-60 md:mt-0"
+          className="mt-12 md:flex hidden items-center gap-3 opacity-60 md:mt-0"
           role="list"
           aria-label="Social links"
         >
