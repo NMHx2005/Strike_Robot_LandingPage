@@ -19,49 +19,6 @@ const LOGO_DIMENSIONS: Record<string, { width: number; height: number }> = {
 
 const FALLBACK_DIMENSIONS = { width: 240, height: 80 };
 
-// Mobile-only: one infinite marquee row. Logos are duplicated once so the
-// translateX(-50%) loop is seamless; the duplicate set is hidden from a11y.
-function LogoMarqueeRow({ direction }: { direction: "left" | "right" }) {
-  const items = [...ABOUT_PARTNERS.logos, ...ABOUT_PARTNERS.logos];
-
-  return (
-    <div className="w-full overflow-hidden">
-      <div
-        className={cn(
-          "flex w-max",
-          direction === "left" ? "marquee-track-left" : "marquee-track-right"
-        )}
-      >
-        {items.map((logo, i) => {
-          const dimensions = LOGO_DIMENSIONS[logo.src] ?? FALLBACK_DIMENSIONS;
-          const isClone = i >= ABOUT_PARTNERS.logos.length;
-
-          return (
-            <div
-              key={`${logo.name}-${i}`}
-              className="mr-4 shrink-0"
-              aria-hidden={isClone}
-            >
-              <div className="flex h-[76px] w-[160px] items-center justify-center rounded-[16px] border-b border-[#0000001a] bg-white px-4">
-                <Image
-                  src={logo.src}
-                  alt={isClone ? "" : logo.name}
-                  width={dimensions.width}
-                  height={dimensions.height}
-                  className={cn(
-                    "h-[40px] w-auto max-w-[120px] object-contain",
-                    logo.invert && "invert"
-                  )}
-                />
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
-
 export function AboutPartners() {
   const prefersReducedMotion = useReducedMotion();
 
@@ -94,10 +51,30 @@ export function AboutPartners() {
           </motion.p>
         </div>
 
-        {/* Mobile: two opposite-direction marquee rows (top → right, bottom → left) */}
-        <div className="flex w-full flex-col gap-4 md:hidden">
-          <LogoMarqueeRow direction="right" />
-          <LogoMarqueeRow direction="left" />
+        {/* Mobile: static 3 × 2 grid (no marquee) */}
+        <div className="grid w-full grid-cols-2 gap-4 md:hidden">
+          {ABOUT_PARTNERS.logos.map((logo, i) => {
+            const dimensions = LOGO_DIMENSIONS[logo.src] ?? FALLBACK_DIMENSIONS;
+
+            return (
+              <motion.div
+                key={`${logo.name}-${i}`}
+                variants={prefersReducedMotion ? {} : staggerItem}
+                className="flex h-[76px] items-center justify-center rounded-[16px] border-b border-[#0000001a] bg-white px-4"
+              >
+                <Image
+                  src={logo.src}
+                  alt={logo.name}
+                  width={dimensions.width}
+                  height={dimensions.height}
+                  className={cn(
+                    "h-[52px] w-auto max-w-full object-contain",
+                    logo.invert && "invert"
+                  )}
+                />
+              </motion.div>
+            );
+          })}
         </div>
 
         {/* Desktop: static 4 / 2 grid */}

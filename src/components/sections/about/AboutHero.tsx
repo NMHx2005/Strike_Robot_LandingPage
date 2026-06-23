@@ -65,7 +65,6 @@ export function AboutHero() {
       )}
       style={{
         background: darkGradient,
-        border: "2px solid #0d0d0d",
         boxShadow:
           "inset 0 2px 4px rgba(0,0,0,0.2), inset 0 -2px 4px rgba(255,255,255,0.2)",
       }}
@@ -80,7 +79,7 @@ export function AboutHero() {
           <span
             aria-hidden
             className="absolute z-[1] rounded-[inherit]"
-            style={{ inset: 3, background: darkGradient }}
+            style={{ inset: 1.5, background: darkGradient }}
           />
         </>
       )}

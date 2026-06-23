@@ -46,10 +46,10 @@ export const HeroSpotlightHands = forwardRef<HTMLDivElement, Props>(
         style={
           {
             width: 1200,
-            height: 800,
+            height: 950,
             opacity: 1,
             "--mx": "600px",
-            "--my": "400px",
+            "--my": "475px",
             "--reveal": "0",
           } as React.CSSProperties
         }
@@ -63,11 +63,37 @@ export const HeroSpotlightHands = forwardRef<HTMLDivElement, Props>(
             height={836}
             priority
             draggable={false}
-            className="h-[clamp(360px,53vw,760px)] w-auto select-none object-contain"
+            className="h-[clamp(420px,60vw,850px)] w-auto select-none object-contain"
           />
         </div>
 
-        {/* Image 2 — effect, masked to a feathered circle that follows the cursor */}
+        {/* Image 3 — effect, masked cursor reveal (middle layer, no blend) */}
+        {effectImage2 && (
+          <div
+            className="absolute inset-0"
+            style={
+              {
+                opacity: "var(--reveal)",
+                transition: "opacity 0.4s ease",
+                WebkitMaskImage: mask,
+                maskImage: mask,
+              } as React.CSSProperties
+            }
+          >
+            <div className="absolute inset-x-0 bottom-0 flex items-end justify-center">
+              <Image
+                src={effectImage2}
+                alt=""
+                width={740}
+                height={740}
+                draggable={false}
+                className="h-[clamp(420px,60vw,850px)] w-auto select-none object-contain"
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Image 2 — effect, masked cursor reveal (top layer) */}
         <div
           className="absolute inset-0"
           style={
@@ -87,7 +113,7 @@ export const HeroSpotlightHands = forwardRef<HTMLDivElement, Props>(
                 width={740}
                 height={740}
                 draggable={false}
-                className="h-[clamp(360px,53vw,760px)] w-auto select-none object-contain"
+                className="h-[clamp(420px,60vw,850px)] w-auto select-none object-contain"
               />
             ) : (
               // Placeholder until image 2 (the real effect art) is ready
@@ -101,33 +127,6 @@ export const HeroSpotlightHands = forwardRef<HTMLDivElement, Props>(
             )}
           </div>
         </div>
-
-        {/* Image 3 — second effect, stacked on top of image 2, same cursor reveal */}
-        {effectImage2 && (
-          <div
-            className="absolute inset-0"
-            style={
-              {
-                opacity: "var(--reveal)",
-                transition: "opacity 0.4s ease",
-                mixBlendMode: "screen",
-                WebkitMaskImage: mask,
-                maskImage: mask,
-              } as React.CSSProperties
-            }
-          >
-            <div className="absolute inset-x-0 bottom-0 flex items-end justify-center">
-              <Image
-                src={effectImage2}
-                alt=""
-                width={740}
-                height={740}
-                draggable={false}
-                className="h-[clamp(360px,53vw,760px)] w-auto select-none object-contain"
-              />
-            </div>
-          </div>
-        )}
 
         {/* "Viền sáng" — optional glowing ring around the reveal circle */}
         {glow && (

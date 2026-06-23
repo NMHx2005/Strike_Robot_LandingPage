@@ -153,7 +153,8 @@ export function AboutMission() {
           </motion.div>
         </motion.div>
         <motion.div
-          className="w-[min(980px,70vw)]"
+          className="w-[min(720px,52vw)]"
+          style={{ marginBottom: 165 }}
           initial={
             prefersReducedMotion
               ? { x: "24%", y: "40%" }
@@ -187,7 +188,7 @@ export function AboutMission() {
       {/* Watermark — repeated word scrolling right→left, same band as home/agentic */}
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-x-0 bottom-[0%] z-0 overflow-hidden mb-[24px] md:mb-[24px] md:py-[24px] py-[10px] "
+        className="pointer-events-none absolute inset-x-0 bottom-[0%] z-0 overflow-hidden mb-[24px] md:mb-[0px] md:py-[24px] py-[10px] "
       >
         <div className="agentic-watermark-marquee flex w-max items-center whitespace-nowrap font-superground text-[clamp(40px,8vw,72px)] lowercase leading-none text-black/[0.06]">
           {WATERMARK_ITEMS.map((item) => (
@@ -349,7 +350,7 @@ export function AboutMission() {
               type="button"
               onClick={() => setExpanded((prev) => !prev)}
               aria-expanded={expanded}
-              className="mt-5 flex cursor-pointer items-center gap-1.5 rounded-md text-[16px] font-semibold text-black"
+              className="mt-5 mb-2 flex cursor-pointer items-center gap-1.5 rounded-md text-[16px] font-semibold text-black"
             >
               {expanded ? ABOUT_MISSION.readLess : ABOUT_MISSION.readMore}
               <ChevronDown

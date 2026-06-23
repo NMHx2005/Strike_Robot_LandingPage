@@ -17,7 +17,7 @@ const STAR_SPEED_HOVER = "2s";
 
 // Inner cover sits above the glow and hides it everywhere except this thin rim,
 // so the shine reads as a border highlight instead of a halo filling the pill.
-const STAR_RIM = 3; // px of glow visible inside the border
+const STAR_RIM = 1.5; // px of glow visible inside the border
 
 type PillButtonProps = {
   variant?: "dark" | "outline";
@@ -77,8 +77,6 @@ export function PillButton({
       <motion.button
         type="button"
         onClick={onClick}
-        onMouseEnter={() => setHovered(true)}
-        onMouseLeave={() => setHovered(false)}
         className={cn(
           "relative flex items-center justify-center rounded-3xl font-normal text-black/70 cursor-pointer select-none overflow-hidden",
           sizeClasses[size],
@@ -92,12 +90,6 @@ export function PillButton({
         }}
         {...motionProps}
       >
-        {!prefersReducedMotion && (
-          <>
-            <StarBorderLayer color="rgba(13,13,13,0.5)" speed={starSpeed} />
-            <StarRimCover background="#fff" />
-          </>
-        )}
         <span className="relative z-[2]">{children}</span>
         {showArrow && (
           <ArrowRight
@@ -122,7 +114,6 @@ export function PillButton({
       )}
       style={{
         background: darkGradient,
-        border: "2px solid #0d0d0d",
         boxShadow:
           "inset 0 2px 4px rgba(0,0,0,0.2), inset 0 -2px 4px rgba(255,255,255,0.2)",
       }}
@@ -171,7 +162,6 @@ export function PillButtonCta({
       )}
       style={{
         background: darkGradient,
-        border: "2px solid #0d0d0d",
         boxShadow: showShadow
           ? "0 4px 0 rgba(0,0,0,0.25), inset 0 2px 4px rgba(0,0,0,0.2), inset 0 -2px 4px rgba(255,255,255,0.2)"
           : "inset 0 2px 4px rgba(0,0,0,0.2), inset 0 -2px 4px rgba(255,255,255,0.2)",
