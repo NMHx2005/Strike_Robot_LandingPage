@@ -24,7 +24,7 @@ export function CTA({ variant = "platform" }: CTAProps) {
       aria-label="Call to action section"
     >
       <motion.div
-        className="relative mx-auto max-w-[1632px] overflow-hidden rounded-3xl bg-black max-md:rounded-tl-[50px] max-md:rounded-tr-none max-md:rounded-bl-none max-md:rounded-br-none"
+        className="relative mx-auto overflow-hidden rounded-3xl bg-black max-md:rounded-tl-[50px] max-md:rounded-tr-none max-md:rounded-bl-none max-md:rounded-br-none"
         style={{ minHeight: 423 }}
         initial={prefersReducedMotion ? undefined : { opacity: 0, y: 24 }}
         whileInView={{ opacity: 1, y: 0 }}
