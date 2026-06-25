@@ -307,7 +307,7 @@ function MobileScrollHeader({
 
   const paddingTop = useTransform(progress, [0, 1], [12, 12]);
   const paddingBottom = useTransform(progress, [0, 1], [0, 12]);
-  const innerPx = useTransform(progress, [0, 1], [12, 12]);
+  const innerPx = useTransform(progress, [0, 1], [8, 12]);
   const borderRadius = useTransform(progress, [0, 1], [0, 12]);
   const innerRadius = useTransform(progress, [0, 1], [0, 10.6]);
   const blurPx = useTransform(progress, [0, 1], [0, 10]);
@@ -342,7 +342,7 @@ function MobileScrollHeader({
           }}
         />
         <motion.div
-          className="relative flex h-14 items-center justify-between py-2"
+          className="relative flex h-14 items-center justify-between"
           style={{
             paddingLeft: innerPx,
             paddingRight: innerPx,
