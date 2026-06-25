@@ -37,15 +37,15 @@ export function Footer() {
         <div className="flex w-full items-center justify-between md:contents">
           <Link
             href="/"
-            className="flex h-8 w-[84px] shrink-0 justify-start md:order-1 md:w-[320px]"
+            className="flex h-[26px] w-[76px] shrink-0 justify-start md:order-1 md:h-[42px] md:w-[320px]"
             aria-label={SITE_NAME}
           >
             <Image
-              src="/Logo.png"
+              src="/Logo.svg"
               alt=""
-              width={84}
-              height={32}
-              className="object-contain"
+              width={123}
+              height={42}
+              className="h-[26px] w-[76px] object-contain md:h-[42px] md:w-[123px]"
             />
           </Link>
 

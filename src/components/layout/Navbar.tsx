@@ -253,20 +253,29 @@ function MobileMenuButton({
   );
 }
 
-function MobileLogo({ onClick }: { onClick?: () => void }) {
+function MobileLogo({
+  onClick,
+  legacy = false,
+}: {
+  onClick?: () => void;
+  legacy?: boolean;
+}) {
   return (
     <Link
       href="/"
-      className="flex w-[84px] items-center"
+      className={cn(
+        "flex items-center",
+        legacy ? "w-[84px]" : "h-[26px] w-[76px]"
+      )}
       aria-label={SITE_NAME}
       onClick={onClick}
     >
       <Image
-        src="/Logo.png"
+        src={legacy ? "/Logo.png" : "/Logo.svg"}
         alt={SITE_NAME}
-        width={84}
-        height={32}
-        className="h-8 w-auto"
+        width={legacy ? 84 : 76}
+        height={legacy ? 32 : 26}
+        className={legacy ? "h-8 w-auto" : "h-[26px] w-[76px] object-contain"}
         priority
       />
     </Link>
@@ -446,11 +455,11 @@ export function Navbar() {
             aria-label={SITE_NAME}
           >
             <Image
-              src="/Logo.png"
+              src="/Logo.svg"
               alt={SITE_NAME}
-              width={116}
-              height={44}
-              className="h-11 w-auto"
+              width={123}
+              height={42}
+              className="h-[42px] w-[123px] object-contain"
               priority
             />
           </Link>
@@ -615,7 +624,7 @@ export function Navbar() {
               {[0, 1].map((i) => (
                 <Image
                   key={i}
-                  src="/images/Logo.png"
+                  src="/Logo.svg"
                   alt=""
                   width={525}
                   height={200}
@@ -627,7 +636,7 @@ export function Navbar() {
 
             <GlassPill>
               <div className="flex h-14 items-center justify-between px-3">
-                <MobileLogo onClick={() => setMobileOpen(false)} />
+                <MobileLogo onClick={() => setMobileOpen(false)} legacy />
                 <MobileMenuButton
                   onClick={() => setMobileOpen(false)}
                   label="Close menu"
