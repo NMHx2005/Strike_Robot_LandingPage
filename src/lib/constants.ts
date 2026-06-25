@@ -142,9 +142,8 @@ export const FOOTER = {
     "© 2026 DSC Labs. All rights reserved. SR Platform™ is a trademark of DSC Labs.",
   socials: [
     { label: "X", href: "#" },
-    { label: "Instagram", href: "#" },
-    { label: "Facebook", href: "#" },
-    { label: "Discord", href: "#" },
+    { label: "GitHub", href: "#" },
+    { label: "GitBook", href: "#" },
   ],
 };
 
