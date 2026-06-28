@@ -5,8 +5,6 @@ import Image from "next/image";
 import { motion, useReducedMotion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import { ABOUT_HERO } from "@/lib/constants";
-import { fadeUp } from "@/components/animations/fadeUp";
-import { staggerContainer } from "@/components/animations/stagger";
 import { StarBorderLayer } from "@/components/ui/StarBorder";
 import { cn } from "@/lib/utils";
 import { HeroSpotlightHands } from "./HeroSpotlightHands";
@@ -52,6 +50,25 @@ export function AboutHero() {
   const followTap = prefersReducedMotion
     ? {}
     : { whileTap: { scale: 0.97 }, transition: { duration: 0.2, ease: tapEase } };
+
+  // Sequential A→B→C→D entrance: A title + socials, B hands, C description, D cube.
+  const reveal = (delay: number) =>
+    prefersReducedMotion
+      ? {}
+      : {
+          initial: { opacity: 0, y: 24 },
+          animate: { opacity: 1, y: 0 },
+          transition: { duration: 0.6, ease: tapEase, delay },
+        };
+
+  const fadeIn = (delay: number) =>
+    prefersReducedMotion
+      ? {}
+      : {
+          initial: { opacity: 0 },
+          animate: { opacity: 1 },
+          transition: { duration: 0.7, ease: tapEase, delay },
+        };
 
   // Rendered twice: inside the title column on desktop, after the description on
   // mobile (Figma order). `extraClassName` controls visibility / height / order.
@@ -120,29 +137,31 @@ export function AboutHero() {
       onPointerMove={prefersReducedMotion ? undefined : handlePointerMove}
       onPointerLeave={prefersReducedMotion ? undefined : handlePointerLeave}
     >
-      {/* Robot hands spotlight reveal — centered behind the columns on desktop */}
-      <HeroSpotlightHands
-        ref={spotlightRef}
-        baseImage="/about/layer-1.png"
-        effectImage="/about/layer-2.png"
-        effectImage2="/about/layer-3-glow.png"
-        magnet
-      />
+      {/* B — Robot hands spotlight reveal (centered behind the columns). */}
+      <motion.div {...fadeIn(0.35)}>
+        <HeroSpotlightHands
+          ref={spotlightRef}
+          baseImage="/about/layer-1.png"
+          effectImage="/about/layer-2.png"
+          effectImage2="/about/layer-3-glow.png"
+          magnet
+        />
+      </motion.div>
 
-      {/* Cinematic AI core — floats in the gap between the two palms, layered
-          above the 3 spotlight images and below the text. Desktop only. */}
-      <HeroAICore className="absolute bottom-[clamp(160px,28vw,400px)] left-[calc(50%+30px)] z-20 hidden h-[clamp(200px,20vw,300px)] w-[clamp(200px,20vw,300px)] -translate-x-1/2 md:block" />
+      {/* D — Cinematic AI core, floating in the palm gap (desktop only). The
+          outer div owns the absolute position + z-20 so the fade (inner) keeps
+          it above the content layer; the iframe fills it. */}
+      <div className="absolute bottom-[clamp(140px,28vw,380px)] left-[calc(50%+30px)] z-20 hidden h-[clamp(200px,20vw,300px)] w-[clamp(200px,20vw,300px)] -translate-x-1/2 md:block">
+        <motion.div {...fadeIn(0.95)} className="h-full w-full">
+          <HeroAICore className="h-full w-full" />
+        </motion.div>
+      </div>
 
-      <motion.div
-        className="relative z-10 mx-auto flex w-full flex-col pt-28 md:min-h-[1080px] md:pb-16 md:pt-36"
-        variants={prefersReducedMotion ? {} : staggerContainer}
-        initial="hidden"
-        animate="visible"
-      >
+      <div className="relative z-10 mx-auto flex w-full flex-col pt-28 md:min-h-[1080px] md:pb-16 md:pt-36">
         <div className="flex flex-1 flex-col items-center gap-8 md:flex-row md:items-center md:justify-between">
-          {/* Title (+ desktop button) */}
+          {/* A — Title (+ desktop button) */}
           <motion.div
-            variants={prefersReducedMotion ? {} : fadeUp}
+            {...reveal(0)}
             className="order-1 flex flex-col items-center md:items-start"
           >
             <h1 className="bg-gradient-to-r from-black to-[#314344] bg-clip-text text-center text-[clamp(56px,9vw,96px)] font-normal leading-[1.02] tracking-[-0.02em] text-transparent md:text-left">
@@ -160,9 +179,9 @@ export function AboutHero() {
             {followButton("mt-[84px] hidden h-11 md:flex")}
           </motion.div>
 
-          {/* Description */}
+          {/* C — Description */}
           <motion.div
-            variants={prefersReducedMotion ? {} : fadeUp}
+            {...reveal(0.65)}
             className="order-2 flex flex-col items-center text-center md:flex-row md:items-start md:gap-[26px] md:pt-2 md:text-left"
           >
             {/* Decorative left marker — desktop only; mt nudges the line onto the first text row */}
@@ -201,9 +220,9 @@ export function AboutHero() {
           </div>
         </div>
 
-        {/* Social links */}
+        {/* A — Social links */}
         <motion.div
-          variants={prefersReducedMotion ? {} : fadeUp}
+          {...reveal(0.12)}
           className="mt-12 md:flex hidden items-center gap-3 opacity-60 md:mt-0"
           role="list"
           aria-label="Social links"
@@ -220,7 +239,7 @@ export function AboutHero() {
             </a>
           ))}
         </motion.div>
-      </motion.div>
+      </div>
     </section>
   );
 }
