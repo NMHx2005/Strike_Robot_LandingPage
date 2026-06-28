@@ -53,9 +53,12 @@ export const HeroSpotlightHands = forwardRef<HTMLDivElement, Props>(
     };
 
     // Reverse-magnet repel for the whole hands group; centred node => -50% base.
+    // Heavier + shorter slide than the default (lower inertia, smaller push).
     useReverseMagnet(localRef, {
       enabled: magnet,
       basePrefix: "translateX(-50%)",
+      inertia: 0.015,
+      maxPush: 35,
     });
 
     const solid = Math.round(feather * 100);

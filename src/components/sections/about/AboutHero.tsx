@@ -131,7 +131,7 @@ export function AboutHero() {
 
       {/* Cinematic AI core — floats in the gap between the two palms, layered
           above the 3 spotlight images and below the text. Desktop only. */}
-      <HeroAICore className="absolute bottom-[clamp(160px,28vw,400px)] left-[calc(50%+30px)] z-[5] hidden h-[clamp(200px,20vw,300px)] w-[clamp(200px,20vw,300px)] -translate-x-1/2 md:block" />
+      <HeroAICore className="absolute bottom-[clamp(160px,28vw,400px)] left-[calc(50%+30px)] z-20 hidden h-[clamp(200px,20vw,300px)] w-[clamp(200px,20vw,300px)] -translate-x-1/2 md:block" />
 
       <motion.div
         className="relative z-10 mx-auto flex w-full flex-col pt-28 md:min-h-[1080px] md:pb-16 md:pt-36"

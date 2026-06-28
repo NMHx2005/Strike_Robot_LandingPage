@@ -48,7 +48,7 @@ export function HeroAICore({ className }: { className?: string }) {
   return (
     <iframe
       ref={ref}
-      src="/ai-core/index.html"
+      src="/ai-core/index.html?v=2"
       title="StrikeRobot AI core"
       aria-hidden
       tabIndex={-1}

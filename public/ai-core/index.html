@@ -80,7 +80,7 @@
     // --- KHỐI BÊN TRONG: KIM LOẠI ĐEN NHÁM (DARK CHROME) ---
     const boxGeometry = new THREE.BoxGeometry(1.2, 1.2, 1.2);
     const boxMaterial = new THREE.MeshStandardMaterial({
-      color: 0x111111,
+      color: 0xcccccc,
       metalness: 1.0,
       roughness: 0.2,
     });
@@ -143,8 +143,8 @@
       requestAnimationFrame(animate);
 
       // Xử lý xoay theo chuột (Parallax)
-      targetX = mouseX * 0.0015;
-      targetY = mouseY * 0.0015;
+      targetX = mouseX * 0.0025;
+      targetY = mouseY * 0.0025;
       coreGroup.rotation.y += 0.05 * (targetX - coreGroup.rotation.y);
       coreGroup.rotation.x += 0.05 * (targetY - coreGroup.rotation.x);
 
@@ -162,15 +162,15 @@
         if (!isHovered) {
           clearTimeout(hoverTimeout); // Hủy lệnh thu nhỏ nếu có
           isHovered = true;
-          targetScale = 1.35; // Scale lên 135% (nằm trong khoảng 30-40% bạn yêu cầu)
+          targetScale = 1.4; // Scale lớp ngoài lên +40% khi hover
         }
       } else {
         if (isHovered) {
           isHovered = false;
-          // Đợi 2 giây (2000ms) trước khi thu về bình thường
+          // Đợi 1.5 giây (1500ms) trước khi thu về bình thường
           hoverTimeout = setTimeout(() => {
             targetScale = 1.0;
-          }, 2000);
+          }, 1500);
         }
       }
 

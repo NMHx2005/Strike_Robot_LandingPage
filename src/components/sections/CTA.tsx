@@ -97,7 +97,7 @@ export function CTA({ variant = "platform" }: CTAProps) {
           <motion.nav
             aria-label="Footer quick links"
             variants={prefersReducedMotion ? {} : fadeUp}
-            className="z-10 mt-10 flex w-full flex-col gap-6 text-[16px] tracking-[-0.16px] text-white/70 md:absolute md:bottom-10 md:left-6 md:mt-0 md:w-auto md:flex-col md:gap-4 md:text-[13px] md:tracking-normal md:text-white/75 lg:left-12"
+            className="z-10 mt-10 flex w-full flex-col gap-6 text-[16px] tracking-[-0.16px] text-white/70 md:absolute md:bottom-10 md:left-6 md:mt-0 md:w-auto md:flex-col md:gap-4 md:text-[15px] md:tracking-normal md:text-white/75 lg:left-12"
           >
             {VIDEO_CTA.sidebarLinks.map((link, i) => (
               <a
