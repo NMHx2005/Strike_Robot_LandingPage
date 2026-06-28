@@ -10,6 +10,7 @@ import { staggerContainer } from "@/components/animations/stagger";
 import { StarBorderLayer } from "@/components/ui/StarBorder";
 import { cn } from "@/lib/utils";
 import { HeroSpotlightHands } from "./HeroSpotlightHands";
+import { HeroAICore } from "./HeroAICore";
 
 const darkGradient =
   "linear-gradient(131deg, rgb(51, 51, 51) 0.79%, rgb(13, 13, 13) 35.22%, rgb(38, 38, 38) 99.16%)";
@@ -125,7 +126,12 @@ export function AboutHero() {
         baseImage="/about/layer-1.png"
         effectImage="/about/layer-2.png"
         effectImage2="/about/layer-3-glow.png"
+        magnet
       />
+
+      {/* Cinematic AI core — floats in the gap between the two palms, layered
+          above the 3 spotlight images and below the text. Desktop only. */}
+      <HeroAICore className="absolute bottom-[clamp(160px,28vw,400px)] left-[calc(50%+30px)] z-[5] hidden h-[clamp(200px,20vw,300px)] w-[clamp(200px,20vw,300px)] -translate-x-1/2 md:block" />
 
       <motion.div
         className="relative z-10 mx-auto flex w-full flex-col pt-28 md:min-h-[1080px] md:pb-16 md:pt-36"
