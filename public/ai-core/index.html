@@ -128,8 +128,10 @@
     let isHovered = false;
     let hoverTimeout = null;
     let targetScale = 1.0; // Mặc định 100%
+    let hasMoved = false; // chỉ bật hover sau khi chuột thực sự di chuyển
 
     document.addEventListener('mousemove', (event) => {
+      hasMoved = true;
       // Tọa độ cho hiệu ứng xoay (Parallax)
       mouseX = (event.clientX - windowHalfX);
       mouseY = (event.clientY - windowHalfY);
@@ -153,24 +155,26 @@
       innerBox.rotation.x -= 0.003;
       innerBox.rotation.y -= 0.001;
 
-      // --- LOGIC RAYCASTER KÍCH HOẠT HOVER ---
-      raycaster.setFromCamera(mouseNDC, camera);
-      // Kiểm tra xem chuột có đang nằm trên khối icosahedron không
-      const intersects = raycaster.intersectObject(icosahedron);
+      // --- LOGIC RAYCASTER KÍCH HOẠT HOVER (chỉ sau khi chuột đã di chuyển) ---
+      if (hasMoved) {
+        raycaster.setFromCamera(mouseNDC, camera);
+        // Kiểm tra xem chuột có đang nằm trên khối icosahedron không
+        const intersects = raycaster.intersectObject(icosahedron);
 
-      if (intersects.length > 0) {
-        if (!isHovered) {
-          clearTimeout(hoverTimeout); // Hủy lệnh thu nhỏ nếu có
-          isHovered = true;
-          targetScale = 1.4; // Scale lớp ngoài lên +40% khi hover
-        }
-      } else {
-        if (isHovered) {
-          isHovered = false;
-          // Đợi 1.5 giây (1500ms) trước khi thu về bình thường
-          hoverTimeout = setTimeout(() => {
-            targetScale = 1.0;
-          }, 1500);
+        if (intersects.length > 0) {
+          if (!isHovered) {
+            clearTimeout(hoverTimeout); // Hủy lệnh thu nhỏ nếu có
+            isHovered = true;
+            targetScale = 1.4; // Scale lớp ngoài lên +40% khi hover
+          }
+        } else {
+          if (isHovered) {
+            isHovered = false;
+            // Đợi 1.5 giây (1500ms) trước khi thu về bình thường
+            hoverTimeout = setTimeout(() => {
+              targetScale = 1.0;
+            }, 1500);
+          }
         }
       }
 
