@@ -8,7 +8,7 @@ import { ABOUT_HERO } from "@/lib/constants";
 import { StarBorderLayer } from "@/components/ui/StarBorder";
 import { cn } from "@/lib/utils";
 import { HeroSpotlightHands } from "./HeroSpotlightHands";
-import { HeroAICore } from "./HeroAICore";
+// import { HeroAICore } from "./HeroAICore"; // temporarily hidden
 
 const darkGradient =
   "linear-gradient(131deg, rgb(51, 51, 51) 0.79%, rgb(13, 13, 13) 35.22%, rgb(38, 38, 38) 99.16%)";
@@ -150,12 +150,13 @@ export function AboutHero() {
 
       {/* D — Cinematic AI core, floating in the palm gap (desktop only). The
           outer div owns the absolute position + z-20 so the fade (inner) keeps
-          it above the content layer; the iframe fills it. */}
-      <div className="absolute bottom-[clamp(140px,28vw,380px)] left-[calc(50%+30px)] z-20 hidden h-[clamp(200px,20vw,300px)] w-[clamp(200px,20vw,300px)] -translate-x-1/2 md:block">
+          it above the content layer; the iframe fills it.
+          TODO: temporarily hidden — re-enable when ready. */}
+      {/* <div className="absolute bottom-[clamp(140px,28vw,380px)] left-[calc(50%+30px)] z-20 hidden h-[clamp(200px,20vw,300px)] w-[clamp(200px,20vw,300px)] -translate-x-1/2 md:block">
         <motion.div {...fadeIn(0.95)} className="h-full w-full">
           <HeroAICore className="h-full w-full" />
         </motion.div>
-      </div>
+      </div> */}
 
       <div className="relative z-10 mx-auto flex w-full flex-col pt-28 md:min-h-[1080px] md:pb-16 md:pt-36">
         <div className="flex flex-1 flex-col items-center gap-8 md:flex-row md:items-center md:justify-between">
