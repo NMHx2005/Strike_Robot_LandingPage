@@ -1,18 +1,13 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
-import {
-  motion,
-  useReducedMotion,
-  useTransform,
-  useSpring,
-  useMotionValue,
-} from "framer-motion";
+import { useRef, useState } from "react";
+import { motion, useReducedMotion } from "framer-motion";
 import { ChevronDown } from "lucide-react";
 import { ABOUT_MISSION } from "@/lib/constants";
 import { fadeUp } from "@/components/animations/fadeUp";
 import { staggerContainer } from "@/components/animations/stagger";
+import { useReverseMagnet } from "@/hooks/useReverseMagnet";
 
 const EASE = [0.25, 0.1, 0.25, 1] as const;
 
@@ -66,22 +61,18 @@ export function AboutMission() {
   const [expanded, setExpanded] = useState(false);
   const cardClip = `url(#${expanded ? "about-card-expanded" : "about-card-collapsed"})`;
 
-  // Reaching-hands hover push-away (% of each hand's own size). The diagonal
-  // fly-in is a scroll-triggered reveal (whileInView) handled on the wrappers
-  // below; this only adds the outward nudge when the section is hovered.
-  const hover = useMotionValue(0);
-  const hoverSpring = useSpring(hover, { stiffness: 140, damping: 20 });
-  const leftHoverX = useTransform(hoverSpring, [0, 1], ["0%", "-5%"]);
-  const leftHoverY = useTransform(hoverSpring, [0, 1], ["0%", "3%"]);
-  const rightHoverX = useTransform(hoverSpring, [0, 1], ["0%", "5%"]);
-  const rightHoverY = useTransform(hoverSpring, [0, 1], ["0%", "3%"]);
+  // Reaching hands — reverse-magnet repel: each hand recoils from the cursor
+  // (heavy inertia, never upward) and eases back to rest. The diagonal fly-in
+  // reveal (whileInView) stays on the wrappers below.
+  const leftHandRef = useRef<HTMLDivElement>(null);
+  const rightHandRef = useRef<HTMLDivElement>(null);
+  useReverseMagnet(leftHandRef);
+  useReverseMagnet(rightHandRef);
 
   return (
     <section
       id="mission"
       aria-label="Our mission"
-      onMouseEnter={() => hover.set(1)}
-      onMouseLeave={() => hover.set(0)}
       className="relative isolate overflow-hidden bg-gradient-to-b from-[#f5f5f5] to-[#fafafa] px-6 pt-[72px] pb-[270px] md:px-12 md:pb-[250px] md:pt-[150px] cv-auto"
     >
       {/* Card silhouette clip paths (scoped notch for both card states) */}
@@ -137,11 +128,7 @@ export function AboutMission() {
           viewport={{ once: true, margin: "-10% 0px -10% 0px" }}
           transition={{ duration: 0.9, ease: EASE }}
         >
-          <motion.div
-            style={
-              prefersReducedMotion ? undefined : { x: leftHoverX, y: leftHoverY }
-            }
-          >
+          <div ref={leftHandRef}>
             <Image
               src={ABOUT_MISSION.handLeft}
               alt=""
@@ -150,7 +137,7 @@ export function AboutMission() {
               draggable={false}
               className="h-auto w-full select-none object-contain"
             />
-          </motion.div>
+          </div>
         </motion.div>
         <motion.div
           className="w-[min(720px,52vw)]"
@@ -166,13 +153,7 @@ export function AboutMission() {
           viewport={{ once: true, margin: "-10% 0px -10% 0px" }}
           transition={{ duration: 0.9, ease: EASE }}
         >
-          <motion.div
-            style={
-              prefersReducedMotion
-                ? undefined
-                : { x: rightHoverX, y: rightHoverY }
-            }
-          >
+          <div ref={rightHandRef}>
             <Image
               src={ABOUT_MISSION.handRight}
               alt=""
@@ -181,7 +162,7 @@ export function AboutMission() {
               draggable={false}
               className="h-auto w-full select-none object-contain"
             />
-          </motion.div>
+          </div>
         </motion.div>
       </div>
 

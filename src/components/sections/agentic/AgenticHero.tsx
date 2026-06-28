@@ -2,6 +2,7 @@
 
 import { useRef } from "react";
 import {
+  AnimatePresence,
   motion,
   useReducedMotion,
   useScroll,
@@ -10,7 +11,9 @@ import {
 import { AGENTIC_HERO, VIDEOS } from "@/lib/constants";
 import { PillButton } from "@/components/ui/PillButton";
 import { AutoplayVideo } from "@/components/ui/AutoplayVideo";
+import { HeroVideoCard } from "@/components/ui/HeroVideoCard";
 import { ScrollVideoReveal } from "@/components/ui/ScrollVideoReveal";
+import { useVideoHoverCard } from "@/hooks/useVideoHoverCard";
 import { fadeUp } from "@/components/animations/fadeUp";
 import { staggerContainer } from "@/components/animations/stagger";
 import { REVEAL_OFFSET } from "@/components/animations/scrollVideoReveal";
@@ -36,6 +39,7 @@ function BadgeSparkIcon() {
 export function AgenticHero() {
   const prefersReducedMotion = useReducedMotion();
   const videoWrapperRef = useRef<HTMLDivElement>(null);
+  const { cardVisible, onVideoEnter, onVideoLeave } = useVideoHoverCard();
 
   const { scrollYProgress } = useScroll({
     target: videoWrapperRef,
@@ -137,13 +141,27 @@ export function AgenticHero() {
         className="mb-16 mt-4 max-w-[calc(100vw-24px)] md:max-w-[calc(100vw-96px)] md:mb-20"
         targetRef={videoWrapperRef}
       >
-        <div className="relative aspect-[1632/720] overflow-hidden rounded-3xl border border-black/10 bg-black/5 shadow-[0_32px_90px_rgba(0,0,0,0.18)]">
-          <AutoplayVideo
-            src={VIDEOS.hero}
-            ariaLabel="SR Agentic robotics task demonstration"
-            loadOnScroll
-            mobileTapFullscreen
-          />
+        <div
+          className="relative"
+          onMouseEnter={onVideoEnter}
+          onMouseLeave={onVideoLeave}
+        >
+          <div className="relative aspect-[1632/720] overflow-hidden rounded-3xl border border-black/10 bg-black/5 shadow-[0_32px_90px_rgba(0,0,0,0.18)]">
+            <AutoplayVideo
+              src={VIDEOS.hero}
+              ariaLabel="SR Agentic robotics task demonstration"
+              loadOnScroll
+              mobileTapFullscreen
+            />
+
+            {/* Hover preview card — glass surface, inset 20px from the
+                video's right and bottom edges (desktop only). */}
+            <div className="pointer-events-none absolute bottom-5 right-5 z-20 hidden md:block">
+              <AnimatePresence>
+                {cardVisible && <HeroVideoCard key="agentic-video-card" />}
+              </AnimatePresence>
+            </div>
+          </div>
         </div>
 
         <p className="mx-auto mt-6 max-w-[760px] text-center text-sm leading-relaxed text-black/55 md:text-base">

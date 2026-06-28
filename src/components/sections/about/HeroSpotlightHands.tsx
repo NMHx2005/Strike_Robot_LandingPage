@@ -1,9 +1,9 @@
 "use client";
 
-import { forwardRef, useEffect, useRef } from "react";
+import { forwardRef, useRef } from "react";
 import Image from "next/image";
-import { useReducedMotion } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { useReverseMagnet } from "@/hooks/useReverseMagnet";
 
 type Props = {
   /** Image 1 — base robot hands (bottom layer) */
@@ -21,13 +21,6 @@ type Props = {
   /** Reverse-magnet hover: the whole hands group is pushed away from the cursor with heavy inertia. */
   magnet?: boolean;
 };
-
-// Reverse-magnet physics (ported from the reference): a wide trigger ring, a
-// gentle max push, and a tiny lerp factor for a heavy, settled feel. The push
-// is never upward (Y stays >= 0) so the hands only ever recoil down/aside.
-const MAGNET_TRIGGER = 380;
-const MAGNET_MAX_PUSH = 60;
-const MAGNET_INERTIA = 0.025;
 
 /**
  * Cursor-driven spotlight reveal: image 2 sits on top of image 1, hidden behind a
@@ -51,7 +44,6 @@ export const HeroSpotlightHands = forwardRef<HTMLDivElement, Props>(
     },
     ref,
   ) {
-    const prefersReducedMotion = useReducedMotion();
     const localRef = useRef<HTMLDivElement | null>(null);
 
     const setRef = (node: HTMLDivElement | null) => {
@@ -60,76 +52,11 @@ export const HeroSpotlightHands = forwardRef<HTMLDivElement, Props>(
       else if (ref) (ref as React.MutableRefObject<HTMLDivElement | null>).current = node;
     };
 
-    useEffect(() => {
-      const el = localRef.current;
-      if (!el || !magnet || prefersReducedMotion) return;
-
-      let curX = 0;
-      let curY = 0;
-      let tgtX = 0;
-      let tgtY = 0;
-      let raf = 0;
-      let running = false;
-
-      const apply = () => {
-        el.style.transform =
-          `perspective(1000px) translate(calc(-50% + ${curX.toFixed(2)}px), ${curY.toFixed(2)}px)` +
-          ` rotateX(${(curY * -0.03).toFixed(2)}deg) rotateY(${(curX * 0.03).toFixed(2)}deg)`;
-      };
-
-      const tick = () => {
-        curX += (tgtX - curX) * MAGNET_INERTIA;
-        curY += (tgtY - curY) * MAGNET_INERTIA;
-        apply();
-        const atRest =
-          tgtX === 0 &&
-          tgtY === 0 &&
-          Math.abs(curX) < 0.05 &&
-          Math.abs(curY) < 0.05;
-        if (atRest) {
-          curX = 0;
-          curY = 0;
-          apply();
-          running = false;
-          return;
-        }
-        raf = requestAnimationFrame(tick);
-      };
-
-      const start = () => {
-        if (running) return;
-        running = true;
-        raf = requestAnimationFrame(tick);
-      };
-
-      const onMove = (event: MouseEvent) => {
-        const rect = el.getBoundingClientRect();
-        // Rest centre = live rect centre minus the current push (avoids feedback).
-        const cx = rect.left + rect.width / 2 - curX;
-        const cy = rect.top + rect.height / 2 - curY;
-        const dx = cx - event.clientX;
-        const dy = cy - event.clientY;
-        const dist = Math.hypot(dx, dy);
-
-        if (dist > 0 && dist < MAGNET_TRIGGER) {
-          const force = Math.pow((MAGNET_TRIGGER - dist) / MAGNET_TRIGGER, 2.5);
-          tgtX = (dx / dist) * force * MAGNET_MAX_PUSH;
-          tgtY = Math.max(0, (dy / dist) * force * MAGNET_MAX_PUSH);
-        } else {
-          tgtX = 0;
-          tgtY = 0;
-        }
-        start();
-      };
-
-      apply();
-      window.addEventListener("mousemove", onMove);
-      return () => {
-        cancelAnimationFrame(raf);
-        window.removeEventListener("mousemove", onMove);
-        el.style.transform = "translateX(-50%)";
-      };
-    }, [magnet, prefersReducedMotion]);
+    // Reverse-magnet repel for the whole hands group; centred node => -50% base.
+    useReverseMagnet(localRef, {
+      enabled: magnet,
+      basePrefix: "translateX(-50%)",
+    });
 
     const solid = Math.round(feather * 100);
     const mask = `radial-gradient(circle ${radius}px at var(--mx) var(--my), #000 0%, #000 ${solid}%, transparent 100%)`;

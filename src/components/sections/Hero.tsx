@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useRef } from "react";
 import {
   AnimatePresence,
   motion,
@@ -14,6 +14,7 @@ import { PillButton } from "@/components/ui/PillButton";
 import { AutoplayVideo } from "@/components/ui/AutoplayVideo";
 import { HeroVideoCard } from "@/components/ui/HeroVideoCard";
 import { ScrollVideoReveal } from "@/components/ui/ScrollVideoReveal";
+import { useVideoHoverCard } from "@/hooks/useVideoHoverCard";
 import { fadeUp } from "@/components/animations/fadeUp";
 import { staggerContainer } from "@/components/animations/stagger";
 import { REVEAL_OFFSET } from "@/components/animations/scrollVideoReveal";
@@ -56,50 +57,8 @@ export function Hero() {
   const prefersReducedMotion = useReducedMotion();
   const videoWrapperRef = useRef<HTMLDivElement>(null);
 
-  // Hover preview card: desktop (fine pointer) only — leaves the mobile
-  // tap-to-play flow untouched.
-  const [isDesktop, setIsDesktop] = useState(false);
-  const [cardVisible, setCardVisible] = useState(false);
-  const hideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  useEffect(() => {
-    const mq = window.matchMedia("(hover: hover) and (min-width: 768px)");
-    const onChange = () => setIsDesktop(mq.matches);
-    onChange();
-    mq.addEventListener("change", onChange);
-    return () => mq.removeEventListener("change", onChange);
-  }, []);
-
-  const clearHideTimer = () => {
-    if (hideTimerRef.current) {
-      clearTimeout(hideTimerRef.current);
-      hideTimerRef.current = null;
-    }
-  };
-
-  useEffect(() => {
-    if (!isDesktop) {
-      clearHideTimer();
-      setCardVisible(false);
-    }
-  }, [isDesktop]);
-
-  useEffect(() => () => clearHideTimer(), []);
-
-  const handleVideoEnter = () => {
-    if (!isDesktop) return;
-    clearHideTimer();
-    setCardVisible(true);
-  };
-
-  const handleVideoLeave = () => {
-    if (!isDesktop) return;
-    clearHideTimer();
-    hideTimerRef.current = setTimeout(() => {
-      setCardVisible(false);
-      hideTimerRef.current = null;
-    }, 2500);
-  };
+  // Hover preview card — desktop only (hook); mobile tap-to-play untouched.
+  const { cardVisible, onVideoEnter, onVideoLeave } = useVideoHoverCard();
 
   const { scrollYProgress } = useScroll({
     target: videoWrapperRef,
@@ -187,8 +146,8 @@ export function Hero() {
       >
         <div
           className="relative"
-          onMouseEnter={handleVideoEnter}
-          onMouseLeave={handleVideoLeave}
+          onMouseEnter={onVideoEnter}
+          onMouseLeave={onVideoLeave}
         >
           <div className="relative aspect-[1200/484] overflow-hidden rounded-3xl border border-black/10 bg-black/5 shadow-[0_32px_90px_rgba(0,0,0,0.18)]">
             <AutoplayVideo
