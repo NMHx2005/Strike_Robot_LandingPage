@@ -141,7 +141,7 @@ export function HeroVideoCard() {
           <path
             d={CARD_SILHOUETTE}
             fill="none"
-            stroke="rgba(255,255,255,0.95)"
+            stroke="rgba(255,255,255,0.6)"
             strokeWidth="1.5"
             strokeLinecap="round"
             vectorEffect="non-scaling-stroke"
