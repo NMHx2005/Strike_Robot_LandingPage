@@ -1,7 +1,8 @@
 "use client";
 
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
+  AnimatePresence,
   motion,
   useReducedMotion,
   useScroll,
@@ -11,6 +12,7 @@ import Image from "next/image";
 import { HERO, VIDEOS } from "@/lib/constants";
 import { PillButton } from "@/components/ui/PillButton";
 import { AutoplayVideo } from "@/components/ui/AutoplayVideo";
+import { HeroVideoCard } from "@/components/ui/HeroVideoCard";
 import { ScrollVideoReveal } from "@/components/ui/ScrollVideoReveal";
 import { fadeUp } from "@/components/animations/fadeUp";
 import { staggerContainer } from "@/components/animations/stagger";
@@ -53,6 +55,51 @@ function BadgeSparkIcon({ color }: { color: string }) {
 export function Hero() {
   const prefersReducedMotion = useReducedMotion();
   const videoWrapperRef = useRef<HTMLDivElement>(null);
+
+  // Hover preview card: desktop (fine pointer) only — leaves the mobile
+  // tap-to-play flow untouched.
+  const [isDesktop, setIsDesktop] = useState(false);
+  const [cardVisible, setCardVisible] = useState(false);
+  const hideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(hover: hover) and (min-width: 768px)");
+    const onChange = () => setIsDesktop(mq.matches);
+    onChange();
+    mq.addEventListener("change", onChange);
+    return () => mq.removeEventListener("change", onChange);
+  }, []);
+
+  const clearHideTimer = () => {
+    if (hideTimerRef.current) {
+      clearTimeout(hideTimerRef.current);
+      hideTimerRef.current = null;
+    }
+  };
+
+  useEffect(() => {
+    if (!isDesktop) {
+      clearHideTimer();
+      setCardVisible(false);
+    }
+  }, [isDesktop]);
+
+  useEffect(() => () => clearHideTimer(), []);
+
+  const handleVideoEnter = () => {
+    if (!isDesktop) return;
+    clearHideTimer();
+    setCardVisible(true);
+  };
+
+  const handleVideoLeave = () => {
+    if (!isDesktop) return;
+    clearHideTimer();
+    hideTimerRef.current = setTimeout(() => {
+      setCardVisible(false);
+      hideTimerRef.current = null;
+    }, 2500);
+  };
 
   const { scrollYProgress } = useScroll({
     target: videoWrapperRef,
@@ -138,15 +185,70 @@ export function Hero() {
         className="mb-16 mt-4 max-w-[calc(100vw-24px)] md:max-w-[calc(100vw-96px)] md:mb-20"
         targetRef={videoWrapperRef}
       >
-        <div className="relative aspect-[1200/484] overflow-hidden rounded-3xl border border-black/10 bg-black/5 shadow-[0_32px_90px_rgba(0,0,0,0.18)]">
-          <AutoplayVideo
-            src={VIDEOS.hero}
-            ariaLabel="SR Platform simulation environment with robotic arms"
-            loadOnScroll
-            mobileTapFullscreen
-          />
+        <div
+          className="relative"
+          onMouseEnter={handleVideoEnter}
+          onMouseLeave={handleVideoLeave}
+        >
+          <div className="relative aspect-[1200/484] overflow-hidden rounded-3xl border border-black/10 bg-black/5 shadow-[0_32px_90px_rgba(0,0,0,0.18)]">
+            <AutoplayVideo
+              src={VIDEOS.hero}
+              ariaLabel="SR Platform simulation environment with robotic arms"
+              loadOnScroll
+              mobileTapFullscreen
+            />
+
+            {/* Hover preview card — glass surface, inset 20px from the
+                video's right and bottom edges. */}
+            <div className="pointer-events-none absolute bottom-5 right-5 z-20 hidden md:block">
+              <AnimatePresence>
+                {cardVisible && <HeroVideoCard key="hero-video-card" />}
+              </AnimatePresence>
+            </div>
+          </div>
         </div>
       </ScrollVideoReveal>
+
+      {/* Mobile-only "Watch full video" row — sits below the video and reveals
+          in sequence after it (video → thumbnail → label → arrow), the same
+          staggered cadence as the Agentic cards. Desktop uses the hover card. */}
+      <motion.div
+        className="-mt-8 mb-12 flex items-center justify-center md:hidden"
+        variants={prefersReducedMotion ? {} : staggerContainer}
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, margin: "-40px" }}
+      >
+        <motion.div
+          variants={prefersReducedMotion ? {} : fadeUp}
+          className="relative mr-3 h-8 w-[46px] shrink-0 overflow-hidden rounded-[6px] border border-black/10"
+        >
+          <Image
+            src="/images/hero-watch-preview.png"
+            alt=""
+            fill
+            sizes="46px"
+            className="object-cover"
+            draggable={false}
+          />
+        </motion.div>
+        <motion.span
+          variants={prefersReducedMotion ? {} : fadeUp}
+          className="text-base font-semibold tracking-[-0.01em] text-black"
+        >
+          Watch full video
+        </motion.span>
+        <motion.svg
+          variants={prefersReducedMotion ? {} : fadeUp}
+          aria-hidden
+          viewBox="0 0 8 10"
+          fill="none"
+          className="ml-1.5 size-[11px] shrink-0 text-black"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path d="M0 0L8 5L0 10V0Z" fill="currentColor" />
+        </motion.svg>
+      </motion.div>
     </section>
   );
 }

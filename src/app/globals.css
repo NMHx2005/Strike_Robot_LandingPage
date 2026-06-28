@@ -201,6 +201,21 @@
   }
 }
 
+/* Hero video hover-card: a bright dash traveling the notch outline (drawn as
+   an SVG stroke so it follows the bottom-right scoop). pathLength is normalised
+   to 100, so the dash offset animates one full perimeter. */
+.hero-card-border-run {
+  animation: heroCardBorderRun 3.5s linear infinite;
+}
+.hero-video-card:hover .hero-card-border-run {
+  animation-duration: 2s;
+}
+@keyframes heroCardBorderRun {
+  to {
+    stroke-dashoffset: -100;
+  }
+}
+
 /* Star-border shine for CTA pills — traveling glow (reactbits StarBorder) */
 .border-gradient-bottom,
 .border-gradient-top {
