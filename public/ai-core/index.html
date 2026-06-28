@@ -77,12 +77,12 @@
     }));
     icosahedron.add(wireframe);
 
-    // --- KHỐI BÊN TRONG: KIM LOẠI ĐEN NHÁM (DARK CHROME) ---
+    // --- KHỐI BÊN TRONG: TRẮNG XÁM (low metalness => base colour hiện rõ) ---
     const boxGeometry = new THREE.BoxGeometry(1.2, 1.2, 1.2);
     const boxMaterial = new THREE.MeshStandardMaterial({
-      color: 0xcccccc,
-      metalness: 1.0,
-      roughness: 0.2,
+      color: 0xd4d4d4,
+      metalness: 0.3,
+      roughness: 0.45,
     });
     const innerBox = new THREE.Mesh(boxGeometry, boxMaterial);
     coreGroup.add(innerBox);
