@@ -12,7 +12,7 @@ export const NAV_LINKS = [
 export const NAV_CTA = "Create with SR Platform";
 
 export const VIDEOS = {
-  hero: "/Video/Comp%202.mp4",
+  hero: "/Video/hero-simulation.mp4",
   featureEditor: "/Video/Comp%201.mp4",
   communityExplore: "/Video/Community%20Creation.mp4",
   communityBlog: "/Video/Blog-Articles.mp4",
